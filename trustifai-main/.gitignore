@@ -1,0 +1,10 @@
+__pycache__
+.env
+Neo4j-*.txt
+*.zip
+
+fine-tuned-mistral
+venv
+
+Log/user_updates.csv
+Log/data.csv

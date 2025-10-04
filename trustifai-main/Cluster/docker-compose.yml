@@ -1,0 +1,12 @@
+version: "3.8"
+services:
+  app:
+    build: .
+    ports:
+      - "8000:8000" 
+    volumes:
+      - .:/app       
+    environment:
+      - HF_API_TOKEN=${HF_API_TOKEN}  
+      - BITSANDBYTES_NOWELCOME="1"
+      - USE_CUDA="0"

@@ -1,0 +1,14 @@
+To-Be Done:
+* Unify dataframe for all logs
+* Record user name for save it in logs
+* User could update all system decisions like (sentence decomposition, edge creation, add more edges if there is more than one, ..etc )
+* User not need to write lots of inputs just enter or escape could be ok , minimal inputs by user.
+* Add configuration to either expand Knowledge based on specific subgraph or to upload all information in the given data source [PDF].
+* Add a session vector database to check if a sentence/chunk information is already uploaded in the current runnable session if uploaded then skip it.
+* 
+
+Done:
++ As a user, I can choose to chunk the inserted PDF into longer chunks instead of sentences so that more information is available for retrieval in the graph.
++ As a user, I can update the system output to correct any errors made by the system.
++ As a system, I can log all user decisions to improve decision-making and determine when to request human feedback.
++ As a system, I can log users updates to improve decision-making and determine when to request human feedback.

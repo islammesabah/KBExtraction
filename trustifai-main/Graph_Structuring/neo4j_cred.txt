@@ -1,0 +1,15 @@
+Neo4j Aura DB:
+https://neo4j.com/product/auradb/
+DB console:
+https://workspace-preview.neo4j.io/workspace/query?ntid=auth0%7C6745a63a68df9a8a252e57dd
+
+
+Set the following key in colab, if not there
+NEO4J_URI	neo4j+s://62f54917.databases.neo4j.io
+NEO4J_PASSWORD	yqyKyCuAv1wQzH7OG7LsTyEsEVzSYXjfXyvX0FALLJ0
+
+Make sure the instance is running if not login to Neo4j Aura DB and run it
+
+User login details:
+Priyabanta.sandulu@dfki.de
+Tom27@jerry

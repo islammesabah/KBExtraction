@@ -1,0 +1,28 @@
+Queries to resolve in future
+
+1) Effective sentence filtering
+    current implementation considers new line (\n) and process further
+    check using Chonike (sentence chunker), spacy, NLTK's Sentence Tokenizer analyzing sentence quality improvement
+
+2) What if a part of sentence splitted in consecutive pages.
+    current implementation create 2 chunks for same sentence
+
+3) Query re-writing:
+    User Query-->KG-->valuable context and additional Information-->User query re-write-->Vector search
+    eg:
+    User Query: "What is AI fairness?"
+    Knowledge Graph Response: "AI fairness involves guidelines and practices that mitigate bias in decision-making models."
+    Without re-writing: 'AI fairness involves guidelines and practices that mitigate bias in decision-making models.
+    
+    What is AI fairness?'
+    LLM query re-writing: "What are the guidelines and practices for mitigating bias in AI decision-making models, focusing on fairness?"
+    User Query-->Knowledge Graph Response-->Query rewriting-->RAG Retrieval
+
+3) Re-rank:
+    -- Retrieved chunks (sentences) having reference has more priority. 
+    e.g: sentence1[reference], sentence2
+         sentence 1 has more priority.
+
+4) Evaluation Metrics
+    HybridRAG: Integrating Knowledge Graphs and Vector Retrieval Augmented Generation for Efficient Information Extraction
+    section 2.4

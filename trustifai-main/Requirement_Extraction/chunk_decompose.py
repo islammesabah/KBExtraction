@@ -92,8 +92,14 @@ simple_rag_chain = (
 )
 
 def extract(query):
-    res = simple_rag_chain.invoke({"examples":create_examples(sentences_examples), "user_query":f'"{query.replace('"', "")}"'})
-    
+    query_clean = query.replace('"', '')
+    user_query = f'"{query_clean}"'
+
+    res = simple_rag_chain.invoke({
+        "examples": create_examples(sentences_examples),
+        "user_query": user_query
+    })
+
     # extract json object
     match = re.search(r"\{[^{}]*?\}", res)
     if match:

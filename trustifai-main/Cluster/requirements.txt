@@ -52,6 +52,7 @@ effdet==0.4.1
 einops==0.8.0
 emoji==2.14.1
 en-core-web-sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.1/en_core_web_sm-3.7.1-py3-none-any.whl#sha256=86cc141f63942d4b2c5fcee06630fd6f904788d2f0ab005cce45aadb8fb73889
+# en-core-web-sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.1/en_core_web_sm-3.7.1-py3-none-any.whl
 eval_type_backport==0.2.2
 execnet==2.1.1
 executing==2.1.0
@@ -116,6 +117,7 @@ kubernetes==32.0.0
 langchain==0.3.17
 langchain-chroma==0.2.1
 langchain-community==0.3.16
+# langchain-community
 langchain-core==0.3.33
 langchain-huggingface==0.1.2
 langchain-neo4j==0.3.0
@@ -192,6 +194,7 @@ pathspec==0.12.1
 pdf2image==1.17.0
 pdfminer.six==20240706
 peft==0.14.0
+# peft
 pexpect==4.9.0
 pi_heif==0.21.0
 pikepdf==9.5.2
@@ -220,7 +223,7 @@ pydantic==2.10.6
 pydantic-settings==2.7.1
 pydantic_core==2.27.2
 Pygments==2.18.0
-PyMuPDF==1.25.2
+PyMuPDF==1.25.2 # provides 'fitz' for PDF extraction
 pyparsing==3.2.0
 pypdf==5.3.0
 pypdfium2==4.30.1

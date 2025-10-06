@@ -45,9 +45,24 @@
 
 ### 1. Install Dependencies
 
+#### Local (CPU) setup
 ```sh
-pip install -r requirements.txt
+> python -m venv .venv
+> .\.venv\Scripts\Activate
+> python -m pip install --upgrade pip setuptools wheel
+> pip install -r requirements.cpu.txt
 ```
+if torch fails on Windows, use:
+```sh
+> pip install --index-url https://download.pytorch.org/whl/cpu torch
+```
+
+#### GPU setup
+requires NVIDIA CUDA
+```sh
+pip install -r Cluster/requirements.txt
+```
+
 
 ### 2. Configure the System
 

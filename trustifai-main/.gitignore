@@ -1,10 +1,26 @@
-__pycache__
-.env
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+.ipynb_checkpoints/
+.mypy_cache/
+.pytest_cache/
+.cache/
+
+# Virtual envs
+.venv*/
+venv*/
+env*/
+
+# Project-specific
+Log/*.csv
 Neo4j-*.txt
 *.zip
 
 fine-tuned-mistral
-venv
 
+# Logs
 Log/user_updates.csv
 Log/data.csv

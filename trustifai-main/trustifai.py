@@ -1,5 +1,5 @@
-import warnings
-warnings.simplefilter("ignore")
+from utils.warnings_config import install_warning_filters
+install_warning_filters()
 
 
 from terminal_interface import interface

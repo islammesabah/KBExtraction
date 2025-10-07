@@ -1,4 +1,5 @@
 import os
+
 def print_message(message, options):
     print("Q: "+message)
     print("A: Choose an option:")

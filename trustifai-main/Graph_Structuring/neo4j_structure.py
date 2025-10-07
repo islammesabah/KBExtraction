@@ -1,21 +1,19 @@
-from langchain_neo4j import Neo4jGraph
+# from langchain_neo4j import Neo4jGraph
+from langchain_community.graphs import Neo4jGraph
 from dotenv import load_dotenv
 import os
 
 # load the environment variables
 load_dotenv(override=True)
 
-# Load from colab note
-NEO4J_USERNAME = "neo4j"
-NEO4J_URI = os.getenv('NEO4J_URI')
-NEO4J_PASSWORD = os.getenv('NEO4J_PASSWORD')
-
 # Set up connection to graph instance using LangChain
 kg = Neo4jGraph(
-    url=NEO4J_URI,
-    username=NEO4J_USERNAME,
-    password=NEO4J_PASSWORD
+    url=os.getenv("NEO4J_URI"),
+    username=os.getenv("NEO4J_USERNAME","neo4j"),
+    password=os.getenv("NEO4J_PASSWORD","")
 )
+
+print(f"[TrustifAI] Connected to Neo4j at {os.getenv('NEO4J_URI')} as user '{os.getenv('NEO4J_USERNAME','neo4j')}'")
 
 def create_relations(edge_object, sentence_doc):
     return [{

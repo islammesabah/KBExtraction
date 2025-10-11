@@ -1,15 +1,15 @@
 import os
 
-def print_message(message, options):
-    print("Q: "+message)
+def print_message(message: str, options: list[str]):
+    print(f"Q: {message}")
     print("A: Choose an option:")
     for i, option in enumerate(options, 1):
-        print(f"   {i}. {option}")
-    print(f"   {len(options) + 1}. Exit")
+        print(f"\t{i}. {option}")
+    print(f"\t{len(options) + 1}. Exit")
 
-def interface(message, options):
+def interface(message: str, options: list[str]) -> str | None:
     print_message(message, options)
-    options_length = len(options) + 1
+    options_length = len(options) + 1 # +1 for `Exit` option
 
     while True:
         try:

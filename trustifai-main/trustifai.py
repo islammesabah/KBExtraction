@@ -22,7 +22,7 @@ EXTRACT_TYPE = "Sentences"
 RETRIEVING_APPROACH = "Sparse Retrieval"
 BULK_UPLOAD = True
  
-def system_message(txt):
+def system_message(txt: str) -> None:
      print("\n##########>> SYSTEM <<##########")
      print(txt)
      print("################################\n")
@@ -50,8 +50,15 @@ def decompose(inp):
     else:
         return chunk_decompose(inp)
 
-def get_similar(data):
-    BULK_UPLOAD = False
+def get_similar(data: list) -> None:
+    """
+    Get similar documents from the existing knowledge graph and add new relations based on user approval.
+    Interactively asks the user for input on which retrieving approach to use and whether to upload new relations.
+    Args:
+        data (list): List of LangChain `Document` objects (produced earlier by create_sentences or create_chunks etc.). 
+        to be used for retrieval and relation extraction.
+    """
+    BULK_UPLOAD = False # TODO: remove this line as it is not used
     global RETRIEVING_APPROACH
     # build Retriever
     match interface(
@@ -84,10 +91,10 @@ def get_similar(data):
         system_message("Graph Information to expand:")
         print(source)
         relevant_docs = Retriever.invoke(source)
-        # remoce the source from the relevant_docs
+        # remove the source from the relevant_docs
         relevant_docs = [doc for doc in relevant_docs if doc.page_content != source]
         print("---------------------")
-        system_message(f"Relevant Information based on {RETRIEVING_APPROACH}:")
+        system_message(f"Relevant Information based on the '{RETRIEVING_APPROACH}' retrieving approach:")
         for i,sen in enumerate(relevant_docs):
                 print(i," : ", sen.page_content)
                 print(sen.metadata)
@@ -127,12 +134,13 @@ def get_similar(data):
 
 
 def main():
+    # module-level variables
     global DATA_SOURCE
     global DATA_FILE 
     global EXTRACT_TYPE 
     global BULK_UPLOAD 
 
-    data = None
+    data: list | None = None
     match interface(
             "Which data source do you want to use?", 
             ["DSA", "SDS"]

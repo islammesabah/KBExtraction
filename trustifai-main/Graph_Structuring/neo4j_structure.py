@@ -34,7 +34,7 @@ def create_relations(edge_object, sentence_doc):
         },
     } for edge in edge_object["edges"]]
 
-def get_graph(query):
+def get_graph(query: str) -> list[dict]:
     return kg.query(
         query
     )

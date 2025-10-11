@@ -1,7 +1,7 @@
 import string
 from langchain.schema import Document
 
-def txt_extraction(data_path):
+def txt_extraction(data_path: str) -> list[Document]:
     with open(data_path, "r") as file:
         data = file.read()
     sentences = [s.strip().rstrip(string.punctuation) for s in data.strip().split('\n') if s.strip()]

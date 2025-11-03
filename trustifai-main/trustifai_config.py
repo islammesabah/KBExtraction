@@ -7,11 +7,11 @@ from terminal_interface import interface
 from Requirement_Extraction.txt_sentences_extraction import txt_extraction
 from Requirement_Extraction.pdf_sentences_extraction import create_sentences
 from Requirement_Extraction.pdf_chunks import create_chunks
-from Requirement_Extraction.sentence_decompose import extract as sentence_decompose
+from Requirement_Extraction.sentence_decompose_old import extract as sentence_decompose
 from Requirement_Extraction.chunk_decompose import extract as chunk_decompose
 
-from Graph_Structuring.relationship_extraction import create_item
-from Graph_Structuring.neo4j_structure import create_relations, add_to_graph, get_graph
+from Graph_Structuring.relationship_extraction import extract_triplets
+from Graph_Structuring.neo4j_structure import create_relations, add_to_graph, query_graph
 
 from Log.logs_dataframe import Logs
 
@@ -30,7 +30,7 @@ def bulk_upload(data):
         decompose_list = sentence_decompose(doc.page_content, config.get('LLM', 'requirement_extraction'))
         try:
             for sentence in decompose_list:
-                edges = create_item(sentence)
+                edges = extract_triplets(sentence)
                 for relation in create_relations(edges, doc):
                     logs.add_record_data(relation)
                     add_to_graph(relation)
@@ -63,7 +63,7 @@ def get_similar(data):
 
     Cypher_query = config.get('Graph', 'cypher_query')    
     
-    graph = get_graph(Cypher_query)
+    graph = query_graph(Cypher_query)
 
     print("---------------------")
     system_message(f"Information from the Graph to expand:")
@@ -102,7 +102,7 @@ def get_similar(data):
                 for sentence in decompose_list:
                     print("&&&&&&&&&&&&&&&&&&&&&&&&")
                     print("Sentence: ",sentence)
-                    edges = create_item(sentence)
+                    edges = extract_triplets(sentence)
                     print("Generated Edges",edges)
                     for relation in create_relations(edges, doc):
                         logs.add_record_data(relation)

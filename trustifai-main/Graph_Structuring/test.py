@@ -1,5 +1,5 @@
 # from relationship_extraction import create_item
-from neo4j_structure import add_to_graph, get_graph
+from neo4j_structure import add_to_graph, query_graph
 
 # query = """Monitoring is performed during operation of KI system"""
 
@@ -54,5 +54,5 @@ Cypher_query = """
             RETURN DISTINCT r.sentence  as sentence
         """
     
-graph = get_graph(Cypher_query)
+graph = query_graph(Cypher_query)
 print(graph)

@@ -5,16 +5,14 @@ import json
 
 from LLM_Access.model_access import get_response
 
-# semtemce examples
+# sentence examples
 sentences_examples = [
     {
         "sentence":"Data Preprocessing is subclass of Data Science Task",
         "output":"""["Data Preprocessing is subclass of Data Science Task"]"""
     },
     {
-        "sentence":"""Transparency
-Property of an →KI system that is explainable and comprehensible. In the context of this quality
-standard, "transparency" also includes documentation of the properties of the →KI system.""",
+        "sentence":"""Transparency Property of an →KI system that is explainable and comprehensible. In the context of this quality standard, "transparency" also includes documentation of the properties of the →KI system.""",
         "output":"""["Transparency is a property of KI system.", "Transparency is explainable.", "Transparency is comprehensible.", "Transparency includes documentation of properties of KI system."]"""
     },
     {
@@ -43,17 +41,17 @@ sentence: "{ex["sentence"].replace('"', "")}"
 
 # Prompt for the LLM to extract qualities from sentences
 prompt_template = """<s>[INST]you are a helpful assistant. You will help me extract key qualities and properties of an AI system based on the sentences provided to you.
-Keep in mind that the qualities you extract should connect to each other, in a way that when somebody reads the qualities, he should be able to make a graph from your statements.
-Avoid mentioning redundent expressions.
+Keep in mind that the qualities you extract should connect to each other, in a way that when somebody reads the qualities, they should be able to make a graph from your statements.
+Avoid mentioning redundant expressions.
 Start from the important qualities and move forward to more detailed or other qualities that are related to previous ones.
 
 Your answer must be structured as a JSON string. Do not answer in any other way, e.g. as normal text. Here is the structure:
 {{"qualities": [List qualities you extracted from the text goes HERE]}}
 
-if you do not adhere to this structure everything will fail.
+if you do not adhere to this structure, everything will fail.
 Make sure to never use other information except the text provided to you. Only use the reference text given to you for extracting the qualities.
 Do not hallucinate. This is very important.
-Try to be consice and to the point, because you are going to extract only qualities.
+Try to be concise and to the point, because you are going to extract only qualities.
 Don't write ``` at the beginning or end of your answer.
 
 Here are some examples:
@@ -66,9 +64,10 @@ Here are some examples:
 prompt = PromptTemplate.from_template(prompt_template)
 
 simple_rag_chain = (
-    prompt                                   # build the prompt
-    | get_response                                 # llm for generation
+    prompt          # build the prompt
+    | get_response  # llm for generation
 )
+# get_response(prompt)
 
 def extract(query):
     query_clean = query.replace('"', '')

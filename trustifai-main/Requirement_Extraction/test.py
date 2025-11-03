@@ -1,4 +1,4 @@
-from sentence_decompose import extract
+from Requirement_Extraction.sentence_decompose_old import extract
 from pdf_sentences_extraction import create_sentences
 from txt_sentences_extraction import txt_extraction
 from pdf_chunks import create_chunks

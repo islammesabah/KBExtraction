@@ -101,6 +101,17 @@ Follow the prompts to select data sources, extraction types (sentence/chunk), an
 
 ---
 
+## Our canonical glossary (what we’ll use going forward)
+
+- **Node** *(Neo4j term; aka Vertex in graph theory)*: an entity (e.g., `classification`, `supervised_learning`).
+- **Relationship** *(Neo4j term; aka Edge in graph theory)*: a typed connection between two nodes (e.g., `(:Node)-[:IS_SUBCLASS_OF]->(:Node)`).
+- **Edge**: synonym for **Relationship** *only* (we will not use “edge” to mean a whole triple).
+- **Triple / Triplet (S-P-O)** *(knowledge graph / NLP)*: `(Subject, Predicate, Object)`.
+    - **Subject** and **Object** map to **Nodes**.
+    - **Predicate** maps to the **Relationship type** (e.g., `IS_SUBCLASS_OF`).
+
+**Rule:** In extraction code we say **triple**/**predicate**. In Neo4j code we say **relationship**. We won’t use “edge” except as a synonym for *relationship*.
+
 ## Notebooks
 
 The `Notebooks/` directory contains Jupyter notebooks for:

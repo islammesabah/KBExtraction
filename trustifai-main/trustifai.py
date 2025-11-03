@@ -6,14 +6,18 @@ from terminal_interface import interface
 from Requirement_Extraction.txt_sentences_extraction import txt_extraction
 from Requirement_Extraction.pdf_sentences_extraction import create_sentences
 from Requirement_Extraction.pdf_chunks import create_chunks
-from Requirement_Extraction.sentence_decompose import extract as sentence_decompose
+from Requirement_Extraction.sentence_decompose_old import extract as sentence_decompose
+from Requirement_Extraction.decomposer.sentence_decompose import build_sentence_decomposer
+from Requirement_Extraction.decomposer.decompose import decompose, DecomposeMode
+# from chunk_decompose import build_chunk_decomposer  # (we'll add similarly later)
 from Requirement_Extraction.chunk_decompose import extract as chunk_decompose
 
-from Graph_Structuring.relationship_extraction import create_item
-from Graph_Structuring.neo4j_structure import create_relations, add_to_graph, get_graph
-
+from Graph_Structuring.relationship_extraction import extract_triplets
+from Graph_Structuring.neo4j_structure import build_graph_relations, create_relations, add_to_graph, map_extracted_triplets_to_graph_relations, query_graph, upsert_graph_relation
 import glob
 from tqdm import tqdm
+from langchain_core.documents import Document
+from LLM_Access.model_access import get_response
 
 # ENVIRONMENT VARIABLES
 DATA_SOURCE = "DSA"
@@ -33,8 +37,8 @@ def bulk_upload(data):
         decompose_list = sentence_decompose(doc.page_content)
         try:
             for sentence in decompose_list:
-                edges = create_item(sentence)
-                for relation in create_relations(edges, doc):
+                triplets = extract_triplets(sentence)
+                for relation in create_relations(triplets, doc):
                     print(relation)
                     add_to_graph(relation)
                     relation_update += 1
@@ -44,26 +48,34 @@ def bulk_upload(data):
 
     system_message(f"We add or update {relation_update} relations in your Graph Knowledge")
 
-def decompose(inp):
-    if EXTRACT_TYPE == "Sentences":
-        return sentence_decompose(inp)
-    else:
-        return chunk_decompose(inp)
+# def decompose(inp):
+#     if EXTRACT_TYPE == "Sentences":
+#         return sentence_decompose(inp)
+#     else:
+#         return chunk_decompose(inp)
 
-def get_similar(data: list) -> None:
+def get_similar(
+    data: list[Document]
+) -> None:
     """
     Get similar documents from the existing knowledge graph and add new relations based on user approval.
     Interactively asks the user for input on which retrieving approach to use and whether to upload new relations.
     Args:
         data (list): List of LangChain `Document` objects (produced earlier by create_sentences or create_chunks etc.). 
         to be used for retrieval and relation extraction.
+        
+        Assume data is a list of Document objects, each document can be as simple as one sentence or chunk.
+        So we iterate over each document (sentence), use this sentence as a query and query the KB (Knowledge Graph) to get similar sentences that are already in the graph.
+        
+        Now say the KB result set returned 2 sentences.
+        For each of these sentences, we now query our NEW DATA SOURCE (e.g., DSA knowledge.txt) using the retrieving approach (Dense, Sparse, Hybrid) to get relevant information.
     """
     BULK_UPLOAD = False # TODO: remove this line as it is not used
     global RETRIEVING_APPROACH
     # build Retriever
     match interface(
-        "Which retrieving approach would you like to use?", 
-        ["Dense Retrieval", "Sparse Retrieval", "Hybrid Retrieval"]
+        message="Which retrieving approach would you like to use?", 
+        options=["Dense Retrieval", "Sparse Retrieval", "Hybrid Retrieval"]
         ):
             case "Sparse Retrieval":
                 from Retriever.BM25Retriever import build_retriever
@@ -77,20 +89,39 @@ def get_similar(data: list) -> None:
                 Retriever = build_retriever(data)
                 RETRIEVING_APPROACH = "Hybrid Retrieval"
 
-    Cypher_query = """ 
-            MATCH (n)-[r:is]->(req:Node{label:"requirement"}) 
-            RETURN DISTINCT r.sentence  as sentence
+    # Old:
+    # Cypher_query = """ 
+    #         MATCH (n)-[r:is]->(req:Node{label:"requirement"}) 
+    #         RETURN DISTINCT r.sentence  as sentence
+    #     """
+
+    # New
+    cypher_query = """ 
+            MATCH (n)-[r:REL]->(req:Node{label:"requirement"}) 
+            RETURN DISTINCT r.sentence as sentence
         """
-    
-    
-    graph = get_graph(Cypher_query)
+
+    graph = query_graph(cypher_query)
 
     for source in graph:
         print("################################################################")
-        source = source["sentence"]
+        source = source["sentence"] #e.g., "fairness is requirement"
         system_message("Graph Information to expand:")
         print(source)
-        relevant_docs = Retriever.invoke(source)
+        relevant_docs = Retriever.invoke(source) # retrieve relevant docs containing: "fairness is requirement"
+        """
+        # Example:
+        relevant_docs = [
+            Document(
+                page_content="Equality is subclass of Fairness",
+                metadata={"source": "DSA_knowledge.txt", "page_number": 3}
+            ),
+            Document(
+                page_content="Human agency and oversight is a requirement",
+                metadata={"source": "DSA_knowledge.txt", "page_number": 5}
+            ),
+        ]
+        """
         # remove the source from the relevant_docs
         relevant_docs = [doc for doc in relevant_docs if doc.page_content != source]
         print("---------------------")
@@ -100,38 +131,63 @@ def get_similar(data: list) -> None:
                 print(sen.metadata)
         print("---------------------\n")
         for doc in relevant_docs:
+            if not isinstance(doc, Document):
+                continue
+            
             print("===========================================================")
             system_message("Add next Information to the Graph:")
             print(doc.page_content)
-            decompose_list = decompose(doc.page_content)
+            # decomposed_list = decompose(doc.page_content) # i.e., chunk the page_content
+            doc_decomposed = decompose(
+                text=doc.page_content,
+                mode=DecomposeMode.SENTENCES,
+                sentence_decomposer=build_sentence_decomposer(llm=get_response),
+                chunk_decomposer=lambda s: [s],  # temporary: identity until we refactor chunk_decompose
+            )
+            """
+            e.g., doc_decomposed = [
+                "Human agency and oversight is a requirement.",
+                "Equality is subclass of Fairness.",
+            ]
+            """
+            # decompose_list is a list of chunks or sentences based on EXTRACT_TYPE
             print("===========================================================")
             system_message("Atomic decomposed sentences:")
-            for i,sen in enumerate(decompose_list):
+            for i,sen in enumerate(doc_decomposed):
                 print(i," : ", sen)
             print("===========================================================")
             try:
-                for sentence in decompose_list:
+                for sentence in doc_decomposed:
                     print("&&&&&&&&&&&&&&&&&&&&&&&&")
                     print("Sentence: ",sentence)
-                    edges = create_item(sentence)
-                    print("Generated Edge",edges)
-                    for relation in create_relations(edges, doc):
+                    extracted_triplets = extract_triplets(sentence)
+                    """
+                    e.g. 
+                    extracted_triplets = {
+                        'sentence': "Human agency and oversight is a requirement.",
+                        'edges': [
+                            ('Human agency', 'requirement', 'is'),
+                            ('oversight', 'requirement', 'is')
+                        ]
+                    }
+                    """
+                    print(f"Extraction Result: {extracted_triplets}")
+                    graph_relations = map_extracted_triplets_to_graph_relations(extracted_triplets, doc)
+                    for relation in graph_relations:
                         match interface(
                                 "Would you like to upload previous relation to Graph Knowledge?", 
                                 ["YES", "NO"]
                             ):
                             case "YES":
-                                add_to_graph(relation)
-                                print("Added relation to graph")
+                                upsert_graph_relation(relation)
+                                print("[UPSERT] relation upserted to knowledge graph")
                             case "NO":
-                                print("Neglect the relation")
+                                print("[INFO] relation neglected")
                     print("&&&&&&&&&&&&&&&&&&&&&&&&")
             except:
                 print(f"Not able to upload: {doc.page_content}")
                 continue
         print("################################################################")
-
-
 
 def main():
     # module-level variables

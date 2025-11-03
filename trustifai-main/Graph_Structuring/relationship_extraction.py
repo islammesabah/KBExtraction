@@ -5,11 +5,13 @@
 from peft import AutoPeftModelForCausalLM
 from transformers import AutoTokenizer
 from dotenv import load_dotenv
+from core.types import ExtractionResult
+from extraction_helpers import _coerce_to_result, _extract_json_object
 
 import torch
 import os
-import re
 import json
+import rich
 
 # --- Optional: BitsAndBytes (CUDA-only). Import guarded. ---
 try:
@@ -141,37 +143,91 @@ if bnb_config is None:
 # -------------------------
 # Prompting helpers
 # -------------------------
-# Define a function to build a prompt from a data example
-def format_instruction(sentence, edges):
+def build_relation_extraction_prompt(sentence: str) -> str:
+    """
+    Build a STRICT JSON-only instruction for extracting (Subject, Object, Relation) triplets.
+    Output schema must be:
+    {
+      "sentence": "<original sentence>",
+      "edges": [["Subject","Object","Relation"], ...]
+    }
+    """
+    # Safely JSON-escape the sentence so quotes don't break the prompt
+    sent_json = json.dumps(sentence.strip())
+
     return f"""
-Extract relationships (edges) from the given sentences. Each relationship should be a triplet in the format `(Subject, Object, Relation)`, where:
+You are an information extraction system. Extract relationships (edges) from a single sentence.
 
-1. **Subject**: The main entity initiating the action or relationship.
-2. **Object**: The entity affected by or related to the Subject.
-3. **Relation**: The action or relationship connecting the Subject and Object.
+Each relationship MUST be a triplet in the exact order:
+(Subject, Object, Relation)
 
-Return the results as a list of dictionaries. Each dictionary should have two keys:
-- `"sentence"`: The original sentence.
-- `"edges"`: A list of triplets representing the extracted edges.
+Return STRICT JSON ONLY (no prose, no markdown). Use this schema exactly:
+{{
+  "sentence": <string>, 
+  "edges": [ [<Subject>, <Object>, <Relation>], ... ]
+}}
 
+Rules:
+- Do not invent entities or relations not present in the sentence.
+- Trim whitespace; keep original casing.
+- If no edges exist, return "edges": [].
 
 Example:
-Input Sentence: "Privacy and data governance ensures prevention of harm"
-Output: {{'edges': [['Privacy', 'harm', 'ensures prevention of'], ['data governance', 'harm', 'ensures prevention of']], 'sentence': 'Privacy and data governance ensures prevention of harm'}}
+Input: "Privacy and data governance ensures prevention of harm"
+Output:
+{{
+  "sentence": "Privacy and data governance ensures prevention of harm",
+  "edges": [
+    ["Privacy", "harm", "ensures prevention of"],
+    ["data governance", "harm", "ensures prevention of"]
+  ]
+}}
 
-Task:
-Input Sentence: "{sentence.strip()}"
-Output: {edges}
+Now extract for this input:
+{sent_json}
 """
+
+# Define a function to build a prompt from a data example
+# def format_instruction(sentence, edges):
+#     return f"""
+# Extract relationships (edges) from the given sentences. 
+# Each relationship should be a triplet in the format `(Subject, Object, Relation)`, where:
+
+# 1. **Subject**: The main entity initiating the action or relationship.
+# 2. **Object**: The entity affected by or related to the Subject.
+# 3. **Relation**: The action or relationship connecting the Subject and Object.
+
+# Return the results as a list of dictionaries. Each dictionary should have two keys:
+# - `"sentence"`: The original sentence.
+# - `"edges"`: A list of triplets representing the extracted edges.
+
+
+# Example:
+# Input Sentence: "Privacy and data governance ensures prevention of harm"
+# Output: {{'edges': [['Privacy', 'harm', 'ensures prevention of'], ['data governance', 'harm', 'ensures prevention of']], 'sentence': 'Privacy and data governance ensures prevention of harm'}}
+
+# Task:
+# Input Sentence: "{sentence.strip()}"
+# Output: {edges}
+# """
 
 # -------------------------
 # Inference
 # -------------------------
 @torch.no_grad()
-def create_item(sentence: str):
+def extract_triplets(sentence: str) -> ExtractionResult:
+    """
+    Given an input sentence, generate edges using the model.
+    Returns an ExtractionResult (sentence + edges) when possible,
+    otherwise a dict with 'raw' or 'error'.
+    """
+    empty_result: ExtractionResult = {
+        "sentence": sentence, 
+        "edges": []
+    }
     try:
-        ex_inp = format_instruction(sentence,"")
-        inputs = tokenizer(ex_inp, return_tensors='pt', padding=True)
+        prompt = build_relation_extraction_prompt(sentence)
+        inputs = tokenizer(prompt, return_tensors='pt', padding=True)
         # inputs = inputs.to("cuda")
         inputs = {k: v.to(DEVICE) for k, v in inputs.items()}
         
@@ -183,21 +239,36 @@ def create_item(sentence: str):
         )[0]     # batch of tokens with one sequence
         
         res_text = tokenizer.decode(output_tokens, skip_special_tokens=True)
-        res_text = res_text.replace(ex_inp,"")
+        res_text = res_text.replace(prompt,"") # so that only the model output remains and not the prompt
 
+        # Since the result should be a dictionary, e.g.,
+        # {
+        #   'edges': [ 
+        #              ['Privacy', 'harm', 'ensures prevention of'], 
+        #              ['data governance', 'harm', 'ensures prevention of']
+        #            ], 
+        #   'sentence': 'Privacy and data governance ensures prevention of harm'}
+        # }
         # Try strict JSON first; if that fails, fallback to a curly-brace slice
         try:
-            return json.loads(res_text)
+            parsed = json.loads(res_text)
+            return _coerce_to_result(parsed, sentence)
         except Exception:
-            match = re.search(r"\{.*\}", res_text, flags=re.DOTALL)
-            if match:
-                return json.loads(match.group(0).replace("'", '"'))
-            return {"raw": res_text, "warning": "Could not parse JSON; returning raw text."}
+            # Try to slice out the first balanced {...}
+            blob = _extract_json_object(res_text)
+            if blob:
+                try:
+                    parsed = json.loads(blob)
+                    return _coerce_to_result(parsed, sentence)
+                except Exception:
+                    pass   # fallthrough to raw
+
+        # 😔 Last resort
+        # return { "raw": res_text, "warning": "⚠️ Could not parse JSON; returning raw text." }
+        rich.print("[extract_triplets] ⚠️ Could not parse JSON; returning empty result.")
+        return empty_result
 
     except Exception as e:
-        return {"error": str(e), "message": "An error occurred. Please try again."}
-    
-    #     return json.loads(re.findall(r'{.*?}', res)[0].replace("\'","\""))
-
-    # except Exception as e:
-    #     return {"error": str(e), 'message': "An error occurred. Please try again."}
+        rich.print(f"[extract_triplets] ❌ Exception during extraction: {e}")
+        # return { "error": str(e), "message": "An error occurred. Please try again." }
+        return empty_result

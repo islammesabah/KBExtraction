@@ -1,4 +1,5 @@
-# - BM25 (Okapi BM25) is a ranking algorithm commonly used in search engines. It calculates the relevance of documents to a query based on:
+# - BM25 (Okapi BM25) is a ranking algorithm commonly used in search engines. 
+# It calculates the relevance of documents to a query based on:
 #     - The frequency of query terms in the document.
 #     - The importance of those terms (e.g., frequent terms like "the" are weighted lower).
 #     - The length of the document (shorter documents are typically favored).

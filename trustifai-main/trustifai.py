@@ -6,14 +6,14 @@ from terminal_interface import interface
 from Requirement_Extraction.txt_sentences_extraction import txt_extraction
 from Requirement_Extraction.pdf_sentences_extraction import create_sentences
 from Requirement_Extraction.pdf_chunks import create_chunks
-from Requirement_Extraction.sentence_decompose_old import extract as sentence_decompose
+# from Requirement_Extraction.sentence_decompose_old import extract as sentence_decompose
 from Requirement_Extraction.decomposer.sentence_decompose import build_sentence_decomposer
 from Requirement_Extraction.decomposer.decompose import decompose, DecomposeMode
 # from chunk_decompose import build_chunk_decomposer  # (we'll add similarly later)
-from Requirement_Extraction.chunk_decompose import extract as chunk_decompose
+# from Requirement_Extraction.chunk_decompose import extract as chunk_decompose
 
 from Graph_Structuring.relationship_extraction import extract_triplets
-from Graph_Structuring.neo4j_structure import build_graph_relations, create_relations, add_to_graph, map_extracted_triplets_to_graph_relations, query_graph, upsert_graph_relation
+from Graph_Structuring.neo4j_structure import map_extracted_triplets_to_graph_relations, query_graph, upsert_graph_relation
 import glob
 from tqdm import tqdm
 from langchain_core.documents import Document
@@ -34,25 +34,23 @@ def system_message(txt: str) -> None:
 def bulk_upload(data):
     relation_update = 0
     for doc in tqdm(data, desc="Decompose the Data", unit="item"):
-        decompose_list = sentence_decompose(doc.page_content)
+        # decompose_list = sentence_decompose(doc.page_content)
+        doc_decomposed = decompose(
+            text=doc.page_content,
+            mode=DecomposeMode.SENTENCES,
+        )
         try:
-            for sentence in decompose_list:
+            for sentence in doc_decomposed:
                 triplets = extract_triplets(sentence)
-                for relation in create_relations(triplets, doc):
+                for relation in map_extracted_triplets_to_graph_relations(triplets, doc):
                     print(relation)
-                    add_to_graph(relation)
+                    upsert_graph_relation(relation)
                     relation_update += 1
         except:
             print(f"Not able to upload: {doc.page_content}")
             continue
 
     system_message(f"We add or update {relation_update} relations in your Graph Knowledge")
-
-# def decompose(inp):
-#     if EXTRACT_TYPE == "Sentences":
-#         return sentence_decompose(inp)
-#     else:
-#         return chunk_decompose(inp)
 
 def get_similar(
     data: list[Document]
@@ -108,7 +106,7 @@ def get_similar(
         source = source["sentence"] #e.g., "fairness is requirement"
         system_message("Graph Information to expand:")
         print(source)
-        relevant_docs = Retriever.invoke(source) # retrieve relevant docs containing: "fairness is requirement"
+        relevant_docs = Retriever.invoke(source) # type: ignore # retrieve relevant docs containing: "fairness is requirement"
         """
         # Example:
         relevant_docs = [
@@ -141,8 +139,8 @@ def get_similar(
             doc_decomposed = decompose(
                 text=doc.page_content,
                 mode=DecomposeMode.SENTENCES,
-                sentence_decomposer=build_sentence_decomposer(llm=get_response),
-                chunk_decomposer=lambda s: [s],  # temporary: identity until we refactor chunk_decompose
+                # sentence_decomposer=build_sentence_decomposer(),
+                # chunk_decomposer=lambda s: [s],  # temporary: identity until we refactor chunk_decompose
             )
             """
             e.g., doc_decomposed = [
@@ -220,6 +218,9 @@ def main():
                 case "Chunks":
                     EXTRACT_TYPE = "Chunks"
                     data = create_chunks(file)
+        
+    if data is None:
+        raise ValueError("No data loaded. Exiting.")
 
     system_message(f"The loaded data has {len(data)} records")
     

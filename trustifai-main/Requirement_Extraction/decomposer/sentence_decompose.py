@@ -9,6 +9,8 @@ import rich
 from langchain.prompts import PromptTemplate
 from langchain_core.runnables import RunnableLambda
 from LLM_Access.model_access import get_response
+from decompose import TextDecomposer
+from LLM_Access.model_access_new import LLMResponder, get_llm_responder, respond
 
 # Wrap your custom HTTP LLM into a Runnable
 llm_runnable = RunnableLambda(lambda s: get_response(s))
@@ -17,9 +19,10 @@ llm_runnable = RunnableLambda(lambda s: get_response(s))
 class SentenceDecomposeError(RuntimeError):
     """Raised when the LLM response cannot be coerced to the expected schema."""
 
-class LLMResponder(Protocol):
-    """Minimal interface for an LLM/chain callable (e.g., LangChain Runnable)."""
-    def invoke(self, inputs: dict[str, Any]) -> str: ...
+# class LLMResponder(Protocol):
+#     """Minimal interface for an LLM/chain callable (e.g., LangChain Runnable)."""
+#     # def invoke(self, inputs: dict[str, Any]) -> str: ...
+#     def invoke(self, prompt: str) -> str: ...
 
 @dataclass(frozen=True)
 class DecomposeConfig:
@@ -139,8 +142,8 @@ def _coerce_qualities(obj: Any) -> Qualities:
 
 # ---------- Public API ----------
 def build_sentence_decomposer(
-    llm: LLMResponder, 
-    config: DecomposeConfig | None = None):
+    # llm: LLMResponder, 
+    config: DecomposeConfig | None = None) -> TextDecomposer:
     """
     Create a callable `decompose_sentence(sentence: str) -> Qualities` bound to a given LLM.
     Use this to inject your LangChain chain (e.g., `prompt | get_response`).
@@ -160,7 +163,7 @@ def build_sentence_decomposer(
             user_query=f'"{s}"'
         )
         # `prompt_str` is unused here, but could be logged for debugging.
-        rich.debug(f"Prompt string: {prompt_str}")
+        rich.print(f"Prompt string: {prompt_str}")
         
         # Compose the chain
         # sentence_chain = PROMPT | llm_runnable
@@ -176,20 +179,34 @@ def build_sentence_decomposer(
         #     - Passes the final string to the model.
 
         # Simply pass the prompt string to the llm directly (No LangChain chain here for simplicity of our case)
-        llm(prompt_str)
+        # llm(prompt_str)
+        # response = llm.invoke(prompt_str)
+        
+        # llm = get_llm_responder()
+        # response = llm.invoke({
+        #     "prompt": prompt_str,
+        #     "max_tokens": 500,
+        #     # "temperature": 0.2,
+        # })
+        # or for convenience
+        response = respond(
+            prompt_str, 
+            max_tokens=500, 
+            # temperature=0.2
+        )
 
         # Some LangChain models return only the completion; if not, raw is fine.
 
         # 💚 Try strict parse → 🟠 fallback to slice → 🚨 fallback to empty list
         try:
-            parsed = json.loads(raw) # ideally raw is: {"qualities": [...]}
+            parsed = json.loads(response) # ideally raw is: {"qualities": [...]}
             qualities = _coerce_qualities(parsed)
             if qualities:
                 return qualities # a list[str]
         except Exception:
             pass
 
-        blob = _first_json_object(raw)
+        blob = _first_json_object(response)
         if blob:
             try:
                 parsed = json.loads(blob)
@@ -200,7 +217,7 @@ def build_sentence_decomposer(
                 pass
 
         # Last resort: if the model dumped plain lines, split heuristically
-        fallback = [line.strip("-• ").strip() for line in raw.splitlines() if line.strip()]
+        fallback = [line.strip("-• ").strip() for line in response.splitlines() if line.strip()]
         return fallback if fallback else []
 
     return decompose_sentence

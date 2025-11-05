@@ -1,0 +1,18 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "🕊️ Trustifai (module)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "trustifai",
+            "console": "integratedTerminal",
+            "envFile": "${workspaceFolder}/.env",
+            "cwd": "${workspaceFolder}",
+
+            "justMyCode": true,                    // step into your code, skip site-packages
+            "subProcess": true,                    // also debug child processes (multiprocessing, etc.)
+            "stopOnEntry": false                   // don’t stop at the entry point
+        }
+    ]
+}

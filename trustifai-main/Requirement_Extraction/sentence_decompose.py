@@ -1,19 +1,19 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from enum import Enum
-from typing import Protocol, Iterable, Any, Final
+from typing import Iterable, Any, Final
 import json
-import re
 import rich
-from langchain.prompts import PromptTemplate
-from langchain_core.runnables import RunnableLambda
-from LLM_Access.model_access import get_response
-from decompose import TextDecomposer
-from LLM_Access.model_access_new import LLMResponder, get_llm_responder, respond
+# from langchain.prompts import PromptTemplate
+from langchain_core.prompts import PromptTemplate
+
+# from langchain_core.runnables import RunnableLambda
+# from LLM_Access.model_access import get_response
+from .common import TextDecomposer, Qualities
+from LLM_Access.model_access_new import get_llm_responder, respond
 
 # Wrap your custom HTTP LLM into a Runnable
-llm_runnable = RunnableLambda(lambda s: get_response(s))
+# llm_runnable = RunnableLambda(lambda s: get_response(s))
 
 # ---------- Types ----------
 class SentenceDecomposeError(RuntimeError):
@@ -31,8 +31,6 @@ class DecomposeConfig:
     - prompt_max_newlines: cap to avoid pathological inputs.
     """
     prompt_max_newlines: int = 2
-
-Qualities = list[str]  # e.g., ["Transparency is a property of KI system.", ...]
 
 # ---------- Prompt Building ----------
 _EXAMPLES: Final[list[dict[str, str]]] = [
@@ -122,13 +120,30 @@ def _render_examples(examples: Iterable[dict[str, str]]) -> str:
 PROMPT: PromptTemplate = PromptTemplate.from_template(_PROMPT_TEMPLATE)
 
 # ---------- Parsing helpers ----------
-_JSON_OBJECT_RE = re.compile(r"\{(?:[^{}]|(?R))*\}", flags=re.DOTALL)
-# Recursive regex to match balanced {...} JSON objects.
+# _JSON_OBJECT_RE = re.compile(r"\{(?:[^{}]|(?R))*\}", flags=re.DOTALL)
+# # Recursive regex to match balanced {...} JSON objects.
+
+# def _first_json_object(text: str) -> str | None:
+#     """Return the first balanced {...} JSON object substring, if any."""
+#     m = _JSON_OBJECT_RE.search(text)
+#     return m.group(0) if m else None # group 0 is the full match
 
 def _first_json_object(text: str) -> str | None:
     """Return the first balanced {...} JSON object substring, if any."""
-    m = _JSON_OBJECT_RE.search(text)
-    return m.group(0) if m else None # group 0 is the full match
+    stack = []
+    start = None
+    for i, c in enumerate(text):
+        if c == '{':
+            if not stack:
+                start = i
+            stack.append(c)
+        elif c == '}':
+            if stack:
+                stack.pop()
+                if not stack and start is not None:
+                    # return the first complete JSON-like object
+                    return text[start:i+1]
+    return None
 
 def _coerce_qualities(obj: Any) -> Qualities:
     """Validate and coerce arbitrary parsed JSON into Qualities."""
@@ -163,7 +178,8 @@ def build_sentence_decomposer(
             user_query=f'"{s}"'
         )
         # `prompt_str` is unused here, but could be logged for debugging.
-        rich.print(f"Prompt string: {prompt_str}")
+        # rich.print(f"Prompt string: {prompt_str}")
+        print("Prompt string:", prompt_str)
         
         # Compose the chain
         # sentence_chain = PROMPT | llm_runnable
@@ -194,6 +210,10 @@ def build_sentence_decomposer(
             max_tokens=500, 
             # temperature=0.2
         )
+        # remove the prompt from the response
+        print("LLM response:", response)
+        response = response.replace(prompt_str, "").strip()
+        print("LLM response after prompt removal:", response)
 
         # Some LangChain models return only the completion; if not, raw is fine.
 

@@ -15,7 +15,7 @@ class ScoredBM25Retriever:
         self.k = k
         
         # Create BM25Okapi instance for scoring
-        self.bm25_scorer = BM25Okapi([doc.page_content.split() for doc in docs])
+        self.bm25_scorer = BM25Okapi(corpus=[doc.page_content.split() for doc in docs])
         
     def get_relevant_documents_and_scores(self, query):
         tokenized_query = query.lower().split()

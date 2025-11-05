@@ -1,12 +1,11 @@
-import os
 from __future__ import annotations
+import os
 from typing import Protocol, Any, Optional, cast
 from langchain_community.graphs import Neo4jGraph
 from dotenv import load_dotenv
 # load the environment variables
 load_dotenv(override=True)
 # graph/clients.py
-from __future__ import annotations
 from typing import Protocol, Any
 
 class GraphClient(Protocol):

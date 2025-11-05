@@ -2,7 +2,8 @@
 from __future__ import annotations
 from enum import Enum
 from typing import Callable, Iterable, Protocol, Any
-from sentence_decompose import Qualities, build_sentence_decomposer
+from .sentence_decompose import build_sentence_decomposer
+from Requirement_Extraction.common import Qualities, TextDecomposer
 
 class DecomposeMode(str, Enum):
     SENTENCES = "sentences"
@@ -12,8 +13,6 @@ class DecomposeMode(str, Enum):
 #     def __call__(self, text: str, /) -> list[str]: ...
 # The slash '/' indicates that 'text' is a positional-only argument.
 # Positional-only parameters ignore names, which sidesteps Pylance's name check.
-
-TextDecomposer = Callable[[str], Qualities]
 
 sentence_decomposer = build_sentence_decomposer()
 chunk_decomposer = lambda s: [s]  # Placeholder; replace with real chunk decomposer later.

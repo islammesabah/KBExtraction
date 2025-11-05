@@ -35,3 +35,12 @@ typer
 rich
 python-dotenv
 configparser
+
+
+typing_extensions
+rank_bm25
+textwrap
+
+langchain_huggingface
+langchain_chroma
+langchain_core

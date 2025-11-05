@@ -6,7 +6,7 @@ from peft import AutoPeftModelForCausalLM
 from transformers import AutoTokenizer
 from dotenv import load_dotenv
 from core.types import ExtractionResult
-from extraction_helpers import _coerce_to_result, _extract_json_object
+from .extraction_helpers import _coerce_to_result, _extract_json_object
 
 import torch
 import os
@@ -60,6 +60,9 @@ print(f"[TrustifAI] Running on {DEVICE.upper()} (USE_CUDA={USE_CUDA})")
 
 bnb_config = None
 if DEVICE == "cuda" and HAVE_BNB:
+    if BitsAndBytesConfig is None:
+        raise ImportError("BitsAndBytesConfig is not available, but required for 4-bit quantization.")
+    
     bnb_config = BitsAndBytesConfig(
         load_in_4bit=True,                      # Q = 4 bits
         #bnb_4bit_use_double_quant=True,        # double quantization, quantizing the quantization constants for saving an additional 0.4 bits per parameter

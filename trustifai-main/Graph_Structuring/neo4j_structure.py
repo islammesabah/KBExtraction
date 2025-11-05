@@ -3,7 +3,7 @@ from typing import Any, List, Optional
 # from langchain_community.graphs import Neo4jGraph
 from dotenv import load_dotenv
 import os
-from clients import connect_graph_client
+from .clients import connect_graph_client
 from core.types import EdgeProperties, ExtractionResult, GraphEdge, GraphRelation
 from langchain_core.documents import Document
 

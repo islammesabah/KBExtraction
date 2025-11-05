@@ -7,8 +7,8 @@ from Requirement_Extraction.txt_sentences_extraction import txt_extraction
 from Requirement_Extraction.pdf_sentences_extraction import create_sentences
 from Requirement_Extraction.pdf_chunks import create_chunks
 # from Requirement_Extraction.sentence_decompose_old import extract as sentence_decompose
-from Requirement_Extraction.decomposer.sentence_decompose import build_sentence_decomposer
-from Requirement_Extraction.decomposer.decompose import decompose, DecomposeMode
+from Requirement_Extraction.sentence_decompose import build_sentence_decomposer
+from Requirement_Extraction.decompose import decompose, DecomposeMode
 # from chunk_decompose import build_chunk_decomposer  # (we'll add similarly later)
 # from Requirement_Extraction.chunk_decompose import extract as chunk_decompose
 
@@ -18,6 +18,7 @@ import glob
 from tqdm import tqdm
 from langchain_core.documents import Document
 from LLM_Access.model_access import get_response
+import textwrap
 
 # ENVIRONMENT VARIABLES
 DATA_SOURCE = "DSA"
@@ -94,14 +95,20 @@ def get_similar(
     #     """
 
     # New
-    cypher_query = """ 
-            MATCH (n)-[r:REL]->(req:Node{label:"requirement"}) 
-            RETURN DISTINCT r.sentence as sentence
-        """
+    # cypher_query = """ 
+    #         MATCH (n)-[r:REL]->(req:Node{label:"requirement"}) 
+    #         RETURN DISTINCT r.sentence as sentence
+    #     """
+    cypher_query = textwrap.dedent("""
+        MATCH ()-[r:REL]->(n:Node{label:"requirement"})
+        WHERE r.sentence IS NOT NULL
+        RETURN DISTINCT r.sentence AS sentence
+    """).strip()
 
-    graph = query_graph(cypher_query)
+    # Query our Knowledge Base (Graph)
+    graph_result = query_graph(cypher_query)
 
-    for source in graph:
+    for source in graph_result:
         print("################################################################")
         source = source["sentence"] #e.g., "fairness is requirement"
         system_message("Graph Information to expand:")
@@ -133,7 +140,7 @@ def get_similar(
                 continue
             
             print("===========================================================")
-            system_message("Add next Information to the Graph:")
+            system_message("Decompose the current document:")
             print(doc.page_content)
             # decomposed_list = decompose(doc.page_content) # i.e., chunk the page_content
             doc_decomposed = decompose(
@@ -194,6 +201,7 @@ def main():
     global EXTRACT_TYPE 
     global BULK_UPLOAD 
 
+    print("Welcome to TrustiFA Knowledge Graph Extraction Tool")
     data: list | None = None
     match interface(
             "Which data source do you want to use?", 

@@ -1,5 +1,6 @@
 from __future__ import annotations
-from typing import NotRequired, Required, TypedDict, Any
+from typing import TypedDict, Any
+from typing_extensions import Required, NotRequired
 
 Subject = str
 Predicate = str
@@ -26,7 +27,7 @@ class EdgeProperties(TypedDict, total=False):
     """
     # ------- Required (minimum we rely on) -------
     sentence: Required[str]                  # human-readable sentence (from extractor or synthesized)
-    predicate_text: Required[str]            # original predicate text (before normalization)
+    predicate_text: NotRequired[str]            # original predicate text (before normalization)
 
     # ------- Strongly recommended provenance -------
     original_sentence: NotRequired[str]      # the raw text from the Document chunk

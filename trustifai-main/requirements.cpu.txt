@@ -44,3 +44,4 @@ textwrap
 langchain_huggingface
 langchain_chroma
 langchain_core
+groq

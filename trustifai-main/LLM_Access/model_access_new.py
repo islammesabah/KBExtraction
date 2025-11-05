@@ -1,24 +1,25 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Optional, Protocol, Dict, Final, Literal, Union, cast
+from typing import Any, Protocol, Final
 import os
-import json
 import time
 
 import requests
 from dotenv import load_dotenv
+from .groq_responder import GroqResponder
+from .llm_protocol import LLMResponder
 
 # -----------------------------
 # Public protocol (matches your code)
 # -----------------------------
-class LLMResponder(Protocol):
-    """
-    Minimal interface expected by the rest of the codebase.
-    Convention here: inputs MUST contain a "prompt" key with a string.
-    """
-    def invoke(self, inputs: dict[str, Any]) -> str: ...
-    # def invoke(self, prompt: str) -> str: ...
+# class LLMResponder(Protocol):
+#     """
+#     Minimal interface expected by the rest of the codebase.
+#     Convention here: inputs MUST contain a "prompt" key with a string.
+#     """
+#     def invoke(self, inputs: dict[str, Any]) -> str: ...
+#     # def invoke(self, prompt: str) -> str: ...
 
 
 # -----------------------------
@@ -170,19 +171,26 @@ class HFLocalResponder:
 def get_llm_responder() -> LLMResponder:
     """
     Factory that returns an object satisfying LLMResponder.
-    Chooses backend by env var MODEL_BACKEND: "http" (default) or "hf_local".
+    Chooses backend via MODEL_BACKEND: "groq", "http", or "hf_local".
 
     Usage:
         llm = get_llm_responder()
         result = llm.invoke({"prompt": "Hello model!"})
     """
-    if MODEL_BACKEND == "hf_local":
-        return HFLocalResponder(
-            model_name=HF_LOCAL_MODEL,
-            device=HF_DEVICE,
-            max_new_tokens=HF_MAX_NEW_TOKENS,
-        )
-    # default: http
+    backend = os.getenv("MODEL_BACKEND", "hf_local").lower()
+
+    match backend:
+        case "groq":
+            return GroqResponder(
+                model=os.getenv("GROQ_MODEL"),
+            )
+        case "hf_local":
+            return HFLocalResponder(
+                model_name=HF_LOCAL_MODEL,
+                device=HF_DEVICE,
+                max_new_tokens=HF_MAX_NEW_TOKENS,
+            )
+        # Default to HTTP
     return HTTPChatResponder(
         url=MODEL_SERVICE_URL,
         model=MODEL_SERVICE_NAME,
@@ -205,4 +213,5 @@ def respond(prompt: str, **kwargs: Any) -> str:
     llm = get_llm_responder()
     payload: dict[str, Any] = {"prompt": prompt}
     payload.update(kwargs)
-    return llm.invoke(payload)
+    response = llm.invoke(payload)
+    return response

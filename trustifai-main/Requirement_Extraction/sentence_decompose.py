@@ -82,6 +82,7 @@ Rules:
 - Use ONLY the provided sentence; do not add external facts.
 - Be concise and avoid redundancy.
 - No markdown fences. No prose outside JSON.
+- Return a COMPACT JSON object (no indentation, no newlines, no spaces between elements).
 - If nothing can be extracted, return {{"qualities": []}}.
 [/INST]
 {examples}
@@ -101,7 +102,8 @@ def _render_examples(examples: Iterable[dict[str, str]]) -> str:
         sent = ex["sentence"].replace('"', "")
         out  = ex["output"]
         block.append(
-            f'sentence: "{sent}"\n{{\n"qualities": {out}\n}}'
+            # f'sentence: "{sent}"\n{{\n"qualities": {out}\n}}'
+            f'sentence: "{sent}"\n{{"qualities": {out}}}'
         )
     return "\n\n".join(block) # double newlines between examples
 
@@ -219,7 +221,9 @@ def build_sentence_decomposer(
 
         # 💚 Try strict parse → 🟠 fallback to slice → 🚨 fallback to empty list
         try:
-            parsed = json.loads(response) # ideally raw is: {"qualities": [...]}
+            # remove literal \n, \r, and multiple spaces that appear between JSON punctuation
+            response = response.replace("\n", "").replace("\r", "").strip()
+            parsed = json.loads(response) # ideally, raw is: {"qualities": [...]}
             qualities = _coerce_qualities(parsed)
             if qualities:
                 return qualities # a list[str]
@@ -228,6 +232,7 @@ def build_sentence_decomposer(
 
         blob = _first_json_object(response)
         if blob:
+            blob_clean = blob.replace("\\n", "").replace("\\r", "")
             try:
                 parsed = json.loads(blob)
                 qualities = _coerce_qualities(parsed)

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Protocol, Final
+from typing import Any, NoReturn, Final
 import os
 import time
 
@@ -165,6 +165,9 @@ class HFLocalResponder:
         return str(outs)
 
 
+def _unsupported_backend(backend: str) -> NoReturn:
+    raise ValueError(f"Unsupported MODEL_BACKEND: {backend!r}")
+
 # -----------------------------
 # Factory
 # -----------------------------
@@ -181,22 +184,22 @@ def get_llm_responder() -> LLMResponder:
 
     match backend:
         case "groq":
-            return GroqResponder(
-                model=os.getenv("GROQ_MODEL"),
-            )
+            return GroqResponder(model=os.getenv("GROQ_MODEL"))
         case "hf_local":
             return HFLocalResponder(
                 model_name=HF_LOCAL_MODEL,
                 device=HF_DEVICE,
                 max_new_tokens=HF_MAX_NEW_TOKENS,
             )
-        # Default to HTTP
-    return HTTPChatResponder(
-        url=MODEL_SERVICE_URL,
-        model=MODEL_SERVICE_NAME,
-        timeout=REQUEST_TIMEOUT,
-        retries=REQUEST_RETRIES,
-    )
+        case "http":
+            return HTTPChatResponder(
+                url=MODEL_SERVICE_URL,
+                model=MODEL_SERVICE_NAME,
+                timeout=REQUEST_TIMEOUT,
+                retries=REQUEST_RETRIES,
+            )
+        case _:
+            _unsupported_backend(backend)  # NoReturn → type checker knows we never return here
 
 
 # -----------------------------

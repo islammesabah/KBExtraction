@@ -6,6 +6,7 @@ import os
 from .clients import connect_graph_client
 from core.types import EdgeProperties, ExtractionResult, GraphEdge, GraphRelation
 from langchain_core.documents import Document
+from datetime import datetime, timezone
 
 # load the environment variables
 load_dotenv(override=True)
@@ -36,7 +37,11 @@ def _normalize_label(text: str) -> str:
 # Public helpers
 # -------------------------
 def query_graph(query: str, params: Optional[dict[str, Any]] = None) -> list[dict[str, str]]:
-    return graph_client.query(query, params=params or {})
+    try:
+        return graph_client.query(query, params=params or {})
+    except Exception as e:
+        # You can log here if you like
+        raise RuntimeError(f"[query_graph] Query failed: {e}") from e
 
 # def create_relations(edge_object, sentence_doc):
 #     return [{
@@ -69,10 +74,10 @@ def map_extracted_triplets_to_graph_relations(
     """
     # defensive: accept partially-typed dicts
     sentence_text = extraction.get("sentence")
-    edges = extraction.get("edges", [])
+    triplets = extraction.get("triplets", [])
 
     rels: List[GraphRelation] = []
-    for subj, obj, rel in edges:
+    for subj, obj, rel in triplets:
         # normalize labels to snake_case-ish and trim
         # s_label = _normalize_label(subj)
         # t_label = _normalize_label(obj)
@@ -118,28 +123,45 @@ def upsert_graph_relation(relation: GraphRelation) -> list[dict[str, Any]]:
     src_label = relation['source']['label']     # e.g., 'Monitoring'
     tgt_label = relation['target']['label']     # e.g., 'KI system'
     rel_label = relation['edge']['label']       # e.g., 'is performed during operation of'
-    props_all = relation['edge']['properties']
-    on_create = props_all.copy()
-    on_match = { "last_updated_at": __import__("time").time() }
+    props_all = relation['edge']['properties']  # sentence/source/page/etc
     
-    # choose a small, stable MATCH KEY for the relationship
-    key_props: EdgeProperties = {
-        'sentence': props_all.get('sentence', ''),
-        'source_file': props_all.get('source_file', ''),
-        'page_number': props_all.get('page_number', 0),
-        'start_index': props_all.get('start_index', 0),
-        'end_index': props_all.get('end_index', 0),
+    # Minimal key (choose your policy):
+    #   Option A (one edge per label between same nodes):
+    # key_props = {"label": rel_label}
+    #
+    #   Option B (dedupe per sentence-location):
+    rel_key_props: EdgeProperties = {
+        "label": rel_label,
+        "source": props_all.get("source", ""), 
+        # "page_number": props_all.get("page_number", 0),
+        # "start_index": props_all.get("start_index", 0),
+        # "end_index": props_all.get("end_index", 0),
     }
+    # ⚠️ remember: the rel_key_props are the props of the relationship used to find existing rels!
+    # so choose them carefully to avoid over- or under-merging.
+
+    # on create: keep every useful bit + created_at
+    on_create_props = {
+        **props_all, # we want to store metadata but not match on it
+        # "created_at": __import__("time").time(),
+        "created_at": datetime.now(timezone.utc).isoformat(),  # "2025-11-06T12:03:45.678+00:00",
+    }
+    
+    # on match: only mutable audit fields
+    on_match_props = {
+        # "last_updated_at": __import__("time").time(),
+        "last_updated_at": datetime.now(timezone.utc).isoformat(),
+    }    
     
     """
     apoc.merge.relationship is a Neo4j APOC procedure used to dynamically merge or create a relationship between two nodes, which either exists or is created based on the provided parameters. 
     It handles dynamic relationship types and properties for creation or matching, and its signature is apoc.merge.relationship(
         startNode, 
-        relType,        # e.g., "IS_SUBCLASS_OF"
+        relType,        # e.g., "REL"
         relKeyProps,    # properties used to identify existing relationships
         onCREATEProps,  # properties set only when a new relationship is created
         endNode, 
-        onMatchProps    # properties updated when an relationship already exists
+        onMatchProps    # properties updated when a relationship already exists
     ). 
     This is useful for building Cypher queries where the relationship details are provided as parameters, for example, when unwinding a list of rows.
     """
@@ -154,31 +176,43 @@ def upsert_graph_relation(relation: GraphRelation) -> list[dict[str, Any]]:
     query_result = graph_client.query(
         """
         MERGE (s:Node {label: $source_label})
+        ON CREATE SET s.created_at = datetime()
+        SET s.last_updated_at = datetime(),
+            s.created_at = coalesce(s.created_at, datetime())
+        
         MERGE (t:Node {label: $target_label})
+        ON CREATE SET t.created_at = datetime()
+        SET t.last_updated_at = datetime(),
+            t.created_at = coalesce(t.created_at, datetime())
+
         WITH s,t
         CALL apoc.merge.relationship(
             s,
-            $rel_label, 
-            $key_props, 
+            $rel_type, 
+            $rel_key_props, 
             $on_create,
             t,
             $on_match
         ) YIELD rel
+        
+        // ensure temporal props exist on the rel too
+        SET rel.created_at     = coalesce(rel.created_at, datetime()),
+        rel.last_updated_at = datetime()
+    
         RETURN s,t,rel
         """,
         params={
           'source_label': src_label,
           'target_label': tgt_label,
-          'rel_label': rel_label,
-          'key_props': key_props,
-          'on_create': on_create,
-          'on_match': on_match
+          'rel_type': 'REL', # always 'REL' as the relationship type; actual label is in properties
+          'rel_key_props': rel_key_props,
+          'on_create': on_create_props, # set only on create
+          'on_match': on_match_props,   # set only on match (update)
         }
     )
     
-    
     # Why this is safer
-    # - We won't create a new rel just because page_number or some metadata changed.
+    # - Option A: We won't create a new rel just because page_number or some metadata changed.
     # - We still persist all the rich properties on first create, and can update on matches.
 
     return query_result

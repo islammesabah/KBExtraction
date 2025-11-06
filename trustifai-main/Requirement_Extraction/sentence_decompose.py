@@ -11,7 +11,8 @@ from langchain_core.prompts import PromptTemplate
 # from LLM_Access.model_access import get_response
 from .common import TextDecomposer, Qualities
 from LLM_Access.model_access_new import get_llm_responder, respond
-
+from Graph_Structuring.extraction_helpers import _extract_json_object
+ 
 # Wrap your custom HTTP LLM into a Runnable
 # llm_runnable = RunnableLambda(lambda s: get_response(s))
 
@@ -130,22 +131,22 @@ PROMPT: PromptTemplate = PromptTemplate.from_template(_PROMPT_TEMPLATE)
 #     m = _JSON_OBJECT_RE.search(text)
 #     return m.group(0) if m else None # group 0 is the full match
 
-def _first_json_object(text: str) -> str | None:
-    """Return the first balanced {...} JSON object substring, if any."""
-    stack = []
-    start = None
-    for i, c in enumerate(text):
-        if c == '{':
-            if not stack:
-                start = i
-            stack.append(c)
-        elif c == '}':
-            if stack:
-                stack.pop()
-                if not stack and start is not None:
-                    # return the first complete JSON-like object
-                    return text[start:i+1]
-    return None
+# def _first_json_object(text: str) -> str | None:
+#     """Return the first balanced {...} JSON object substring, if any."""
+#     stack = []
+#     start = None
+#     for i, c in enumerate(text):
+#         if c == '{':
+#             if not stack:
+#                 start = i
+#             stack.append(c)
+#         elif c == '}':
+#             if stack:
+#                 stack.pop()
+#                 if not stack and start is not None:
+#                     # return the first complete JSON-like object
+#                     return text[start:i+1]
+#     return None
 
 def _coerce_qualities(obj: Any) -> Qualities:
     """Validate and coerce arbitrary parsed JSON into Qualities."""
@@ -230,7 +231,8 @@ def build_sentence_decomposer(
         except Exception:
             pass
 
-        blob = _first_json_object(response)
+        # blob = _first_json_object(response)
+        blob = _extract_json_object(response)
         if blob:
             blob_clean = blob.replace("\\n", "").replace("\\r", "")
             try:

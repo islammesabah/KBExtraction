@@ -10,7 +10,7 @@ TripletSOP = tuple[Subject, Object, Predicate]  # (Subject, Object, Predicate)
 
 class ExtractionResult(TypedDict):
     sentence: str
-    edges: list[TripletSOP]  # [["Subject", "Object", "Relation"], ...]
+    triplets: list[TripletSOP]  # [["Subject", "Object", "Relation"], ...]
 
 class GraphEnd(TypedDict):
     label: str
@@ -26,12 +26,13 @@ class EdgeProperties(TypedDict, total=False):
     We mark some keys Required for downstream logic, and allow extra keys.
     """
     # ------- Required (minimum we rely on) -------
-    sentence: Required[str]                  # human-readable sentence (from extractor or synthesized)
+    label: Required[str]                     # e.g., "is" when the sentence is: "AI is transformative"
+    sentence: NotRequired[str]                  # human-readable sentence (from extractor or synthesized)
     predicate_text: NotRequired[str]            # original predicate text (before normalization)
 
     # ------- Strongly recommended provenance -------
     original_sentence: NotRequired[str]      # the raw text from the Document chunk
-    source_file: NotRequired[str]            # e.g., PDF/file name
+    source: NotRequired[str]            # e.g., PDF/file name
     page_number: NotRequired[int]
     start_index: NotRequired[int]
     end_index: NotRequired[int]

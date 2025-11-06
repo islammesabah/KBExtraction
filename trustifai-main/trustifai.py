@@ -12,7 +12,7 @@ from Requirement_Extraction.decompose import decompose, DecomposeMode
 # from chunk_decompose import build_chunk_decomposer  # (we'll add similarly later)
 # from Requirement_Extraction.chunk_decompose import extract as chunk_decompose
 
-from Graph_Structuring.relationship_extraction import extract_triplets
+from Graph_Structuring.triplet_extraction_new import extract_triplets
 from Graph_Structuring.neo4j_structure import map_extracted_triplets_to_graph_relations, query_graph, upsert_graph_relation
 import glob
 from tqdm import tqdm
@@ -159,7 +159,7 @@ def get_similar(
             print("===========================================================")
             system_message("Atomic decomposed sentences:")
             for i,sen in enumerate(doc_decomposed):
-                print(i," : ", sen)
+                print(i,": ", sen)
             print("===========================================================")
             try:
                 for sentence in doc_decomposed:

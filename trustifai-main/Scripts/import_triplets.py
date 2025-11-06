@@ -32,6 +32,12 @@ FOR (n:Node) REQUIRE n.label IS UNIQUE
 # We could have called it :Entity, :Concept, or even :Thing
 # So, Node is just a convenient, readable name.
 
+# Add indexes
+graph_instance.query("""
+CREATE INDEX node_label IF NOT EXISTS FOR (n:Node) ON (n.label);
+CREATE INDEX rel_label  IF NOT EXISTS FOR ()-[r:REL]-() ON (r.label);
+CREATE INDEX rel_created IF NOT EXISTS FOR ()-[r:REL]-() ON (r.created_at);
+""")
 
 # -------------------------------------------------------------------
 # 4. Load CSV data

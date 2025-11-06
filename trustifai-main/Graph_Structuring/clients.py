@@ -2,11 +2,10 @@ from __future__ import annotations
 import os
 from typing import Protocol, Any, Optional, cast
 from langchain_community.graphs import Neo4jGraph
+from neo4j.exceptions import Neo4jError
 from dotenv import load_dotenv
 # load the environment variables
 load_dotenv(override=True)
-# graph/clients.py
-from typing import Protocol, Any
 
 class GraphClient(Protocol):
     def query(self, query: str, params: dict[str, Any] | None = None) -> list[dict[str, Any]]: ...
@@ -35,5 +34,23 @@ def connect_graph_client(
     if not neo4j_url:
         raise RuntimeError("NEO4J_URI is not set (pass url=... or set env var).")
 
-    client = Neo4jGraph(url=neo4j_url, username=neo4j_user, password=neo4j_pass)
-    return cast(GraphClient, client)
+    base_client = Neo4jGraph(url=neo4j_url, username=neo4j_user, password=neo4j_pass)
+    
+    # --- Wrap the base client to add error reporting ---
+    class SafeNeo4jGraph:
+        def __init__(self, inner: Neo4jGraph):
+            self.inner = inner
+
+        def query(self, query: str, params: Optional[dict[str, Any]] = None) -> list[dict[str, Any]]:
+            try:
+                return self.inner.query(query, params or {})
+            except Neo4jError as e:
+                raise RuntimeError(
+                    f"Neo4j query failed!\nError: {e.__class__.__name__}: {e}\nQuery:\n{query}\nParams:\n{params}"
+                ) from e
+            except Exception as e:
+                raise RuntimeError(
+                    f"Unexpected error during Neo4j query:\n{e}\nQuery:\n{query}\nParams:\n{params}"
+                ) from e
+
+    return cast(GraphClient, SafeNeo4jGraph(base_client))

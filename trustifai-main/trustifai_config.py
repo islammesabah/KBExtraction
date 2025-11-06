@@ -10,7 +10,7 @@ from Requirement_Extraction.pdf_chunks import create_chunks
 from Requirement_Extraction.sentence_decompose_old import extract as sentence_decompose
 from Requirement_Extraction.chunk_decompose import extract as chunk_decompose
 
-from Graph_Structuring.relationship_extraction import extract_triplets
+from Graph_Structuring.triplet_extraction import extract_triplets
 from Graph_Structuring.neo4j_structure import create_relations, add_to_graph, query_graph
 
 from Log.logs_dataframe import Logs

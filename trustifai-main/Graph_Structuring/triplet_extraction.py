@@ -1,17 +1,15 @@
+from __future__ import annotations
 # Safe, device-agnostic loader for PEFT models (CPU by default; CUDA+4bit if available)
 # --------------------------------------------------------------------------------------
 # For loading a PEFT model, we need to use a special object for CausalLM from PEFT
 # instead of the regular HuggingFace object.
+import os, json, torch, rich
+from typing import Optional, Dict, Any
 from peft import AutoPeftModelForCausalLM
 from transformers import AutoTokenizer
 from dotenv import load_dotenv
 from core.types import ExtractionResult
 from .extraction_helpers import _coerce_to_result, _extract_json_object
-
-import torch
-import os
-import json
-import rich
 
 # --- Optional: BitsAndBytes (CUDA-only). Import guarded. ---
 try:
@@ -26,6 +24,27 @@ except Exception:
 # Env & login
 # -------------------------
 load_dotenv(override=True)
+
+# -------------------------
+# Backend selection helper
+# -------------------------
+def _use_hf_local() -> bool:
+    """
+    The key idea: don't import/instantiate large HF models unless the backend is hf_local.
+    Returns:
+        bool: True if using hf_local backend, False otherwise.
+    """
+    return os.getenv("MODEL_BACKEND", "hf_local").lower() == "hf_local"
+
+# -------------------------
+# HF lazy loader (only if needed)
+# -------------------------
+_tokenizer = None
+_model = None
+_DEVICE = "cpu"
+_HAVE_BNB = False
+_bnb_config = None
+
 
 HF_API_TOKEN = os.getenv("HF_API_TOKEN", "").strip()
 def maybe_login_hf(repo_or_path: str):
@@ -94,7 +113,6 @@ print(f"[TrustifAI] Loading model from: {model_source}")
 maybe_login_hf(model_source)
 
 
-
 # Choose dtype sensibly
 torch_dtype = torch.float16 if DEVICE == "cuda" else torch.float32
 
@@ -141,12 +159,12 @@ except Exception:
 
 # Move to device for non-quantized / CPU case
 if bnb_config is None:
-    model.to(DEVICE)
+    model.to(DEVICE) # type: ignore
 
 # -------------------------
 # Prompting helpers
 # -------------------------
-def build_relation_extraction_prompt(sentence: str) -> str:
+def build_triplet_extraction_prompt(sentence: str) -> str:
     """
     Build a STRICT JSON-only instruction for extracting (Subject, Object, Relation) triplets.
     Output schema must be:
@@ -164,11 +182,8 @@ You are an information extraction system. Extract relationships (edges) from a s
 Each relationship MUST be a triplet in the exact order:
 (Subject, Object, Relation)
 
-Return STRICT JSON ONLY (no prose, no markdown). Use this schema exactly:
-{{
-  "sentence": <string>, 
-  "edges": [ [<Subject>, <Object>, <Relation>], ... ]
-}}
+Return STRICT, COMPACT JSON ONLY (no prose, no markdown, no newlines/indentation). Use this schema exactly:
+{{"sentence": <string>, "edges": [[<Subject>, <Object>, <Relation>], ...]}}
 
 Rules:
 - Do not invent entities or relations not present in the sentence.
@@ -177,18 +192,11 @@ Rules:
 
 Example:
 Input: "Privacy and data governance ensures prevention of harm"
-Output:
-{{
-  "sentence": "Privacy and data governance ensures prevention of harm",
-  "edges": [
-    ["Privacy", "harm", "ensures prevention of"],
-    ["data governance", "harm", "ensures prevention of"]
-  ]
-}}
+Output: {{"sentence": "Privacy and data governance ensures prevention of harm","edges": [["Privacy", "harm", "ensures prevention of"],["data governance", "harm", "ensures prevention of"]]}}
 
 Now extract for this input:
 {sent_json}
-"""
+""".strip()
 
 # Define a function to build a prompt from a data example
 # def format_instruction(sentence, edges):
@@ -229,7 +237,7 @@ def extract_triplets(sentence: str) -> ExtractionResult:
         "edges": []
     }
     try:
-        prompt = build_relation_extraction_prompt(sentence)
+        prompt = build_triplet_extraction_prompt(sentence)
         inputs = tokenizer(prompt, return_tensors='pt', padding=True)
         # inputs = inputs.to("cuda")
         inputs = {k: v.to(DEVICE) for k, v in inputs.items()}

@@ -1,0 +1,46 @@
+# --- core NLP ---
+spacy==3.7.4
+en-core-web-sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.1/en_core_web_sm-3.7.1-py3-none-any.whl
+
+# --- langchain ecosystem (avoid installing langchain-core directly) ---
+langchain
+langchain-community
+langchain-openai
+langchainhub
+langchain-huggingface
+langchain-chroma
+
+# Let the container provide PyTorch + CUDA.
+# Don't pip install torch yourself unless you have a very specific reason (and matching CUDA wheels).
+
+# --- hugging Face ---
+transformers
+accelerate
+sentencepiece
+peft
+
+# --- data/graph/util ---
+neo4j
+chromadb
+pandas
+numpy
+scikit-learn
+networkx
+
+# --- pdf & tooling ---
+pymupdf
+pypdf
+pdfminer.six
+
+# --- cli/config ---
+typer
+rich
+python-dotenv
+configparser
+typing_extensions
+
+# --- retrieval ---
+rank-bm25
+
+# --- providers ---
+groq

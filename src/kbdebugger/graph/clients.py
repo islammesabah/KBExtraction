@@ -1,7 +1,7 @@
 from __future__ import annotations
 import os
 from typing import Protocol, Any, Optional, cast
-from langchain_community.graphs import Neo4jGraph
+from kbdebugger.compat.langchain import Neo4jGraph
 from neo4j.exceptions import Neo4jError
 from dotenv import load_dotenv
 # load the environment variables

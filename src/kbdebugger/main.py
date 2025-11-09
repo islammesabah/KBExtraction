@@ -1,28 +1,26 @@
-from utils.warnings_config import install_warning_filters
+import glob
+import textwrap
+
+from .utils.warnings_config import install_warning_filters
 install_warning_filters()
 
-
-from terminal_interface import interface
-from Requirement_Extraction.txt_sentences_extraction import txt_extraction
-from Requirement_Extraction.pdf_sentences_extraction import create_sentences
-from Requirement_Extraction.pdf_chunks import create_chunks
-# from Requirement_Extraction.sentence_decompose_old import extract as sentence_decompose
-from Requirement_Extraction.sentence_decompose import build_sentence_decomposer
-from Requirement_Extraction.decompose import decompose, DecomposeMode
+from .utils.terminal_interface import interface
+from .extraction.txt_sentences_extraction import txt_extraction
+from .extraction.pdf_sentences_extraction import create_sentences
+from .extraction.pdf_chunks import create_chunks
+from .extraction.sentence_decompose import build_sentence_decomposer
+from .extraction.decompose import decompose, DecomposeMode
 # from chunk_decompose import build_chunk_decomposer  # (we'll add similarly later)
 # from Requirement_Extraction.chunk_decompose import extract as chunk_decompose
 
-from Graph_Structuring.triplet_extraction_new import extract_triplets
-from Graph_Structuring.neo4j_structure import map_extracted_triplets_to_graph_relations, query_graph, upsert_graph_relation
-import glob
+from .graph.triplet_extraction import extract_triplets
+from .graph.neo4j_structure import map_extracted_triplets_to_graph_relations, query_graph, upsert_graph_relation
 from tqdm import tqdm
-from langchain_core.documents import Document
-from LLM_Access.model_access import get_response
-import textwrap
+from kbdebugger.compat.langchain import Document
 
 # ENVIRONMENT VARIABLES
 DATA_SOURCE = "DSA"
-DATA_FILE = " ./Data/SDS/20241015_MISSION_KI_Glossar_v1.0 en.pdf"
+DATA_FILE = " ./data/SDS/20241015_MISSION_KI_Glossar_v1.0 en.pdf"
 EXTRACT_TYPE = "Sentences"
 RETRIEVING_APPROACH = "Sparse Retrieval"
 BULK_UPLOAD = True
@@ -77,14 +75,14 @@ def get_similar(
         options=["Dense Retrieval", "Sparse Retrieval", "Hybrid Retrieval"]
         ):
             case "Sparse Retrieval":
-                from Retriever.BM25Retriever import build_retriever
+                from retrieval.BM25Retriever import build_retriever
                 Retriever = build_retriever(data)
             case "Dense Retrieval":
-                from Retriever.SemanticRetriever import build_retriever
+                from retrieval.SemanticRetriever import build_retriever
                 Retriever = build_retriever(data)
                 RETRIEVING_APPROACH = "Dense Retrieval"
             case "Hybrid Retrieval":
-                from Retriever.HybridRetriever import build_retriever
+                from retrieval.HybridRetriever import build_retriever
                 Retriever = build_retriever(data)
                 RETRIEVING_APPROACH = "Hybrid Retrieval"
 
@@ -208,10 +206,10 @@ def main():
             ["DSA", "SDS"]
         ):
         case "DSA":
-            data = txt_extraction("./Data/DSA/DSA_knowledge.txt")
+            data = txt_extraction("data/DSA/DSA_knowledge.txt")
         case "SDS":
             DATA_SOURCE = "SDS"
-            files_list = glob.glob("./Data/SDS/**/*.pdf", recursive=True)
+            files_list = glob.glob("data/SDS/**/*.pdf", recursive=True)
             file = interface(
                 "Which file do you want to use?", 
                 files_list

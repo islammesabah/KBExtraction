@@ -1,10 +1,9 @@
-# from langchain.prompts import PromptTemplate
-from langchain_core.prompts import PromptTemplate
+from kbdebugger.compat.langchain import PromptTemplate
 
 import re
 import json
 
-from LLM_Access.model_access import get_response
+from kbdebugger.llm.model_access import get_llm_responder
 
 sentences_examples = [
     {
@@ -85,28 +84,28 @@ Here are some examples:
 [INST]text: {user_query}[/INST]
 """
 
-prompt = PromptTemplate.from_template(prompt_template)
+# prompt = PromptTemplate.from_template(prompt_template)
 
-simple_rag_chain = (
-    prompt                                   # build the prompt
-    | get_response                           # llm for generation
-)
+# simple_rag_chain = (
+#     prompt                                   # build the prompt
+#     | get_response                           # llm for generation
+# )
 
-def extract(query):
-    query_clean = query.replace('"', '')
-    user_query = f'"{query_clean}"'
+# def extract(query):
+#     query_clean = query.replace('"', '')
+#     user_query = f'"{query_clean}"'
 
-    res = simple_rag_chain.invoke({
-        "examples": create_examples(sentences_examples),
-        "user_query": user_query
-    })
+#     res = simple_rag_chain.invoke({
+#         "examples": create_examples(sentences_examples),
+#         "user_query": user_query
+#     })
 
-    # extract json object
-    match = re.search(r"\{[^{}]*?\}", res)
-    if match:
-        try:
-            return json.loads(match.group())["qualities"]
-        except:
-            return [query]
-    else:
-        return [query]
+#     # extract json object
+#     match = re.search(r"\{[^{}]*?\}", res)
+#     if match:
+#         try:
+#             return json.loads(match.group())["qualities"]
+#         except:
+#             return [query]
+#     else:
+#         return [query]

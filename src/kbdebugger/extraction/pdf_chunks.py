@@ -1,19 +1,22 @@
 import fitz  # PyMuPDF
 import re
 import spacy
-# from langchain.schema import Document
-from langchain_core.documents import Document
-from langchain_community.document_loaders import UnstructuredPDFLoader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+
+from kbdebugger.compat.langchain import RecursiveCharacterTextSplitter, Document, PyMuPDFLoader, UnstructuredPDFLoader
 import logging
 import os
-
 
 def extract_text_with_metadata(pdf_path):
     loader = UnstructuredPDFLoader(pdf_path)
     data = loader.load()
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=700, chunk_overlap=70, add_start_index=True)
     return text_splitter.split_documents(data)
+
+# def extract_text_with_metadata(pdf_path):
+#     loader = PyMuPDFLoader(pdf_path)  # instead of UnstructuredPDFLoader
+#     data = loader.load()
+#     splitter = RecursiveCharacterTextSplitter(chunk_size=700, chunk_overlap=70, add_start_index=True)
+#     return splitter.split_documents(data)
 
 
 def clean_extracted_text(chunks):

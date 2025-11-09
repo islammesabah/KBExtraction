@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-# --- Type stubs for static checkers (so Pylance is happy) ---
-from typing import TYPE_CHECKING
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from transformers import BitsAndBytesConfig
 
@@ -10,13 +8,13 @@ from transformers import BitsAndBytesConfig
 # For loading a PEFT model, we need to use a special object for CausalLM from PEFT
 # instead of the regular HuggingFace object.
 import os, json, torch, rich
-from typing import Optional, Dict, Any
+from typing import Dict, Any
 from peft import AutoPeftModelForCausalLM
 from transformers import AutoTokenizer
 from dotenv import load_dotenv
-from core.types import ExtractionResult
+from kbdebugger.types import ExtractionResult
 from .extraction_helpers import _coerce_to_result, _extract_json_object
-from LLM_Access.model_access_new import get_llm_responder
+from kbdebugger.llm.model_access import get_llm_responder
 
 # -------------------------
 # Backend selection helper

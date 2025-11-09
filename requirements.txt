@@ -44,3 +44,10 @@ rank-bm25
 
 # --- providers ---
 groq
+
+# === Compatibility fixes / dependency pins ===
+# tiktoken & transformers require regex>=2022
+regex>=2023.6.0
+
+# langchainhub requires packaging<25
+packaging<25,>=23.2

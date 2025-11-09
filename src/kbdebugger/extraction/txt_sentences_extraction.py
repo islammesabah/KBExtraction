@@ -1,7 +1,6 @@
 from pathlib import Path
 import string
-# from langchain.schema import Document
-from langchain_core.documents import Document
+from kbdebugger.compat.langchain import Document
 
 def txt_extraction(data_path: str) -> list[Document]:
     p = Path(data_path)

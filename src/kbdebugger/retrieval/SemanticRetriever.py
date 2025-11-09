@@ -1,5 +1,4 @@
-from langchain_huggingface import HuggingFaceEmbeddings
-from langchain_chroma import Chroma
+from kbdebugger.compat.langchain import HuggingFaceEmbeddings, Chroma
 
 def build_retriever(docs, k= 4):
     # for run call .invoke() on returned Object

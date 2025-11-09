@@ -6,8 +6,8 @@
 #     - BM25 is a lexical search algorithm, meaning it matches words in the query to words in the document.
 
 
-from langchain_community.retrievers import BM25Retriever
 from rank_bm25 import BM25Okapi
+from kbdebugger.compat.langchain import BM25Retriever
 
 class ScoredBM25Retriever:
     def __init__(self, docs, k= 4):

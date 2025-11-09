@@ -23,7 +23,7 @@ def create_config():
 
     config['Data'] = {
         'data_source': 'SDS', # "DSA" or "SDS"
-        'data_file': './Data/SDS/20241015_MISSION_KI_Glossar_v1.0 en.pdf'
+        'data_file': './data/SDS/20241015_MISSION_KI_Glossar_v1.0 en.pdf'
     }
 
     config['Retrieving'] = {

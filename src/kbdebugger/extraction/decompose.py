@@ -3,8 +3,6 @@ from __future__ import annotations
 from enum import Enum
 from typing import Callable, Iterable, Protocol, Any
 from .sentence_decompose import build_sentence_decomposer
-from Requirement_Extraction.common import Qualities, TextDecomposer
-
 class DecomposeMode(str, Enum):
     SENTENCES = "sentences"
     CHUNKS = "chunks"

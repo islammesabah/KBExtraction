@@ -2,9 +2,9 @@
 # https://python.langchain.com/docs/how_to/ensemble_retriever/
 
 
-from langchain.retrievers import EnsembleRetriever
-from Retriever.BM25Retriever import build_retriever as build_BM25Retriever
-from Retriever.SemanticRetriever import build_retriever as build_SemanticRetriever
+from retrieval.BM25Retriever import build_retriever as build_BM25Retriever
+from retrieval.SemanticRetriever import build_retriever as build_SemanticRetriever
+from kbdebugger.compat.langchain import EnsembleRetriever
 
 def build_retriever(docs, alpha=0.5, k = 4):
     # for run call .invoke() on returned Object

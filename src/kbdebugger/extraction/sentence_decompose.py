@@ -3,19 +3,12 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Iterable, Any, Final
 import json
-import rich
-# from langchain.prompts import PromptTemplate
-from langchain_core.prompts import PromptTemplate
+from kbdebugger.extraction.types import TextDecomposer, Qualities
 
-# from langchain_core.runnables import RunnableLambda
-# from LLM_Access.model_access import get_response
-from .common import TextDecomposer, Qualities
-from LLM_Access.model_access_new import get_llm_responder, respond
-from Graph_Structuring.extraction_helpers import _extract_json_object
+from kbdebugger.llm.model_access import respond
+from kbdebugger.graph.extraction_helpers import _extract_json_object
  
-# Wrap your custom HTTP LLM into a Runnable
-# llm_runnable = RunnableLambda(lambda s: get_response(s))
-
+from kbdebugger.compat.langchain import PromptTemplate
 # ---------- Types ----------
 class SentenceDecomposeError(RuntimeError):
     """Raised when the LLM response cannot be coerced to the expected schema."""
@@ -118,7 +111,6 @@ def _render_examples(examples: Iterable[dict[str, str]]) -> str:
     # {
     # "qualities": ["Transparency is a property of KI system.", "Transparency is explainable.", ...]
     # }
-
 
 PROMPT: PromptTemplate = PromptTemplate.from_template(_PROMPT_TEMPLATE)
 

@@ -1,4 +1,5 @@
 from __future__ import annotations
+from dotenv import load_dotenv
 
 from dataclasses import dataclass
 from typing import Any, NoReturn, Final
@@ -6,7 +7,6 @@ import os
 import time
 
 import requests
-from dotenv import load_dotenv
 from .groq_responder import GroqResponder
 from .llm_protocol import LLMResponder
 

@@ -35,4 +35,4 @@ source ./.venv/bin/activate # Because ./.venv now symlinks to /netscratch/abuali
 echo -e "🐍 Using $(python --version) ($(which python))"
 
 # python main.py $MACHINE_NAME $JOB_NAME $NUM_NODES $NUM_TASKS_PER_NODE $NUM_GPUS_PER_TASK $NUM_CPUS_PER_TASK $MEM $HOURS $ARGS
-python -m src.main
+python -m kbdebugger.main

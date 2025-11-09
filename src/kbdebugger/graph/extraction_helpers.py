@@ -1,4 +1,4 @@
-from core.types import ExtractionResult, TripletSOP
+from kbdebugger.types import ExtractionResult, TripletSOP
 from typing import Any
 import re
 

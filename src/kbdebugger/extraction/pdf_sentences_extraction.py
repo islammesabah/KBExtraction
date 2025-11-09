@@ -1,8 +1,7 @@
 import fitz  # PyMuPDF
 import re
 import spacy
-# from langchain.schema import Document
-from langchain_core.documents import Document
+from kbdebugger.compat.langchain import Document
 import logging
 import os
 

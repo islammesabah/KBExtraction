@@ -1,5 +1,5 @@
 import os, csv
-from langchain_community.graphs import Neo4jGraph
+from kbdebugger.compat.langchain import Neo4jGraph
 from dotenv import load_dotenv
 
 # -------------------------------------------------------------------
@@ -43,7 +43,7 @@ CREATE INDEX rel_created IF NOT EXISTS FOR ()-[r:REL]-() ON (r.created_at);
 # 4. Load CSV data
 # -------------------------------------------------------------------
 # import local CSV (semicolon separated)
-path = "Data/seed/triplets.csv"
+path = "data/seed/triplets.csv"
 with open(path, newline='', encoding="utf-8") as f:
     reader = csv.DictReader(f, delimiter=';')  # source;relationship;destination
     # DictReader reads each row into a dictionary where keys are the column headers

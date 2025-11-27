@@ -24,6 +24,15 @@ HOURS=$8                # Time to request in hours.
 shift 8 # This removes the first 8 arguments from the argument list so that $@ contains only user arguments.
 ARGS=$@
 
+# ALL MACHINES is an option to run on all available machines. (CAUTION: This will use all available resources on the cluster!)
+ALL_MACHINES="batch,RTX3090,V100-32GB,RTXA6000,RTXA6000-AV,L40S,L40S-AV,A100-40GB,A100-80GB,A100-RP,A100-PCI,H100,H100-RP,H100-PCI,H200"
+
+if [[ "$MACHINE_NAME" == "all" ]]; then
+  MACHINE_NAME=$ALL_MACHINES
+  echo "Using all machines: $MACHINE_NAME"
+fi
+
+
 # Normalize memory input to handle 'G', 'GB', and no suffix cases
 if [[ $MEM == *GB ]]; then
     MEM="${MEM%GB}G"  # Remove 'GB' and replace with 'G'

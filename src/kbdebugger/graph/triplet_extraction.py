@@ -13,7 +13,8 @@ from peft import AutoPeftModelForCausalLM
 from transformers import AutoTokenizer
 from dotenv import load_dotenv
 from kbdebugger.types import ExtractionResult
-from .extraction_helpers import _coerce_to_result, _extract_json_object
+from .extraction_helpers import _coerce_to_result
+from kbdebugger.utils.json import _extract_json_object
 from kbdebugger.llm.model_access import get_llm_responder
 
 # -------------------------
@@ -122,11 +123,18 @@ Return STRICT, COMPACT JSON ONLY (no prose, no markdown, no newlines/indentation
 Rules:
 - Do not invent entities or relationships not present in the sentence.
 - Trim whitespace; keep original casing.
+- If the sentence is already short enough, don't decompose it further.
+- Make sure that the sentence after decomposition still makes sense. If not, keep it as is.
 - If no triplets exist, return "triplets": [].
+
 
 Example:
 Input: "Privacy and data governance ensures prevention of harm"
 Output: {{"sentence": "Privacy and data governance ensures prevention of harm","triplets": [["Privacy", "harm", "ensures prevention of"],["data governance", "harm", "ensures prevention of"]]}}
+
+Input: "Fairness is a Characteristic of KI system"
+Output: {{"sentence": "Fairness is a Characteristic of KI system","triplets": [["Fairness", "KI system", "is a Characteristic of"]]}}
+Notice that here we did not decompose further since the sentence is already short.
 
 Now extract for this input:
 {sent_json}

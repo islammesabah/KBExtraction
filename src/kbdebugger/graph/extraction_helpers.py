@@ -1,33 +1,5 @@
 from kbdebugger.types import ExtractionResult, TripletSOP
 from typing import Any
-import re
-
-# -------------------------
-# Robust JSON post-processing helpers
-# -------------------------
-def _strip_markdown_fences(text: str) -> str:
-    # remove ```json ... ``` or ``` ... ```
-    return re.sub(r"```(?:json)?\s*|```", "", text, flags=re.IGNORECASE).strip()
-
-def _extract_json_object(text: str) -> str | None:
-    """
-    Try to locate a top-level JSON object {...} even if the model added extra text.
-    Uses a simple brace counter to find the first balanced object.
-    """
-    s = _strip_markdown_fences(text)
-    start = s.find("{")
-    if start == -1:
-        # no opening brace found
-        return None
-    depth = 0
-    for i, ch in enumerate(s[start:], start=start):
-        if ch == "{":
-            depth += 1
-        elif ch == "}":
-            depth -= 1
-            if depth == 0:
-                return s[start:i+1]
-    return None
 
 def _coerce_to_result(obj: Any, sentence: str) -> ExtractionResult:
     """

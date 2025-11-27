@@ -6,7 +6,7 @@ import json
 from kbdebugger.extraction.types import TextDecomposer, Qualities
 
 from kbdebugger.llm.model_access import respond
-from kbdebugger.graph.extraction_helpers import _extract_json_object
+from kbdebugger.utils.json import _extract_json_object
  
 from kbdebugger.compat.langchain import PromptTemplate
 # ---------- Types ----------
@@ -174,7 +174,7 @@ def build_sentence_decomposer(
         )
         # `prompt_str` is unused here, but could be logged for debugging.
         # rich.print(f"Prompt string: {prompt_str}")
-        print("Prompt string:", prompt_str)
+        # print("Prompt string:", prompt_str)
         
         # Compose the chain
         # sentence_chain = PROMPT | llm_runnable
@@ -202,13 +202,14 @@ def build_sentence_decomposer(
         # or for convenience
         response = respond(
             prompt_str, 
-            max_tokens=500, 
+            # max_tokens=500,
+            max_tokens=1000, 
             # temperature=0.2
         )
         # remove the prompt from the response
-        print("LLM response:", response)
+        # print("LLM response:", response)
         response = response.replace(prompt_str, "").strip()
-        print("LLM response after prompt removal:", response)
+        # print("LLM response after prompt removal:", response)
 
         # Some LangChain models return only the completion; if not, raw is fine.
 

@@ -14,8 +14,8 @@ def extract_text_with_metadata(pdf_path, page_limit=None):
         with fitz.open(pdf_path) as file:
             logging.info("PDF opened successfully.")
 
-            filename = os.path.basename(pdf_path)
-            title, _ = os.path.splitext(filename)
+            filename = os.path.basename(pdf_path) # e.g., 'data/SDS/20241015_MISSION_KI_Glossar_v1.0 en.pdf' -> '20241015_MISSION_KI_Glossar_v1.0 en.pdf'
+            title, _ = os.path.splitext(filename) # splits at the last period
 
             #return "\n".join(page.get_text() for page in file)
             pages_text = []
@@ -61,6 +61,7 @@ def clean_extracted_text(raw_text):
             # if len(line.strip()) < 20:
                 # continue
             # Fix hyphenated line breaks (e.g., "retrieval-\n augmented")
+            # Thus, "retrieval-\n augmented" becomes "retrievalaugmented"
             line = re.sub(r'(\w+)-\s*\n\s*(\w+)', r'\1\2', line)
             # Replace multiple spaces with a single space
             line = re.sub(r'\s+', ' ', line)
@@ -81,8 +82,10 @@ def tokenize_sentences(cleaned_pages):
     for page in cleaned_pages:
         text = page['cleaned_text']
         page_number = page['page_number']
-        doc = nlp(text)
+        doc = nlp(text) # This will segment the text into sentences using SpaCy
         sentences = [sent.text.strip() for sent in doc.sents if len(sent.text.strip()) > 20]
+        # .strip to remove leading/trailing spaces
+        # We ignore very short sentences (<20 chars)
         tokenized_pages.append({
             'page_number': page_number,
             'sentences': sentences
@@ -105,7 +108,7 @@ def structure_sentences(tokenized_pages, title):
     return documents
 
 def create_sentences(pdf_path):
-    title, pages_raw_text = extract_text_with_metadata(pdf_path) 
+    title, pages_raw_text = extract_text_with_metadata(pdf_path)
     if not pages_raw_text:
         print("No text extracted from the PDF.")
         return

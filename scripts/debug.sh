@@ -10,7 +10,17 @@ else
   exit 1
 fi
 
+
 # Choose a port (default 5678) or pass DEBUG_PORT=xxxx
+# Parse KEY=VALUE args
+for arg in "$@"; do
+  case $arg in
+    PORT=*)
+      DEBUG_PORT="${arg#PORT=}"
+      shift
+      ;;
+  esac
+done
 PORT="${DEBUG_PORT:-5678}"
 
 # Activate venv (./.venv symlinks to /netscratch/.../KBExtract)

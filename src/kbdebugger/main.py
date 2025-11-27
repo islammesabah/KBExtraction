@@ -17,6 +17,7 @@ from .graph.triplet_extraction import extract_triplets
 from .graph.neo4j_structure import map_extracted_triplets_to_graph_relations, query_graph, upsert_graph_relation
 from tqdm import tqdm
 from kbdebugger.compat.langchain import Document
+import rich
 
 # ENVIRONMENT VARIABLES
 DATA_SOURCE = "DSA"
@@ -30,9 +31,9 @@ def system_message(txt: str) -> None:
      print(txt)
      print("################################\n")
 
-def bulk_upload(data):
+def bulk_upload(documents):
     relation_update = 0
-    for doc in tqdm(data, desc="Decompose the Data", unit="item"):
+    for doc in tqdm(documents, desc="Decompose the Documents", unit="item"):
         # decompose_list = sentence_decompose(doc.page_content)
         doc_decomposed = decompose(
             text=doc.page_content,
@@ -52,16 +53,16 @@ def bulk_upload(data):
     system_message(f"We add or update {relation_update} relations in your Graph Knowledge")
 
 def get_similar(
-    data: list[Document]
+    documents: list[Document]
 ) -> None:
     """
     Get similar documents from the existing knowledge graph and add new relations based on user approval.
     Interactively asks the user for input on which retrieving approach to use and whether to upload new relations.
     Args:
-        data (list): List of LangChain `Document` objects (produced earlier by create_sentences or create_chunks etc.). 
+        documents (list): List of LangChain `Document` objects (produced earlier by create_sentences or create_chunks etc.). 
         to be used for retrieval and relation extraction.
         
-        Assume data is a list of Document objects, each document can be as simple as one sentence or chunk.
+        Assume documents is a list of Document objects, each document can be as simple as one sentence or chunk.
         So we iterate over each document (sentence), use this sentence as a query and query the KB (Knowledge Graph) to get similar sentences that are already in the graph.
         
         Now say the KB result set returned 2 sentences.
@@ -75,15 +76,15 @@ def get_similar(
         options=["Dense Retrieval", "Sparse Retrieval", "Hybrid Retrieval"]
         ):
             case "Sparse Retrieval":
-                from retrieval.BM25Retriever import build_retriever
-                Retriever = build_retriever(data)
+                from .retrieval.BM25Retriever import build_retriever
+                Retriever = build_retriever(documents)
             case "Dense Retrieval":
-                from retrieval.SemanticRetriever import build_retriever
-                Retriever = build_retriever(data)
+                from .retrieval.SemanticRetriever import build_retriever
+                Retriever = build_retriever(documents)
                 RETRIEVING_APPROACH = "Dense Retrieval"
             case "Hybrid Retrieval":
-                from retrieval.HybridRetriever import build_retriever
-                Retriever = build_retriever(data)
+                from .retrieval.HybridRetriever import build_retriever
+                Retriever = build_retriever(documents)
                 RETRIEVING_APPROACH = "Hybrid Retrieval"
 
     # Old:
@@ -176,16 +177,18 @@ def get_similar(
                     """
                     print(f"Extraction Result: {extracted_triplets}")
                     graph_relations = map_extracted_triplets_to_graph_relations(extracted_triplets, doc)
-                    for relation in graph_relations:
+                    for i, relation in enumerate(graph_relations):
+                        # relation_sentence = relation['edge']['properties']['sentence']
+                        rich.print(f"👉️ Proposed triplet: [bold yellow]{extracted_triplets['triplets'][i]}[/bold yellow]")
                         match interface(
-                                "Would you like to upload previous relation to Graph Knowledge?", 
+                                f"Would you like to upload the above relation to the knowledge graph?", 
                                 ["YES", "NO"]
                             ):
                             case "YES":
                                 upsert_graph_relation(relation)
-                                print("[UPSERT] relation upserted to knowledge graph")
+                                print("✅ [UPSERT] relation upserted to knowledge graph\n\n")
                             case "NO":
-                                print("[INFO] relation neglected")
+                                print("😢 [INFO] relation neglected")
                     print("&&&&&&&&&&&&&&&&&&&&&&&&")
             except:
                 print(f"Not able to upload: {doc.page_content}")
@@ -200,13 +203,13 @@ def main():
     global BULK_UPLOAD 
 
     print("Welcome to TrustiFA Knowledge Graph Extraction Tool")
-    data: list | None = None
+    documents: list | None = None
     match interface(
             "Which data source do you want to use?", 
             ["DSA", "SDS"]
         ):
         case "DSA":
-            data = txt_extraction("data/DSA/DSA_knowledge.txt")
+            documents = txt_extraction("data/DSA/DSA_knowledge.txt")
         case "SDS":
             DATA_SOURCE = "SDS"
             files_list = glob.glob("data/SDS/**/*.pdf", recursive=True)
@@ -220,15 +223,15 @@ def main():
                 ["Sentences", "Chunks"]
             ):
                 case "Sentences":
-                    data = create_sentences(file)
+                    documents = create_sentences(file)
                 case "Chunks":
                     EXTRACT_TYPE = "Chunks"
-                    data = create_chunks(file)
+                    documents = create_chunks(file)
         
-    if data is None:
+    if documents is None:
         raise ValueError("No data loaded. Exiting.")
 
-    system_message(f"The loaded data has {len(data)} records")
+    system_message(f"Loaded {len(documents)} documents from {DATA_SOURCE} source using {EXTRACT_TYPE} extraction.")
     
     if DATA_SOURCE == "DSA":
         match interface(
@@ -236,11 +239,11 @@ def main():
                     ["Yes", "No"]
         ):
             case "Yes":
-                bulk_upload(data)
+                bulk_upload(documents)
             case "No":
-                get_similar(data)
+                get_similar(documents)
     else:
-        get_similar(data)
+        get_similar(documents)
     
     
 if __name__ == "__main__":

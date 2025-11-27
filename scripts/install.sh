@@ -16,7 +16,7 @@ fi
 
 # 1. Prepare dirs
 mkdir -p "$(dirname "$VENV_DIR")" "$PIP_CACHE_DIR" "$HF_HOME" "$TRANSFORMERS_CACHE"
-
+es0-
 # 2. Create venv on /netscratch if missing, reusing container site-packages (torch lives there)
 # Install core dependencies, that are sometimes missing from the base image.
 if [ -d "$VENV_DIR" ]; then
@@ -100,4 +100,4 @@ PY
 # echo -e "Job took $((end-start)) seconds."
 
 # # Deactivate the virtual environment.
-# deactivate4ywaas
+# deactivate

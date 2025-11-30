@@ -86,12 +86,24 @@ try:
 except Exception:
     PyMuPDFLoader = None  # type: ignore
 
+# UnstructuredPDFLoader: Any
+# try:
+#     from langchain_community.document_loaders import UnstructuredPDFLoader as _UnstructuredPDFLoader # type: ignore
+#     UnstructuredPDFLoader = _UnstructuredPDFLoader
+# except Exception:
+#     UnstructuredPDFLoader = None  # type: ignore
+
+# UnstructuredPDFLoader: REQUIRED
 UnstructuredPDFLoader: Any
 try:
-    from langchain_community.document_loaders import UnstructuredPDFLoader as _UnstructuredPDFLoader # type: ignore
+    from langchain_community.document_loaders import UnstructuredPDFLoader as _UnstructuredPDFLoader  # type: ignore
     UnstructuredPDFLoader = _UnstructuredPDFLoader
-except Exception:
-    UnstructuredPDFLoader = None  # type: ignore
+except Exception as exc:
+    raise ImportError(
+        "UnstructuredPDFLoader requires the 'unstructured' package.\n"
+        "Install it with:\n\n"
+        "    pip install unstructured unstructured-inference unstructured.pytesseract\n"
+    ) from exc
 
 # ------------------ Graphs (Neo4j) ------------------
 from langchain_community.graphs import Neo4jGraph # type: ignore

@@ -53,3 +53,18 @@ regex>=2023.6.0
 packaging<25,>=23.2
 
 sentence-transformers
+
+debugpy
+
+unstructured==0.16.20
+unstructured-client==0.30.1
+unstructured-inference==0.8.7
+unstructured.pytesseract==0.3.13
+pi_heif==0.21.0
+pdf2image==1.17.0
+
+# unstructured
+# unstructured-client
+# unstructured-inference
+# unstructured.pytesseract
+# pi_heif

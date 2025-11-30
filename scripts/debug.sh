@@ -28,6 +28,9 @@ source ./.venv/bin/activate
 echo "🐍 $(python --version) @ $(which python)"
 echo "🪲🐞 Debugger will listen on 0.0.0.0:${PORT}"
 
+# 👇 add this line
+export PYTHONPATH="${PYTHONPATH:-}:$(pwd)/src"
+
 # -------- portable port check (no 'ss' dependency) ----------
 if ! python - "$PORT" <<'PY'
 import socket, sys

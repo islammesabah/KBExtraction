@@ -1,3 +1,4 @@
+# Given a chunk of text, extract quality sentences out of it.
 # from langchain.prompts import PromptTemplate
 from langchain_core.prompts import PromptTemplate
 

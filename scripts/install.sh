@@ -16,7 +16,7 @@ fi
 
 # 1. Prepare dirs
 mkdir -p "$(dirname "$VENV_DIR")" "$PIP_CACHE_DIR" "$HF_HOME" "$TRANSFORMERS_CACHE"
-es0-
+
 # 2. Create venv on /netscratch if missing, reusing container site-packages (torch lives there)
 # Install core dependencies, that are sometimes missing from the base image.
 if [ -d "$VENV_DIR" ]; then
@@ -54,6 +54,8 @@ fi
 
 # ⛓️🏷️ 3. Optional symlink so our run.sh file can 'source ./venv/bin/activate'
 ln -sfn "$VENV_DIR" .venv
+
+export PYTHONPATH="${PYTHONPATH:-}:$(pwd)/src"
 
 # 4. Activate the virtual environment and install (excluding torch; container provides it)
 source "$VENV_DIR/bin/activate"

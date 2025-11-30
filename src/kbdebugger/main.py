@@ -5,15 +5,16 @@ from .utils.warnings_config import install_warning_filters
 install_warning_filters()
 
 from .utils.terminal_interface import interface
-from .extraction.txt_sentences_extraction import txt_extraction
-from .extraction.pdf_sentences_extraction import create_sentences
-from .extraction.pdf_chunks import create_chunks
+from .extraction.text_to_sentences import extract_txt_sentences
+from .extraction.pdf_to_sentences import extract_pdf_sentences
+from .extraction.pdf_to_chunks import extract_pdf_chunks
 from .extraction.sentence_decompose import build_sentence_decomposer
 from .extraction.decompose import decompose, DecomposeMode
+from .extraction.sentence_to_triplets import extract_triplets
 # from chunk_decompose import build_chunk_decomposer  # (we'll add similarly later)
 # from Requirement_Extraction.chunk_decompose import extract as chunk_decompose
 
-from .graph.triplet_extraction import extract_triplets
+# from .graph.triplet_extraction import extract_triplets
 from .graph.neo4j_structure import map_extracted_triplets_to_graph_relations, query_graph, upsert_graph_relation
 from tqdm import tqdm
 from kbdebugger.compat.langchain import Document
@@ -145,8 +146,6 @@ def get_similar(
             doc_decomposed = decompose(
                 text=doc.page_content,
                 mode=DecomposeMode.SENTENCES,
-                # sentence_decomposer=build_sentence_decomposer(),
-                # chunk_decomposer=lambda s: [s],  # temporary: identity until we refactor chunk_decompose
             )
             """
             e.g., doc_decomposed = [
@@ -209,7 +208,7 @@ def main():
             ["DSA", "SDS"]
         ):
         case "DSA":
-            documents = txt_extraction("data/DSA/DSA_knowledge.txt")
+            documents = extract_txt_sentences("data/DSA/DSA_knowledge.txt")
         case "SDS":
             DATA_SOURCE = "SDS"
             files_list = glob.glob("data/SDS/**/*.pdf", recursive=True)
@@ -217,16 +216,18 @@ def main():
                 "Which file do you want to use?", 
                 files_list
             )
+            if file is None:
+                raise ValueError("No file selected. Exiting.")
             DATA_FILE = file
             match interface(
                 "Do you want to extract sentences or chunks?", 
                 ["Sentences", "Chunks"]
             ):
                 case "Sentences":
-                    documents = create_sentences(file)
+                    documents = extract_pdf_sentences(file)
                 case "Chunks":
                     EXTRACT_TYPE = "Chunks"
-                    documents = create_chunks(file)
+                    documents = extract_pdf_chunks(file)
         
     if documents is None:
         raise ValueError("No data loaded. Exiting.")

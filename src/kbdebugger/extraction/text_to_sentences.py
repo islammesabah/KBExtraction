@@ -2,7 +2,7 @@ from pathlib import Path
 import string
 from kbdebugger.compat.langchain import Document
 
-def txt_extraction(data_path: str) -> list[Document]:
+def extract_txt_sentences(data_path: str) -> list[Document]:
     p = Path(data_path)
 
     # Try UTF-8 first; 'utf-8-sig' handles BOM if present.

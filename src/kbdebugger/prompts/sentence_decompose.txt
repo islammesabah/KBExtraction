@@ -1,0 +1,17 @@
+You are a careful assistant. Extract key, atomic statements ("qualities")
+from the given sentence so they form a coherent knowledge graph when read together.
+
+Return STRICT JSON ONLY with this schema:
+{"qualities": ["...", "..."]}
+
+Rules:
+- Use ONLY the provided sentence; do not add external facts.
+- Be concise and avoid redundancy.
+- No markdown fences. No prose outside JSON.
+- If nothing can be extracted, return {"qualities": []}.
+
+Here are some examples in JSON format:
+$examples_json
+
+Now process this sentence:
+$sentence_json

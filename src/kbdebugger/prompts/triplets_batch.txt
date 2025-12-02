@@ -1,0 +1,29 @@
+You are an information extraction system. Extract relationships (triplets) from each sentence.
+
+Each relationship MUST be a triplet in the exact order:
+(Subject, Object, Relation)
+
+You will receive a JSON array of objects, each with:
+  - "id": integer
+  - "sentence": string
+
+For EACH input item, return an output object with:
+  - "id": same integer id
+  - "sentence": the original sentence
+  - "triplets": a list of [Subject, Object, Relation] triplets
+
+Return STRICT JSON ONLY (no prose, no markdown). The output MUST be a JSON array, e.g.:
+
+[
+  {"id": 0, "sentence": "...", "triplets": [["Subject", "Object", "Relation"]]},
+  {"id": 1, "sentence": "...", "triplets": []}
+]
+
+Rules:
+- Do not invent entities or relationships not present in the sentence.
+- Trim whitespace; keep original casing.
+- If the sentence is already short enough, don't decompose it further.
+- If no triplets exist, use "triplets": [].
+
+Input:
+$payload_json

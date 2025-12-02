@@ -1,0 +1,17 @@
+[
+  {
+    "sentence": "Data Preprocessing is subclass of Data Science Task",
+    "qualities": [
+      "Data Preprocessing is subclass of Data Science Task."
+    ]
+  },
+  {
+    "sentence": "Transparency Property of an →KI system that is explainable and comprehensible. In the context of this quality standard, \"transparency\" also includes documentation of the properties of the →KI system.",
+    "qualities": [
+      "Transparency is a property of KI system.",
+      "Transparency is explainable.",
+      "Transparency is comprehensible.",
+      "Transparency includes documentation of properties of KI system."
+    ]
+  }
+]

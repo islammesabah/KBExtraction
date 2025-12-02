@@ -3,7 +3,7 @@ from __future__ import annotations
 import os
 from typing import Any, Dict, Optional
 from groq import Groq, BadRequestError
-from kbdebugger.utils.json import _ensure_json_object
+from kbdebugger.utils.json import ensure_json_object
 
 class GroqResponder:
     """
@@ -52,7 +52,7 @@ class GroqResponder:
         # Strategy:
         # 1) Try strict Groq JSON mode (if json_mode=True).
         # 2) If Groq returns 400 (json_validate_failed), retry without response_format.
-        # 3) Always run _ensure_json_object() on the final content in JSON mode.
+        # 3) Always run ensure_json_object() on the final content in JSON mode.
         if json_mode:
             # Valid-JSON guarantee (no extra prose)
             kwargs["response_format"] = {"type": "json_object"}
@@ -72,7 +72,7 @@ class GroqResponder:
         content = (resp.choices[0].message.content or "").strip()
 
         if json_mode:
-            return _ensure_json_object(content)
+            return ensure_json_object(content)
         else:
             return content
 

@@ -24,11 +24,11 @@ def _extract_batch_via_llm(sentences: list[str]) -> list[ExtractionResult]:
         return []
 
     prompt = build_triplet_extraction_prompt_batch(sentences)
-    response = respond(prompt, {
-        "max_tokens": 2048,
-        "temperature": 0.0,
-        "json_mode": True,
-    })
+    response = respond(
+        prompt,
+        max_tokens=2048,
+        temperature=0.0,
+        json_mode=True)
 
     # response = response.replace("\n", "").replace("\r", "").strip()
     parsed = ensure_json_array(response)   # always returns list[...] or []

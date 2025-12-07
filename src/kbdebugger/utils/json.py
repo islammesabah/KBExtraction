@@ -1,5 +1,5 @@
 from kbdebugger.types import ExtractionResult, TripletSOP
-from typing import Any
+from typing import Any, Dict
 import re
 import json
 
@@ -51,45 +51,39 @@ def _extract_json_array(text: str) -> str | None:
                 return text[start:i + 1]
     return None
 
-
-def ensure_json_object(raw: str) -> str:
+def ensure_json_object(raw: str) -> Dict[str, Any]:
     """
-    Best-effort: ensure we return a valid JSON object string.
+    Best-effort: ensure we return a *parsed* JSON object (dict).
     - First: try json.loads(raw) directly.
     - Second: try to extract a {...} from noisy output.
-    - Otherwise: return "{}".
+    - Otherwise: return {}.
     """
     s = raw.strip()
     if not s:
-        return "{}"
+        return {}
 
     # 1. Try direct parse
     try:
         data = json.loads(s)
-        # Must be an object, not array/string/etc.
         if isinstance(data, dict):
-            return s
+            return data
     except json.JSONDecodeError:
         pass
 
     # 2. Maybe noisy output with {...}? Try extracting just the object portion
     obj_str = _extract_json_object(s)
     if obj_str is None:
-        return "{}"
+        return {}
 
     try:
-        # Now that we have extracted {...}, verify it's valid JSON object
         data = json.loads(obj_str)
         if isinstance(data, dict):
             rich.print("[ensure_json_object] ✅ Successfully extracted valid JSON object.")
-            return obj_str
-    except json.JSONDecodeError:
-        rich.print("[ensure_json_object] ⚠️ Extracted JSON object is invalid.")
-        return "{}"
+            return data
+    except json.JSONDecodeError as e:
+        rich.print(f"[ensure_json_object] ⚠️ Extracted JSON object is invalid: {e}")
 
-    return "{}"
-
-
+    return {}
 
 def ensure_json_array(raw: str) -> Any:
     """

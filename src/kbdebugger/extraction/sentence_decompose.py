@@ -246,6 +246,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import re
 from typing import Any, List
 import json
 
@@ -267,8 +268,9 @@ def build_sentence_decomposer(config: DecomposeConfig | None = None) -> TextDeco
     examples_json = json.dumps(examples, ensure_ascii=False)
 
     def decompose_sentence(sentence: str) -> Qualities:
-        # 1. light sanitization
-        s = " ".join(sentence.splitlines()[: cfg.prompt_max_newlines]).strip()
+        # 1. Light sanitization: collapse all whitespace, keep full content
+        # i.e., newlines/tabs → spaces, multiple spaces → single space
+        s = re.sub(r"\s+", " ", sentence).strip()
         if not s:
             return []
 
@@ -284,11 +286,9 @@ def build_sentence_decomposer(config: DecomposeConfig | None = None) -> TextDeco
         # 3. call LLM
         response = respond(
             prompt_str,
-            {
-                "max_tokens": 800,
-                "temperature": 0.0,
-                "json_mode": True,
-            },
+            max_tokens=800,
+            temperature=0.0,
+            json_mode=True,
         )
 
         # 4. parse JSON

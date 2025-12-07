@@ -28,7 +28,7 @@ source ./.venv/bin/activate
 echo "🐍 $(python --version) @ $(which python)"
 echo "🪲🐞 Debugger will listen on 0.0.0.0:${PORT}"
 
-# 👇 add this line
+# Make src/ visible as a top-level package root
 export PYTHONPATH="${PYTHONPATH:-}:$(pwd)/src"
 
 # -------- portable port check (no 'ss' dependency) ----------
@@ -71,4 +71,5 @@ fi
 
 # Start debugpy and wait for VS Code to attach
 # Tip: 0.0.0.0 makes it reachable from the login node for tunneling
-exec python -m debugpy --listen 0.0.0.0:$PORT --wait-for-client -m kbdebugger.main "$@"
+# exec python -m debugpy --listen 0.0.0.0:$PORT --wait-for-client -m kbdebugger.main "$@"
+exec python -m debugpy --listen 0.0.0.0:$PORT --wait-for-client -m kbdebugger.extractor_main "$@"

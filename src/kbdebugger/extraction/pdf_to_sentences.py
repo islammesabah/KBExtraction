@@ -132,7 +132,7 @@ from pathlib import Path
 from typing import Iterable, List, Optional, Tuple
 
 import fitz  # PyMuPDF
-import spacy
+import spacy # type: ignore[import]
 from kbdebugger.compat.langchain import Document
 
 logger = logging.getLogger(__name__)
@@ -265,17 +265,17 @@ def clean_page_text(pages: Iterable[RawPage]) -> List[CleanedPage]:
             ):
                 continue
 
-            # Skip typical metadata / boilerplate lines
-            if re.search(
-                r"(Received|revised|accepted|Keywords|Abstract)",
-                line,
-                re.IGNORECASE,
-            ):
-                continue
+            # # Skip typical metadata / boilerplate lines
+            # if re.search(
+            #     r"(Received|revised|accepted|Keywords|Abstract)",
+            #     line,
+            #     re.IGNORECASE,
+            # ):
+            #     continue
 
-            # Skip lines that are standalone numbers (e.g. page numbers)
-            if re.match(r"^\d+$", line.strip()):
-                continue
+            # # Skip lines that are standalone numbers (e.g. page numbers)
+            # if re.match(r"^\d+$", line.strip()):
+            #     continue
 
             # Fix hyphenated line breaks
             line = re.sub(r"(\w+)-\s*\n\s*(\w+)", r"\1\2", line)

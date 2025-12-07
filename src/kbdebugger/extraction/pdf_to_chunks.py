@@ -148,7 +148,7 @@ def load_pdf_chunks(
     pdf_path = Path(pdf_path)
 
     loader = PyMuPDFLoader(str(pdf_path))
-    docs = loader.load()
+    docs = loader.load() # will load each page as a separate Document
 
     splitter = RecursiveCharacterTextSplitter(
         chunk_size=chunk_size,

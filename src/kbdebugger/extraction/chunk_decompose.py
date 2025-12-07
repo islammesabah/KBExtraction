@@ -115,6 +115,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import json
+import re
 
 from kbdebugger.extraction.types import TextDecomposer, Qualities
 from kbdebugger.llm.model_access import respond
@@ -143,15 +144,14 @@ def build_chunk_decomposer(
         Extract ordered, atomic 'qualities' from a larger paragraph/chunk.
         Returns a list of short statements.
         """
-
-        # 1. Light sanitization: cap the number of lines, trim whitespace
-        lines = text.splitlines()
-        limited = "\n".join(lines[: cfg.prompt_max_newlines]).strip()
-        if not limited:
+        # 1. Light sanitization: collapse all whitespace, keep full content
+        # i.e., newlines/tabs → spaces, multiple spaces → single space
+        s = re.sub(r"\s+", " ", text).strip()
+        if not s:
             return []
-
+        
         # We embed the text as a JSON string literal in the prompt
-        text_json = json.dumps(limited, ensure_ascii=False)
+        text_json = json.dumps(s, ensure_ascii=False)
 
         # 2. Build prompt from template + JSON examples
         prompt_str = render_prompt(
@@ -163,11 +163,9 @@ def build_chunk_decomposer(
         # 3. Call LLM
         response = respond(
             prompt_str,
-            {
-                "max_tokens": 20,
-                "temperature": 0.0,
-                "json_mode": True,
-            },
+            max_tokens=20,
+            temperature=0.0,
+            json_mode=True,
         )
 
         # 4. Parse JSON into Python object

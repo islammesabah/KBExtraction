@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import
+
+from rpds import List
 
 from .sentence_decompose import build_sentence_decomposer
 from .chunk_decompose import build_chunk_decomposer
 from .types import Qualities, TextDecomposer
+from typing import List
 
 class DecomposeMode(str, Enum):
     SENTENCES = "sentences"
@@ -22,15 +24,15 @@ def decompose(
     text: str,
     *,
     mode: DecomposeMode,
-) -> list[str]:
+) -> List[str]:
     """
     Decompose `text` into atomic strings per the selected mode.
 
     Parameters
     ----------
-    - text:
+    text:
         Input text: either a single sentence or a larger chunk.
-    - mode:
+    mode:
         - DecomposeMode.SENTENCES:
             Use when `text` is already sentence-like but may contain
             multiple atomic statements that should be split.
@@ -52,11 +54,13 @@ def decompose(
     list[str]
         A list of short, atomic sentences/qualities.
     """
-    switch mode:
+    match mode:
         case DecomposeMode.SENTENCES:
             return _sentence_decomposer(text)
         case DecomposeMode.CHUNKS:
             return _chunk_decomposer(text)
         case _:
-            # Defensive: this should never happen with the Enum, but keeps mypy happy
-            raise ValueError(f"Unsupported DecomposeMode: {mode}")
+            pass
+        
+    # Defensive: this should never happen with the Enum, but keeps mypy happy
+    raise ValueError(f"Unsupported DecomposeMode: {mode}")

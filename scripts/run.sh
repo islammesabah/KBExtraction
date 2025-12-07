@@ -28,6 +28,9 @@ echo -e "🤗 HF HOME: $HF_HOME"
 
 # export HF_TOKEN=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
 
+# Make src/ visible as a top-level package root
+export PYTHONPATH="${PYTHONPATH:-}:$(pwd)/src"
+
 # Activate the virtual environment.
 source ./.venv/bin/activate # Because ./.venv now symlinks to /netscratch/abuali/envs/KBExtract
 # # fallback in case the symlink didn't work

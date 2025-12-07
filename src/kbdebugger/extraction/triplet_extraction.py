@@ -8,16 +8,12 @@ from transformers import BitsAndBytesConfig
 # For loading a PEFT model, we need to use a special object for CausalLM from PEFT
 # instead of the regular HuggingFace object.
 import os, json, torch, rich
-from typing import Dict, Any
-from peft import AutoPeftModelForCausalLM
-from transformers import AutoTokenizer
-from dotenv import load_dotenv
 from kbdebugger.types import ExtractionResult
 from .utils import coerce_triplets
 from kbdebugger.utils.json import ensure_json_object
 from kbdebugger.llm.model_access import respond
 from kbdebugger.llm.hf_backend import use_hf_local, get_hf_causal_model
-from kbdebugger.prompts.prompt_rendering import render_prompt
+from kbdebugger.prompts import render_prompt
 
 def build_triplet_extraction_prompt(sentence: str) -> str:
     return render_prompt(
@@ -37,12 +33,12 @@ def _extract_via_llm(sentence: str) -> ExtractionResult:
     # empty: ExtractionResult = {"sentence": sentence, "triplets": []}
     prompt = build_triplet_extraction_prompt(sentence)
 
-    response = respond(prompt, {
-        "max_tokens": 512,
-        "temperature": 0.0,
+    response = respond(
+        prompt, 
+        max_tokens=512,
+        temperature=0.0,
         # If using Groq, this triggers JSON object mode; other backends ignore it.
-        "json_mode": True,
-    })
+        json_mode=True)
 
     # Optional belt-and-suspenders: strip escaped newlines if any
     response = response.replace("\n", "").replace("\r", "").strip()

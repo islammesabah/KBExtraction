@@ -6,10 +6,21 @@ from kbdebugger.utils.json import ensure_json_array
 from kbdebugger.extraction.utils import coerce_triplets_batch
 from kbdebugger.types import ExtractionResult
 import json
-import torch
+import torch # type: ignore
 import rich
 
 def build_triplet_extraction_prompt_batch(sentences: list[str]) -> str:
+    """
+    Build a prompt that asks the LLM to extract triplets for multiple sentences
+    in one call, returning a single JSON object:
+
+    {
+      "triplets_batch": [
+        {"id": 0, "sentence": "...", "triplets": [...]},
+        ...
+      ]
+    }
+    """
     payload = [
         {"id": i, "sentence": s.strip()}
         for i, s in enumerate(sentences)
@@ -26,13 +37,21 @@ def _extract_batch_via_llm(sentences: list[str]) -> list[ExtractionResult]:
     prompt = build_triplet_extraction_prompt_batch(sentences)
     response = respond(
         prompt,
-        max_tokens=2048,
+        max_tokens=4096,
         temperature=0.0,
-        json_mode=True)
+        json_mode=True
+    )
 
     # response = response.replace("\n", "").replace("\r", "").strip()
-    parsed = ensure_json_array(response)   # always returns list[...] or []
-    return coerce_triplets_batch(parsed, sentences)
+    # results = parse_response(
+    #     raw,
+    #     coercer=lambda obj: coerce_triplets_batch(obj, sentences),
+    #     default=[],
+    # )
+    parsed = ensure_json_object(response)
+    triplets = coerce_triplets_batch(parsed, sentences)
+
+    return triplets
 
 
 @torch.no_grad()

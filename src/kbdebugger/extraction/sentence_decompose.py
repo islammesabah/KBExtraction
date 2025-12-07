@@ -264,7 +264,7 @@ def build_sentence_decomposer(config: DecomposeConfig | None = None) -> TextDeco
     cfg = config or DecomposeConfig()
 
     # load examples once from JSON
-    examples = load_json_resource("sentence_decompose_examples")
+    examples = load_json_resource("sentence_decompose")
     examples_json = json.dumps(examples, ensure_ascii=False)
 
     def decompose_sentence(sentence: str) -> Qualities:
@@ -286,7 +286,7 @@ def build_sentence_decomposer(config: DecomposeConfig | None = None) -> TextDeco
         # 3. call LLM
         response = respond(
             prompt_str,
-            max_tokens=800,
+            max_tokens=2048,
             temperature=0.0,
             json_mode=True,
         )

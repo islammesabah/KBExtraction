@@ -180,7 +180,7 @@ def get_llm_responder() -> LLMResponder:
         llm = get_llm_responder()
         result = llm.invoke({"prompt": "Hello model!"})
     """
-    backend = os.getenv("MODEL_BACKEND", "hf_local").lower()
+    backend = os.getenv("MODEL_BACKEND", "groq").lower()
 
     match backend:
         case "groq":

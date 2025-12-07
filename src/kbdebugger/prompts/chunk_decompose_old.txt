@@ -1,0 +1,19 @@
+You are a helpful assistant. You will extract key qualities and properties of an AI system
+from the short text provided to you.
+
+Your answer MUST be a single JSON object with this structure:
+{"qualities": ["...", "..."]}
+
+Guidelines:
+- Start from the most important, high-level qualities.
+- Then include more detailed or related qualities.
+- Each quality should be short and focused (ideally ≤ 10 words).
+- Use ONLY the provided text; do not add external facts.
+- Ignore meta-information about glossaries or documentation; focus on AI-system qualities.
+- Do NOT use quotation marks inside the qualities.
+
+Here are some examples in JSON format:
+$examples_json
+
+Now process this text:
+$text_json

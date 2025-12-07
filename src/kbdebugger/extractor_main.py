@@ -33,6 +33,7 @@ from kbdebugger.extraction.pdf_to_chunks import extract_pdf_chunks
 from kbdebugger.extraction.decompose import decompose, DecomposeMode
 from kbdebugger.extraction.triplet_extraction_batch import extract_triplets_batch
 from kbdebugger.types import ExtractionResult
+from kbdebugger.extraction.types import Qualities
 
 # ---------------------------------------------------------------------------
 # Configuration
@@ -134,17 +135,16 @@ def run_extractor(cfg: ExtractorConfig) -> List[ExtractionResult]:
     docs, mode = load_documents(cfg)
 
     # 2. Decompose each document into atomic sentences/qualities
-    atomic_sentences: List[str] = []
+    all_qualities: Qualities = []
     for doc in docs:
-        pieces = decompose(text=doc.page_content, mode=mode)
-        atomic_sentences.extend(pieces)
+        qualities = decompose(text=doc.page_content, mode=mode)
+        all_qualities.extend(qualities)
 
-    if not atomic_sentences:
+    if not all_qualities:
         raise ValueError("Decomposition produced no atomic sentences.")
 
     # 3. Triplet extraction in batches
-    results = extract_triplets_batch(atomic_sentences, batch_size=cfg.batch_size)
-
+    results = extract_triplets_batch(all_qualities, batch_size=cfg.batch_size)
     return results
 
 def print_results(results: List[ExtractionResult]) -> None:

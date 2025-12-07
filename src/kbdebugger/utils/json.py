@@ -2,7 +2,7 @@ from kbdebugger.types import ExtractionResult, TripletSOP
 from typing import Any, Dict
 import re
 import json
-
+import ast
 import rich
 
 # -------------------------
@@ -32,6 +32,7 @@ def _extract_json_object(text: str) -> str | None:
                 return text[start:i+1]
     return None
 
+
 def _extract_json_array(text: str) -> str | None:
     """
     Extract the first balanced JSON array '[ ... ]' substring.
@@ -58,6 +59,9 @@ def ensure_json_object(raw: str) -> Dict[str, Any]:
     - Second: try to extract a {...} from noisy output.
     - Otherwise: return {}.
     """
+    if not isinstance(raw, str):
+        return {}
+
     s = raw.strip()
     if not s:
         return {}

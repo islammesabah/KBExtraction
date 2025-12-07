@@ -1,19 +1,18 @@
 from __future__ import annotations
 
-from transformers import AutoModelForCausalLM, AutoTokenizer
-from transformers import BitsAndBytesConfig
-
 # Safe, device-agnostic loader for PEFT models (CPU by default; CUDA+4bit if available)
 # --------------------------------------------------------------------------------------
 # For loading a PEFT model, we need to use a special object for CausalLM from PEFT
 # instead of the regular HuggingFace object.
-import os, json, torch, rich
+import os, json, rich
+import torch # type: ignore
+
 from kbdebugger.types import ExtractionResult
-from .utils import coerce_triplets
 from kbdebugger.utils.json import ensure_json_object
 from kbdebugger.llm.model_access import respond
 from kbdebugger.llm.hf_backend import use_hf_local, get_hf_causal_model
 from kbdebugger.prompts import render_prompt
+from .utils import coerce_triplets
 
 def build_triplet_extraction_prompt(sentence: str) -> str:
     return render_prompt(

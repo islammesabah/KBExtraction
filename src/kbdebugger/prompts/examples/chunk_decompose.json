@@ -1,0 +1,43 @@
+[
+  {
+    "chunk": "Einstein was a German-born theoretical physicist. He developed the theory of relativity. He won the Nobel Prize in Physics in 1921 for his explanation of  photoelectric effect.",
+    "qualities": [
+      "Einstein was a theoretical physicist.",
+      "Einstein was born in Germany.",
+      "Einstein developed the theory of relativity.",
+      "Einstein won the Nobel Prize in Physics in 1921.",
+      "Einstein explained the photoelectric effect."
+    ]
+  },
+  {
+    "chunk": "Photosynthesis is the process by which green plants convert sunlight into chemical energy. It occurs mainly in the chloroplasts.",
+    "qualities": [
+      "Photosynthesis converts sunlight into chemical energy.",
+      "Photosynthesis occurs in green plants.",
+      "Photosynthesis occurs mainly in chloroplasts."
+    ]
+  },
+  {
+    "chunk": "The exam inspection period begins two weeks after grades are published. Students must request an appointment by email before the deadline.",
+    "qualities": [
+      "The exam inspection period begins two weeks after grades are published.",
+      "Students must request an appointment by email.",
+      "Students must request the appointment before the deadline."
+    ]
+  },
+  {
+    "chunk": "A black hole is a region of spacetime where gravity is so strong that nothing can escape from it. Not even light can escape its pull.",
+    "qualities": [
+      "A black hole is a region of spacetime with very strong gravity.",
+      "Nothing can escape from a black hole.",
+      "Light cannot escape a black hole."
+    ]
+  },
+  {
+    "chunk": "There is no entitlement to inspection if the examination was graded 1.0.",
+    "qualities": [
+      "There is no entitlement to inspection if the examination was graded 1.0."
+    ]
+  }
+]
+

@@ -1,19 +1,30 @@
-You are a helpful assistant. You will extract key qualities and properties of an AI system
-from the short text provided to you.
+You are a careful assistant. Your task is to extract clear, atomic “qualities” from the provided text chunk.
 
-Your answer MUST be a single JSON object with this structure:
+Your output MUST be a single strict JSON object with this structure:
 {"qualities": ["...", "..."]}
 
-Guidelines:
-- Start from the most important, high-level qualities.
-- Then include more detailed or related qualities.
-- Each quality should be short and focused (ideally ≤ 10 words).
-- Use ONLY the provided text; do not add external facts.
-- Ignore meta-information about glossaries or documentation; focus on AI-system qualities.
-- Do NOT use quotation marks inside the qualities.
+These qualities will later be converted into Subject–Predicate–Object triplets.
+Therefore, each quality MUST be phrased so that a triplet can be extracted unambiguously.
 
-Here are some examples in JSON format:
+Guidelines for qualities:
+- Each quality expresses exactly ONE fact (one atomic idea).
+- Use explicit entities instead of pronouns.
+  - BAD: "He discovered relativity."
+  - GOOD: "Einstein discovered relativity."
+- Qualities MUST be written so they can be turned into a clean S–P–O triplet.
+- Preserve conditional meaning. Do NOT split sentences into separate facts. Instead, keep the full conditional as ONE quality, for example:
+  "There is no entitlement to inspection if the examination was graded 1.0."
+- Start with the most important, high-level qualities.
+- Then include more specific or supporting qualities.
+- Use ONLY information in the provided text. Never add external facts.
+- Avoid vague phrases (“this thing”, “it”, “that process”).
+- Avoid quotation marks inside the qualities.
+- Ignore meta-information (e.g., glossary formatting, headings, citations, references).
+- If nothing meaningful can be extracted, return {"qualities": []}.
+- Always return a strict JSON, use double quotes and avoid single quotes. Otherwise, parsing the response will fail!
+
+These examples demonstrate the expected style:
 $examples_json
 
-Now process this text:
+Now extract qualities from this text:
 $text_json

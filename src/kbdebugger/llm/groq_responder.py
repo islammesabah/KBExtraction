@@ -22,7 +22,7 @@ class GroqResponder:
             # For JSON mode, empty prompt => empty object
             return "{}" if inputs.get("json_mode", False) else ""
 
-        max_tokens: int = int(inputs.get("max_tokens", 1000))
+        max_tokens: int = int(inputs.get("max_tokens", 2048))
         temperature: float = float(inputs.get("temperature", 0.0))
         json_mode: bool = bool(inputs.get("json_mode", True))  # default: Respond with JSON
 
@@ -45,7 +45,7 @@ class GroqResponder:
         kwargs: Dict[str, Any] = {
             "model": self.model,
             "messages": messages,
-            "max_completion_tokens": max_tokens,
+            "max_completion_tokens": max_tokens, # Same semantics as max_new_tokens in transformers
             "temperature": temperature,
         }
 
@@ -63,6 +63,7 @@ class GroqResponder:
             # Only handle the JSON validate failure specially in JSON mode
             if not json_mode:
                 raise
+            # raise e from e
 
             # Retry WITHOUT response_format, then we'll do our own post-processing
             retry_kwargs = dict(kwargs)
@@ -71,8 +72,9 @@ class GroqResponder:
 
         content = (resp.choices[0].message.content or "").strip()
 
-        if json_mode:
-            return ensure_json_object(content)
-        else:
-            return content
+        return content
+        # if json_mode:
+        #     return str(ensure_json_object(content))
+        # else:
+        #     return content
 

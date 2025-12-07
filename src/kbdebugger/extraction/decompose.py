@@ -2,12 +2,11 @@ from __future__ import annotations
 
 from enum import Enum
 
-from rpds import List
+from typing import List
 
 from .sentence_decompose import build_sentence_decomposer
 from .chunk_decompose import build_chunk_decomposer
 from .types import Qualities, TextDecomposer
-from typing import List
 
 class DecomposeMode(str, Enum):
     SENTENCES = "sentences"
@@ -24,7 +23,7 @@ def decompose(
     text: str,
     *,
     mode: DecomposeMode,
-) -> List[str]:
+) -> Qualities:
     """
     Decompose `text` into atomic strings per the selected mode.
 

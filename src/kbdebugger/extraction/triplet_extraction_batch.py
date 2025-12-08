@@ -1,8 +1,8 @@
 from typing import Iterable, List, Sequence
 from kbdebugger.llm.hf_backend import use_hf_local, get_hf_causal_model
 from kbdebugger.llm.model_access import respond
-from kbdebugger.prompts import render_prompt
-from kbdebugger.utils.json import ensure_json_array
+from kbdebugger.prompts import load_json_resource, render_prompt
+from kbdebugger.utils.json import ensure_json_object
 from kbdebugger.extraction.utils import coerce_triplets_batch
 from kbdebugger.types import ExtractionResult
 import json
@@ -21,13 +21,23 @@ def build_triplet_extraction_prompt_batch(sentences: list[str]) -> str:
       ]
     }
     """
+    # Load few-shot examples once from JSON
+    examples = load_json_resource("triplets_batch")
+    examples_json = json.dumps(examples, ensure_ascii=False)
+    
     payload = [
         {"id": i, "sentence": s.strip()}
         for i, s in enumerate(sentences)
         if s.strip()
     ]
     payload_json = json.dumps(payload, ensure_ascii=False)
-    return render_prompt("triplets_batch", payload_json=payload_json)
+    
+    
+    return render_prompt(
+        "triplets_batch", 
+        examples_json=examples_json,
+        payload_json=payload_json
+    )
 
 
 def _extract_batch_via_llm(sentences: list[str]) -> list[ExtractionResult]:
@@ -79,7 +89,7 @@ def _extract_batch_via_hf(sentences: list[str]) -> list[ExtractionResult]:
     res_text = tokenizer.decode(output_tokens, skip_special_tokens=True)
     res_text = res_text.replace(prompt, "")
 
-    parsed = ensure_json_array(res_text)
+    parsed = ensure_json_object(res_text)
     return coerce_triplets_batch(parsed, sentences)
 
 

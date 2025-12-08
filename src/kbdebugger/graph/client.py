@@ -4,6 +4,7 @@ from typing import Protocol, Any, Optional, cast
 from kbdebugger.compat.langchain import Neo4jGraph
 from neo4j.exceptions import Neo4jError
 from dotenv import load_dotenv
+import rich
 # load the environment variables
 load_dotenv(override=True)
 
@@ -45,6 +46,7 @@ def connect_graph_client(
             try:
                 return self.inner.query(query, params or {})
             except Neo4jError as e:
+                rich.print(f"[bold red]Neo4j query failed![/bold red]\nError: {e.__class__.__name__}: {e}\nQuery:\n{query}\nParams:\n{params}")
                 raise RuntimeError(
                     f"Neo4j query failed!\nError: {e.__class__.__name__}: {e}\nQuery:\n{query}\nParams:\n{params}"
                 ) from e

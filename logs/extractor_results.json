@@ -1,0 +1,1669 @@
+{
+  "results": [
+    {
+      "sentence": "The Handreichung zur Einsichtnahme in Pröfungen und Pröfungsbewertungen is a DeepL translation.",
+      "triplets": [
+        [
+          "Handreichung zur Einsichtnahme in Pröfungen und Pröfungsbewertungen",
+          "DeepL translation",
+          "is a"
+        ]
+      ]
+    },
+    {
+      "sentence": "DeepL is excellent at translating.",
+      "triplets": [
+        [
+          "DeepL",
+          "translating",
+          "is excellent at"
+        ]
+      ]
+    },
+    {
+      "sentence": "There is no guarantee that a DeepL translation is 100% correct.",
+      "triplets": [
+        [
+          "DeepL translation",
+          "100% correct",
+          "is not guaranteed to be"
+        ]
+      ]
+    },
+    {
+      "sentence": "A DeepL translation may not be correct in a legal sense.",
+      "triplets": [
+        [
+          "DeepL translation",
+          "correct in a legal sense",
+          "may not be"
+        ]
+      ]
+    },
+    {
+      "sentence": "The Handreichung zur Einsichtnahme in Pröfungen und Pröfungsbewertungen is a handout for students.",
+      "triplets": [
+        [
+          "Handreichung zur Einsichtnahme in Pröfungen und Pröfungsbewertungen",
+          "handout for students",
+          "is a"
+        ]
+      ]
+    },
+    {
+      "sentence": "Students have the right to inspect exam documents.",
+      "triplets": [
+        [
+          "students",
+          "exam documents",
+          "have the right to inspect"
+        ]
+      ]
+    },
+    {
+      "sentence": "Students can assert their right to inspect exam documents.",
+      "triplets": [
+        [
+          "students",
+          "exam documents",
+          "can assert their right to inspect"
+        ]
+      ]
+    },
+    {
+      "sentence": "Students have obligations associated with inspecting exam documents.",
+      "triplets": [
+        [
+          "students",
+          "exam documents",
+          "have obligations associated with inspecting"
+        ]
+      ]
+    },
+    {
+      "sentence": "The inspection of examinations provides students with information about gaps in knowledge and understanding.",
+      "triplets": [
+        [
+          "inspection of examinations",
+          "students",
+          "provides with information about gaps in knowledge and understanding"
+        ],
+        [
+          "examinations",
+          "students",
+          "provides with information about gaps in knowledge and understanding"
+        ]
+      ]
+    },
+    {
+      "sentence": "The inspection of examinations makes the assessment of the examination comprehensible.",
+      "triplets": [
+        [
+          "inspection of examinations",
+          "assessment of examination",
+          "makes comprehensible"
+        ]
+      ]
+    },
+    {
+      "sentence": "The inspection of examinations involves a critical examination of the assessment.",
+      "triplets": [
+        [
+          "examination inspection",
+          "examination of assessment",
+          "involves a critical examination of"
+        ]
+      ]
+    },
+    {
+      "sentence": "Students can raise substantiated objections against the assessment in cases of doubt.",
+      "triplets": [
+        [
+          "students",
+          "substantiated objections",
+          "can raise against"
+        ],
+        [
+          "students",
+          "assessment",
+          "can raise objections against in cases of doubt"
+        ]
+      ]
+    },
+    {
+      "sentence": "Explanations with examiners are not part of the inspection.",
+      "triplets": [
+        [
+          "explanations with examiners",
+          "inspection",
+          "are not part of"
+        ]
+      ]
+    },
+    {
+      "sentence": "The inspection concerns all examination formats.",
+      "triplets": [
+        [
+          "inspection",
+          "examination formats",
+          "concerns"
+        ]
+      ]
+    },
+    {
+      "sentence": "The inspection mainly concerns the assessment of written examinations.",
+      "triplets": [
+        [
+          "inspection",
+          "written examinations",
+          "mainly concerns the assessment of"
+        ]
+      ]
+    },
+    {
+      "sentence": "Every student has the right to inspect their own examinations.",
+      "triplets": [
+        [
+          "student",
+          "examinations",
+          "has the right to inspect their own"
+        ],
+        [
+          "examination",
+          "student",
+          "is inspected by"
+        ]
+      ]
+    },
+    {
+      "sentence": "Every student has the right to inspect their own evaluations.",
+      "triplets": [
+        [
+          "student",
+          "evaluations",
+          "has the right to inspect their own"
+        ],
+        [
+          "evaluation",
+          "student",
+          "is inspected by"
+        ]
+      ]
+    },
+    {
+      "sentence": "The right to inspection exists for every independent part of an examination.",
+      "triplets": [
+        [
+          "right to inspection",
+          "examination",
+          "exists for"
+        ],
+        [
+          "examination",
+          "right to inspection",
+          "has"
+        ],
+        [
+          "examination",
+          "independent part",
+          "has"
+        ]
+      ]
+    },
+    {
+      "sentence": "The right to inspection exists if the examination is a prerequisite for subsequent modules.",
+      "triplets": [
+        [
+          "right to inspection",
+          "examination",
+          "exists if"
+        ],
+        [
+          "examination",
+          "subsequent modules",
+          "is a prerequisite for"
+        ],
+        [
+          "examination",
+          "right to inspection",
+          "is dependent on"
+        ]
+      ]
+    },
+    {
+      "sentence": "The right to inspection exists if the grade is mentioned in subsequent modules.",
+      "triplets": [
+        [
+          "right to inspection",
+          "grade",
+          "exists if"
+        ],
+        [
+          "grade",
+          "subsequent modules",
+          "is mentioned in"
+        ],
+        [
+          "right to inspection",
+          "subsequent modules",
+          "exists if"
+        ]
+      ]
+    },
+    {
+      "sentence": "Certificates or overall grades are formed from the examination.",
+      "triplets": [
+        [
+          "examination",
+          "certificates or overall grades",
+          "are formed from"
+        ]
+      ]
+    },
+    {
+      "sentence": "The inspection takes place after the conclusion of the examination procedure.",
+      "triplets": [
+        [
+          "examination procedure",
+          "inspection",
+          "takes place after the conclusion of"
+        ],
+        [
+          "examination procedure",
+          "inspection",
+          "occurs after"
+        ]
+      ]
+    },
+    {
+      "sentence": "The inspection takes place after the performance has been completely determined and announced.",
+      "triplets": [
+        [
+          "performance",
+          "inspection",
+          "takes place after"
+        ],
+        [
+          "performance",
+          "inspection",
+          "occurs after the determination and announcement of"
+        ]
+      ]
+    },
+    {
+      "sentence": "The inspection takes place before a repeat examination.",
+      "triplets": [
+        [
+          "repeat examination",
+          "inspection",
+          "takes place before"
+        ],
+        [
+          "repeat examination",
+          "inspection",
+          "occurs before"
+        ]
+      ]
+    },
+    {
+      "sentence": "The inspection takes place with sufficient advance notice before an oral supplementary examination.",
+      "triplets": [
+        [
+          "oral supplementary examination",
+          "inspection",
+          "takes place with sufficient advance notice before"
+        ],
+        [
+          "oral supplementary examination",
+          "inspection",
+          "occurs before with sufficient advance notice"
+        ]
+      ]
+    },
+    {
+      "sentence": "The right to inspection exists only if the student has a legitimate interest in inspection.",
+      "triplets": [
+        [
+          "student",
+          "legitimate interest in inspection",
+          "has"
+        ],
+        [
+          "legitimate interest in inspection",
+          "right to inspection",
+          "exists only if"
+        ]
+      ]
+    },
+    {
+      "sentence": "A legitimate interest in inspection exists if the findings of an inspection can be used to claim a reconsideration of the examination.",
+      "triplets": [
+        [
+          "findings of an inspection",
+          "reconsideration of the examination",
+          "can be used to claim"
+        ],
+        [
+          "legitimate interest in inspection",
+          "reconsideration of the examination",
+          "exists if"
+        ]
+      ]
+    },
+    {
+      "sentence": "There is no entitlement to inspection if the examination was graded 1.0.",
+      "triplets": [
+        [
+          "examination",
+          "entitlement to inspection",
+          "is not"
+        ],
+        [
+          "examination",
+          "graded 1.0",
+          "is"
+        ]
+      ]
+    },
+    {
+      "sentence": "The right of inspection includes examiner's notes.",
+      "triplets": [
+        [
+          "examiner's notes",
+          "right of inspection",
+          "includes"
+        ]
+      ]
+    },
+    {
+      "sentence": "The right of inspection includes expert opinions.",
+      "triplets": [
+        [
+          "expert opinions",
+          "right of inspection",
+          "includes"
+        ]
+      ]
+    },
+    {
+      "sentence": "The right of inspection includes minutes of the evaluation.",
+      "triplets": [
+        [
+          "right of inspection",
+          "minutes of the evaluation",
+          "includes"
+        ]
+      ]
+    },
+    {
+      "sentence": "The right of inspection includes statements.",
+      "triplets": [
+        [
+          "right of inspection",
+          "statements",
+          "includes"
+        ]
+      ]
+    },
+    {
+      "sentence": "The right of inspection includes possible counter-opinions.",
+      "triplets": [
+        [
+          "right of inspection",
+          "possible counter-opinions",
+          "includes"
+        ]
+      ]
+    },
+    {
+      "sentence": "The right of inspection does not include notes.",
+      "triplets": [
+        [
+          "right of inspection",
+          "notes",
+          "does not include"
+        ]
+      ]
+    },
+    {
+      "sentence": "The right of inspection does not include sketches.",
+      "triplets": [
+        [
+          "right of inspection",
+          "sketches",
+          "does not include"
+        ]
+      ]
+    },
+    {
+      "sentence": "The right of inspection does not include recordings.",
+      "triplets": [
+        [
+          "right of inspection",
+          "recordings",
+          "does not include"
+        ]
+      ]
+    },
+    {
+      "sentence": "The right of inspection does not include solution notes.",
+      "triplets": [
+        [
+          "right of inspection",
+          "solution notes",
+          "does not include"
+        ]
+      ]
+    },
+    {
+      "sentence": "The right of inspection does not include evaluation schemes.",
+      "triplets": [
+        [
+          "right of inspection",
+          "evaluation schemes",
+          "does not include"
+        ]
+      ]
+    },
+    {
+      "sentence": "There is no right to inspect sample solutions.",
+      "triplets": [
+        [
+          "right to inspect sample solutions",
+          "exists",
+          "does not"
+        ]
+      ]
+    },
+    {
+      "sentence": "An exception exists if the examiner refers to documents beforehand.",
+      "triplets": [
+        [
+          "exception",
+          "exists",
+          "if examiner refers to documents beforehand"
+        ]
+      ]
+    },
+    {
+      "sentence": "It is not possible to inspect examination files of other examinees.",
+      "triplets": [
+        [
+          "examination files",
+          "other examinees",
+          "cannot be inspected"
+        ]
+      ]
+    },
+    {
+      "sentence": "Students should contact the examiner as soon as possible after learning of the examination result.",
+      "triplets": [
+        [
+          "students",
+          "examiner",
+          "should contact"
+        ],
+        [
+          "students",
+          "examination result",
+          "should learn of"
+        ]
+      ]
+    },
+    {
+      "sentence": "Students should informally request inspection from the examiner.",
+      "triplets": [
+        [
+          "students",
+          "examiner",
+          "should request inspection from"
+        ]
+      ]
+    },
+    {
+      "sentence": "The request for inspection does not have to be in any particular form.",
+      "triplets": [
+        [
+          "request for inspection",
+          "particular form",
+          "does not have to be in"
+        ]
+      ]
+    },
+    {
+      "sentence": "Students can request inspection by email or telephone.",
+      "triplets": [
+        [
+          "students",
+          "examination inspection",
+          "can request by"
+        ],
+        [
+          "students",
+          "email or telephone",
+          "can request inspection by"
+        ]
+      ]
+    },
+    {
+      "sentence": "In distance learning programs, the request for inspection must be sent directly to the DISC.",
+      "triplets": [
+        [
+          "distance learning program",
+          "DISC",
+          "must be sent to"
+        ],
+        [
+          "request for inspection",
+          "DISC",
+          "must be sent to"
+        ]
+      ]
+    },
+    {
+      "sentence": "Inspection should be made possible promptly after the announcement of the evaluation.",
+      "triplets": [
+        [
+          "inspection",
+          "announcement of the evaluation",
+          "should be made possible after"
+        ],
+        [
+          "evaluation",
+          "inspection",
+          "should be made possible after"
+        ]
+      ]
+    },
+    {
+      "sentence": "The inspection takes place on the premises of the TU Kaiserslautern.",
+      "triplets": [
+        [
+          "inspection",
+          "TU Kaiserslautern",
+          "takes place on the premises of"
+        ],
+        [
+          "TU Kaiserslautern",
+          "inspection",
+          "takes place on the premises of"
+        ]
+      ]
+    },
+    {
+      "sentence": "The inspection takes place during the usual office hours.",
+      "triplets": [
+        [
+          "inspection",
+          "usual office hours",
+          "takes place during"
+        ]
+      ]
+    },
+    {
+      "sentence": "The inspection is scheduled for written examinations.",
+      "triplets": [
+        [
+          "inspection",
+          "written examinations",
+          "is scheduled for"
+        ]
+      ]
+    },
+    {
+      "sentence": "The inspection is scheduled at the latest with the scheduling of the written examination.",
+      "triplets": [
+        [
+          "written examination",
+          "inspection",
+          "is scheduled at the latest with the scheduling of"
+        ]
+      ]
+    },
+    {
+      "sentence": "Candidates must make it clear within one week that they feel they have been assessed unfairly.",
+      "triplets": [
+        [
+          "candidates",
+          "assessment",
+          "must make it clear that they feel they have been unfair"
+        ],
+        [
+          "candidates",
+          "assessment",
+          "have been unfair"
+        ]
+      ]
+    },
+    {
+      "sentence": "Candidates must make it clear within one week that they cannot understand the assessment.",
+      "triplets": [
+        [
+          "candidates",
+          "assessment",
+          "must make it clear that they cannot understand"
+        ],
+        [
+          "candidates",
+          "assessment",
+          "cannot be understood"
+        ]
+      ]
+    },
+    {
+      "sentence": "Candidates must make it clear within one week that they are considering raising objections to the assessment.",
+      "triplets": [
+        [
+          "candidates",
+          "assessment",
+          "must make it clear that they are considering raising objections to"
+        ],
+        [
+          "candidates",
+          "objections",
+          "are considering raising to the assessment"
+        ]
+      ]
+    },
+    {
+      "sentence": "Departments are free to organize the inspection collectively as a group inspection.",
+      "triplets": [
+        [
+          "departments",
+          "group inspection",
+          "are free to organize the inspection collectively as"
+        ]
+      ]
+    },
+    {
+      "sentence": "Students have to inform themselves in time how the inspection is organized in their field of teaching.",
+      "triplets": [
+        [
+          "students",
+          "inspection",
+          "are organized in"
+        ],
+        [
+          "students",
+          "field of teaching",
+          "are informed about"
+        ]
+      ]
+    },
+    {
+      "sentence": "Students must be given sufficient time for the inspection.",
+      "triplets": [
+        [
+          "students",
+          "sufficient time",
+          "must be given for"
+        ],
+        [
+          "students",
+          "inspection",
+          "must be given sufficient time for"
+        ]
+      ]
+    },
+    {
+      "sentence": "The duration of the inspection should depend on the scope of the examination.",
+      "triplets": [
+        [
+          "duration of inspection",
+          "scope of examination",
+          "should depend on"
+        ]
+      ]
+    },
+    {
+      "sentence": "Students can inform themselves sufficiently about the content of the examination evaluation under reasonable conditions.",
+      "triplets": [
+        [
+          "students",
+          "content of examination evaluation",
+          "can inform themselves sufficiently about"
+        ]
+      ]
+    },
+    {
+      "sentence": "Students who stay abroad are unable to attend the regular appointments.",
+      "triplets": [
+        [
+          "students who stay abroad",
+          "regular appointments",
+          "are unable to attend"
+        ]
+      ]
+    },
+    {
+      "sentence": "Students who have a verifiable illness are unable to attend the regular appointments.",
+      "triplets": [
+        [
+          "students",
+          "regular appointments",
+          "are unable to attend"
+        ],
+        [
+          "students",
+          "verifiable illness",
+          "are unable to attend due to"
+        ]
+      ]
+    },
+    {
+      "sentence": "Students must be offered an additional appointment upon informal request.",
+      "triplets": [
+        [
+          "students",
+          "additional appointment",
+          "must be offered"
+        ],
+        [
+          "students",
+          "informal request",
+          "must be offered an additional appointment upon"
+        ]
+      ]
+    },
+    {
+      "sentence": "Students must be allowed to make copies.",
+      "triplets": [
+        [
+          "students",
+          "copies",
+          "must be allowed to make"
+        ]
+      ]
+    },
+    {
+      "sentence": "Students must be allowed to make photocopies at their own expense.",
+      "triplets": [
+        [
+          "students",
+          "photocopies",
+          "must be allowed to make at their own expense"
+        ],
+        [
+          "students",
+          "own expense",
+          "must be allowed to make photocopies at"
+        ]
+      ]
+    },
+    {
+      "sentence": "Students may make their own notes during the inspection.",
+      "triplets": [
+        [
+          "students",
+          "own notes",
+          "may make during the inspection"
+        ],
+        [
+          "students",
+          "inspection",
+          "may make their own notes during"
+        ]
+      ]
+    },
+    {
+      "sentence": "Students are permitted to make a photocopy in the form of photographs.",
+      "triplets": [
+        [
+          "students",
+          "photocopy",
+          "are permitted to make"
+        ],
+        [
+          "students",
+          "photographs",
+          "are permitted to make in the form of"
+        ]
+      ]
+    },
+    {
+      "sentence": "The department decides whether copies are sent by post.",
+      "triplets": [
+        [
+          "department",
+          "copies",
+          "decides whether are sent by post"
+        ]
+      ]
+    },
+    {
+      "sentence": "There is no obligation to hand out a copy or photocopy during the inspection appointment.",
+      "triplets": [
+        [
+          "copy",
+          "inspection appointment",
+          "is not obligated to be handed out during"
+        ],
+        [
+          "photocopy",
+          "inspection appointment",
+          "is not obligated to be handed out during"
+        ]
+      ]
+    },
+    {
+      "sentence": "Students have the opportunity to receive copies promptly from the teaching area.",
+      "triplets": [
+        [
+          "students",
+          "copies",
+          "have the opportunity to receive promptly from the teaching area"
+        ],
+        [
+          "teaching area",
+          "copies",
+          "has the opportunity to provide promptly to students"
+        ]
+      ]
+    },
+    {
+      "sentence": "Students have no right to electronic transmission of the copy.",
+      "triplets": [
+        [
+          "students",
+          "electronic transmission",
+          "have no right to"
+        ],
+        [
+          "students",
+          "copy",
+          "have no right to electronic transmission of"
+        ]
+      ]
+    },
+    {
+      "sentence": "Electronic transmission of the copy is at the discretion of the department.",
+      "triplets": [
+        [
+          "department",
+          "copy transmission",
+          "is at the discretion of"
+        ]
+      ]
+    },
+    {
+      "sentence": "Electronic transmission of the copy must be done in a secure way.",
+      "triplets": [
+        [
+          "copy transmission",
+          "secure way",
+          "must be done in a"
+        ]
+      ]
+    },
+    {
+      "sentence": "Electronic transmission of the copy can be done via signed and encrypted e-mail.",
+      "triplets": [
+        [
+          "copy transmission",
+          "signed and encrypted e-mail",
+          "can be done via"
+        ]
+      ]
+    },
+    {
+      "sentence": "Electronic transmission of the copy can be done via download from an access-secured server.",
+      "triplets": [
+        [
+          "copy transmission",
+          "access-secured server",
+          "can be done via download from"
+        ]
+      ]
+    },
+    {
+      "sentence": "Sending to the RHRK account is a secure way to transmit the copy.",
+      "triplets": [
+        [
+          "RHRK account",
+          "copy transmission",
+          "is a secure way to"
+        ]
+      ]
+    },
+    {
+      "sentence": "Students bear the costs incurred by making the copies.",
+      "triplets": [
+        [
+          "students",
+          "costs",
+          "bear"
+        ],
+        [
+          "students",
+          "copies",
+          "bear the costs of making"
+        ]
+      ]
+    },
+    {
+      "sentence": "Students must bear the costs of making copies.",
+      "triplets": [
+        [
+          "students",
+          "costs",
+          "must bear"
+        ],
+        [
+          "students",
+          "copies",
+          "must bear the costs of making"
+        ]
+      ]
+    },
+    {
+      "sentence": "Students will be charged for making copies based on the TU's scale of charges.",
+      "triplets": [
+        [
+          "students",
+          "copies",
+          "will be charged for making"
+        ],
+        [
+          "students",
+          "TU's scale of charges",
+          "will be charged based on"
+        ]
+      ]
+    },
+    {
+      "sentence": "Students will receive a separate invoice for making copies.",
+      "triplets": [
+        [
+          "students",
+          "invoice",
+          "will receive a separate for making copies"
+        ]
+      ]
+    },
+    {
+      "sentence": "Students can only use photocopies to check the assessment.",
+      "triplets": [
+        [
+          "students",
+          "photocopies",
+          "can only use to check the assessment"
+        ],
+        [
+          "photocopies",
+          "assessment",
+          "can be used to check"
+        ]
+      ]
+    },
+    {
+      "sentence": "Examinations, reports, minutes, etc. are protected by copyright.",
+      "triplets": [
+        [
+          "examinations, reports, minutes, etc.",
+          "copyright",
+          "are protected by"
+        ]
+      ]
+    },
+    {
+      "sentence": "Questions and comments in examinations, reports, minutes, etc. are protected by copyright.",
+      "triplets": [
+        [
+          "questions and comments in examinations, reports, minutes, etc.",
+          "copyright",
+          "are protected by"
+        ]
+      ]
+    },
+    {
+      "sentence": "Dissemination of copyrighted materials is not permitted.",
+      "triplets": [
+        [
+          "dissemination of copyrighted materials",
+          "nothing",
+          "is not permitted"
+        ]
+      ]
+    },
+    {
+      "sentence": "Public reproduction of copyrighted materials is not permitted.",
+      "triplets": [
+        [
+          "public reproduction of copyrighted materials",
+          "nothing",
+          "is not permitted"
+        ]
+      ]
+    },
+    {
+      "sentence": "Use of copyrighted materials is not permitted.",
+      "triplets": [
+        [
+          "use of copyrighted materials",
+          "nothing",
+          "is not permitted"
+        ]
+      ]
+    },
+    {
+      "sentence": "Disclosure of copyrighted materials to third parties is not permitted.",
+      "triplets": [
+        [
+          "copyrighted materials",
+          "third parties",
+          "is not permitted to be disclosed to"
+        ]
+      ]
+    },
+    {
+      "sentence": "Violations of copyright can have consequences under civil law.",
+      "triplets": [
+        [
+          "violations of copyright",
+          "civil law",
+          "can have consequences under"
+        ]
+      ]
+    },
+    {
+      "sentence": "Violations of copyright can have consequences under criminal law.",
+      "triplets": [
+        [
+          "violations of copyright",
+          "criminal law",
+          "can have consequences under"
+        ]
+      ]
+    },
+    {
+      "sentence": "Examiners do not have to supervise the inspection themselves.",
+      "triplets": [
+        [
+          "examiners",
+          "inspection",
+          "do not have to supervise themselves"
+        ]
+      ]
+    },
+    {
+      "sentence": "Examiners do not have to accompany the inspection themselves.",
+      "triplets": [
+        [
+          "examiners",
+          "inspection",
+          "do not have to accompany themselves"
+        ]
+      ]
+    },
+    {
+      "sentence": "Examiners may appoint staff members for the inspection.",
+      "triplets": [
+        [
+          "examiners",
+          "staff members",
+          "may appoint for"
+        ],
+        [
+          "staff members",
+          "inspection",
+          "are appointed for"
+        ]
+      ]
+    },
+    {
+      "sentence": "Appointed staff members can provide initial expert information.",
+      "triplets": [
+        [
+          "appointed staff members",
+          "initial expert information",
+          "can provide"
+        ]
+      ]
+    },
+    {
+      "sentence": "It is possible to represent a student in the inspection procedure.",
+      "triplets": [
+        [
+          "student",
+          "inspection procedure",
+          "can be represented in"
+        ]
+      ]
+    },
+    {
+      "sentence": "Representation in the inspection procedure is possible in case of hospitalization.",
+      "triplets": [
+        [
+          "inspection procedure",
+          "hospitalization",
+          "is possible in case of"
+        ]
+      ]
+    },
+    {
+      "sentence": "Representation in the inspection procedure is possible in case of a stay abroad.",
+      "triplets": [
+        [
+          "inspection procedure",
+          "stay abroad",
+          "is possible in case of"
+        ]
+      ]
+    },
+    {
+      "sentence": "The authorization includes filing the application.",
+      "triplets": [
+        [
+          "authorization",
+          "application",
+          "includes filing"
+        ]
+      ]
+    },
+    {
+      "sentence": "The authorization includes receiving a copy.",
+      "triplets": [
+        [
+          "authorization",
+          "copy",
+          "includes receiving"
+        ]
+      ]
+    },
+    {
+      "sentence": "The authorization does not include discussing the examination during the inspection.",
+      "triplets": [
+        [
+          "authorization",
+          "discussing the examination during the inspection",
+          "does not include"
+        ]
+      ]
+    },
+    {
+      "sentence": "Discussion of the examination during the inspection is a personal matter.",
+      "triplets": [
+        [
+          "discussion of the examination during the inspection",
+          "personal matter",
+          "is"
+        ]
+      ]
+    },
+    {
+      "sentence": "Authorized attorneys are exempt from this rule.",
+      "triplets": [
+        [
+          "authorized attorneys",
+          "this rule",
+          "are exempt from"
+        ]
+      ]
+    },
+    {
+      "sentence": "Authorized attorneys are exempt from this rule.",
+      "triplets": [
+        [
+          "attorneys",
+          "this rule",
+          "are exempt from"
+        ]
+      ]
+    },
+    {
+      "sentence": "Authorized representatives must be able to identify themselves at the appointment.",
+      "triplets": [
+        [
+          "representatives",
+          "appointment",
+          "must be able to identify themselves at"
+        ]
+      ]
+    },
+    {
+      "sentence": "Authorized representatives must present a power of attorney at the appointment.",
+      "triplets": [
+        [
+          "representatives",
+          "appointment",
+          "must present a power of attorney at"
+        ]
+      ]
+    },
+    {
+      "sentence": "The original grade should not be changed to the student's disadvantage during the review process.",
+      "triplets": [
+        [
+          "grade",
+          "student's disadvantage",
+          "should not be changed to"
+        ],
+        [
+          "grade",
+          "review process",
+          "should not be changed during"
+        ]
+      ]
+    },
+    {
+      "sentence": "After inspection, students are free to approach the department/examiner or DISC with a reconsideration request.",
+      "triplets": [
+        [
+          "students",
+          "department/examiner or DISC",
+          "are free to approach with a reconsideration request"
+        ],
+        [
+          "students",
+          "reconsideration request",
+          "are free to approach with"
+        ]
+      ]
+    },
+    {
+      "sentence": "The student must state objections to the evaluation.",
+      "triplets": [
+        [
+          "student",
+          "objections",
+          "must state"
+        ],
+        [
+          "objections",
+          "evaluation",
+          "must be stated to"
+        ]
+      ]
+    },
+    {
+      "sentence": "Objections can only be considered if they are substantiated.",
+      "triplets": [
+        [
+          "objections",
+          "consideration",
+          "can only be if substantiated"
+        ],
+        [
+          "objections",
+          "substantiation",
+          "is required for"
+        ]
+      ]
+    },
+    {
+      "sentence": "Objections must be substantiated in a concrete and comprehensible manner.",
+      "triplets": [
+        [
+          "objections",
+          "substantiation",
+          "must be in a concrete and comprehensible manner"
+        ],
+        [
+          "objections",
+          "substantiation",
+          "must be"
+        ]
+      ]
+    },
+    {
+      "sentence": "The substantiation must clearly state the examiner's misjudgement.",
+      "triplets": [
+        [
+          "substantiation",
+          "examiner's misjudgement",
+          "must clearly state"
+        ]
+      ]
+    },
+    {
+      "sentence": "A general reference to other students' evaluations is not sufficient.",
+      "triplets": [
+        [
+          "general reference",
+          "other students' evaluations",
+          "is not sufficient"
+        ],
+        [
+          "general reference",
+          "sufficiency",
+          "is not"
+        ]
+      ]
+    },
+    {
+      "sentence": "Students who received a notice of examination result must state objections in writing.",
+      "triplets": [
+        [
+          "notice of examination result",
+          "objections",
+          "must be stated in writing"
+        ],
+        [
+          "students",
+          "objections",
+          "must state in writing"
+        ]
+      ]
+    },
+    {
+      "sentence": "The time limit for appeal is one month from the date of notification.",
+      "triplets": [
+        [
+          "time limit for appeal",
+          "one month",
+          "is from the date of notification"
+        ],
+        [
+          "time limit for appeal",
+          "date of notification",
+          "is one month from"
+        ]
+      ]
+    },
+    {
+      "sentence": "The time limit for appeal is stated in the instructions on appeal.",
+      "triplets": [
+        [
+          "time limit for appeal",
+          "instructions on appeal",
+          "is stated in"
+        ]
+      ]
+    },
+    {
+      "sentence": "No extension of the time limit for appeal occurs by inspection and independent request for reconsideration.",
+      "triplets": [
+        [
+          "time limit for appeal",
+          "inspection and independent request for reconsideration",
+          "does not occur by"
+        ]
+      ]
+    },
+    {
+      "sentence": "An objection can be filed in parallel within the time limit.",
+      "triplets": [
+        [
+          "objection",
+          "time limit",
+          "can be filed in parallel within"
+        ]
+      ]
+    },
+    {
+      "sentence": "The reconsideration procedure can be continued within the time limit.",
+      "triplets": [
+        [
+          "reconsideration procedure",
+          "time limit",
+          "can be continued within"
+        ]
+      ]
+    },
+    {
+      "sentence": "Students can have justified doubts about the examiner's decision.",
+      "triplets": [
+        [
+          "students",
+          "examiner's decision",
+          "can have justified doubts about"
+        ]
+      ]
+    },
+    {
+      "sentence": "Students can discuss the examiner's decision with the examiner.",
+      "triplets": [
+        [
+          "students",
+          "examiner",
+          "can discuss the examiner's decision with"
+        ],
+        [
+          "examiner's decision",
+          "examiner",
+          "can be discussed with"
+        ]
+      ]
+    },
+    {
+      "sentence": "An appeal can be made against the assessment.",
+      "triplets": [
+        [
+          "appeal",
+          "assessment",
+          "can be made against"
+        ]
+      ]
+    },
+    {
+      "sentence": "The evaluation is reviewed again via an internal administrative procedure.",
+      "triplets": [
+        [
+          "evaluation",
+          "internal administrative procedure",
+          "is reviewed again via"
+        ]
+      ]
+    },
+    {
+      "sentence": "The examiner leaves the assessment unchanged if there are no procedural errors or assessment deficiencies.",
+      "triplets": [
+        [
+          "examiner",
+          "assessment",
+          "leaves unchanged"
+        ],
+        [
+          "examiner",
+          "procedural errors",
+          "leaves unchanged if there are no"
+        ],
+        [
+          "examiner",
+          "assessment deficiencies",
+          "leaves unchanged if there are no"
+        ]
+      ]
+    },
+    {
+      "sentence": "The objection is rejected if the examiner leaves the assessment unchanged.",
+      "triplets": [
+        [
+          "objection",
+          "examiner",
+          "is rejected if leaves assessment unchanged"
+        ],
+        [
+          "objection",
+          "examiner",
+          "is rejected if leaves unchanged assessment"
+        ],
+        [
+          "objection",
+          "examiner leaves assessment unchanged",
+          "is rejected if"
+        ]
+      ]
+    },
+    {
+      "sentence": "The objection is rejected if there are no procedural errors or assessment deficiencies.",
+      "triplets": [
+        [
+          "objection",
+          "procedural errors",
+          "is rejected if there are no"
+        ],
+        [
+          "objection",
+          "assessment deficiencies",
+          "is rejected if there are no"
+        ]
+      ]
+    },
+    {
+      "sentence": "Students have the right to take legal action before the administrative court after the appeal procedure.",
+      "triplets": [
+        [
+          "students",
+          "legal action",
+          "have the right to take before administrative court after appeal procedure"
+        ],
+        [
+          "students",
+          "administrative court",
+          "have the right to take legal action before after appeal procedure"
+        ],
+        [
+          "students",
+          "appeal procedure",
+          "have the right to take legal action before administrative court after"
+        ]
+      ]
+    },
+    {
+      "sentence": "Appeal proceedings are subject to a fee.",
+      "triplets": [
+        [
+          "appeal proceedings",
+          "fee",
+          "are subject to"
+        ]
+      ]
+    },
+    {
+      "sentence": "The costs of appeal proceedings are based on the time and effort required to prepare and justify the notice of appeal.",
+      "triplets": [
+        [
+          "appeal proceedings",
+          "time and effort",
+          "are based on"
+        ],
+        [
+          "notice of appeal",
+          "time and effort",
+          "requires to prepare and justify"
+        ]
+      ]
+    },
+    {
+      "sentence": "The rights of the students may not be restricted by the implementation of a digitally conducted examination.",
+      "triplets": [
+        [
+          "digitally conducted examination",
+          "rights of the students",
+          "may not restrict"
+        ]
+      ]
+    },
+    {
+      "sentence": "The rights of the students may not be restricted by the implementation of a digital inspection.",
+      "triplets": [
+        [
+          "digital inspection",
+          "rights of the students",
+          "may not restrict"
+        ]
+      ]
+    },
+    {
+      "sentence": "The right to comprehensive inspection is a right of the students.",
+      "triplets": [
+        [
+          "right to comprehensive inspection",
+          "rights of the students",
+          "is a"
+        ]
+      ]
+    },
+    {
+      "sentence": "The right to copying for their own purposes is a right of the students.",
+      "triplets": [
+        [
+          "right to copying",
+          "rights of the students",
+          "is a"
+        ]
+      ]
+    },
+    {
+      "sentence": "The implementation of a digitally conducted examination is in the teaching area of Main department 4.",
+      "triplets": [
+        [
+          "digitally conducted examination",
+          "Main department 4",
+          "is in the teaching area of"
+        ]
+      ]
+    },
+    {
+      "sentence": "Marc Frey is in Main department 4.",
+      "triplets": [
+        [
+          "Marc Frey",
+          "Main department 4",
+          "is in"
+        ]
+      ]
+    },
+    {
+      "sentence": "Miriam Gärtner is in Main department 4.",
+      "triplets": [
+        [
+          "Miriam Gärtner",
+          "Main department 4",
+          "is in"
+        ]
+      ]
+    },
+    {
+      "sentence": "Katharina Franck is in Main department 4.",
+      "triplets": [
+        [
+          "Katharina Franck",
+          "Main department 4",
+          "is in"
+        ]
+      ]
+    },
+    {
+      "sentence": "Marc Frey's phone number is 0631 205 2215.",
+      "triplets": [
+        [
+          "Marc Frey",
+          "phone number",
+          "is"
+        ]
+      ]
+    },
+    {
+      "sentence": "Miriam Gartner's phone number is 0631 205 4087.",
+      "triplets": [
+        [
+          "Miriam Gartner",
+          "phone number",
+          "is"
+        ],
+        [
+          "Miriam Gartner",
+          "0631 205 4087",
+          "is"
+        ]
+      ]
+    },
+    {
+      "sentence": "Katharina Franck's phone number is 0631 205 5767.",
+      "triplets": [
+        [
+          "Katharina Franck",
+          "phone number",
+          "is"
+        ],
+        [
+          "Katharina Franck",
+          "0631 205 5767",
+          "is"
+        ]
+      ]
+    }
+  ]
+}

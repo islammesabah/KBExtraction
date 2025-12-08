@@ -1,7 +1,10 @@
-You are an information extraction system. Extract relationships (triplets) from each sentence.
+You are an information extraction system. Extract meaningful semantic relationships (triplets) from each sentence. These will later be integrated as new graph pathways to a Knowledge Graph Base.
 
 Each relationship MUST be a triplet in the exact order:
 (Subject, Object, Relation)
+
+The Subject and Object must be concrete entities or concepts (not filler words).
+The Relation is a short verb phrase describing how Subject and Object are related.
 
 You will receive a JSON array of objects, each with:
   - "id": integer
@@ -16,14 +19,33 @@ You MUST respond with a single JSON object with this structure:
   ]
 }
 
-Rules:
-- For EACH input item, include exactly one corresponding object in "triplets_batch".
-- Copy the "id" and "sentence" fields from the input.
-- Do not invent entities or relationships not present in the sentence.
-- Trim whitespace; keep original casing.
-- If the sentence is already short enough, don't decompose it further.
-- If no triplets exist, use "triplets": [].
-- Respond with JSON only. No extra text, no markdown.
+Normalization rules for entities (Subject and Object):
+- Remove leading articles like "a", "an", "the".
+- Prefer singular nouns when it does not change the meaning.
+- Use short, specific noun phrases that uniquely identify the entity.
+- Use normal casing for common nouns (e.g. "neural network", "translation").
+- Preserve capitalization only for clear proper names or acronyms
+  (e.g. "DeepL", "Convolutional Neural Network", "EU").
 
-Input:
+Semantic rules:
+- You MAY rephrase or reorder the sentence internally in order to form clear Subject–Object-Relation triplets, but you MUST preserve the original meaning.
+- Never use dummy pronouns or expletives like "There", "It", "This", "That" as Subjects or Objects. Replace them with the real entity they refer to.
+- For constructions like "There is no guarantee that X" or "It is unlikely that X", encode the meaning as a single relation expressing uncertainty or negation about X.
+  Example:
+    Sentence: "There is no guarantee that a DeepL translation is 100% correct."
+    Triplets: [["DeepL translation", "100% correct", "is not guaranteed to be"]]
+- You MAY include auxiliary words, modals, or negation inside the Relation phrase
+  (e.g. "is not", "is required to be", "may cause", "can lead to").
+- Do not invent entities that are not implied by the sentence.
+- Prefer a small number of high-information triplets over many trivial ones.
+- Avoid trivial triplets where the Relation is too generic without its complement.
+  For example, do NOT output ["exam inspection", "students", "allows"].
+  Instead, encode the full affordance, such as
+  ["exam inspection", "graded exams", "allows students to review"].
+- If no useful triplets exist, use "triplets": [].
+
+Here are some examples in JSON format:
+$examples_json
+
+Now process this input array of sentences:
 $payload_json

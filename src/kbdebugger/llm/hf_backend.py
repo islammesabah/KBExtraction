@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from functools import lru_cache
 from typing import Any, Tuple
 
-import torch
+import torch # type: ignore
 import rich
 
 from transformers import AutoModelForCausalLM, AutoTokenizer

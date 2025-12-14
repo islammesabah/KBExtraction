@@ -1,7 +1,7 @@
 # protocol/aliases/common TypedDicts
 from __future__ import annotations
 from typing import TypedDict, Any
-from typing_extensions import Required, NotRequired
+from typing_extensions import Literal, Required, NotRequired
 
 Subject = str
 Predicate = str
@@ -54,3 +54,23 @@ class GraphRelation(TypedDict):
     source: GraphEnd
     target: GraphEnd
     edge: GraphEdge
+
+# TODO: Remove if unused
+CoreEdgePropertyKey = Literal[
+    "label", "sentence", "predicate_text"
+]
+
+ProvenanceEdgePropertyKey = Literal[
+    "original_sentence", "source", "page_number",
+    "start_index", "end_index", "doc_id", "chunk_id",
+]
+
+QualityEdgePropertyKey = Literal[
+    "confidence", "extractor_version", "created_at", "last_updated_at"
+]
+
+EdgePropertyKey = (
+    CoreEdgePropertyKey
+    | ProvenanceEdgePropertyKey
+    | QualityEdgePropertyKey
+)

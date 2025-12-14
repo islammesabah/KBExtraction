@@ -89,7 +89,7 @@ class GraphStore:
 
         This is the *only* low-level escape hatch other code should use.
         """
-        print("GraphStore backend:", type(self.driver), type(self))
+        # print("GraphStore backend:", type(self.driver), type(self))
         try:
             with self.driver.session() as session:
                 cypher_as_literal_str = cast(LiteralString, cypher)

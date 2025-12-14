@@ -3,11 +3,10 @@ from typing import Optional
 
 from .store import GraphStore
 
-__all__ = ["GraphStore", "get_graph", "set_graph_for_testing"]
+__all__ = ["get_graph"]
 
 # Internal singleton-ish instance
 _graph_instance: Optional[GraphStore] = None
-
 
 def get_graph() -> GraphStore:
     """

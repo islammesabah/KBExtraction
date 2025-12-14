@@ -3,14 +3,13 @@ from kbdebugger.compat.langchain import Document
 from typing import List, Iterable, Mapping, Any
 
 
-def _normalize_label(text: str) -> str:
+def normalize_text(text: str) -> str:
     """
     Normalize a free-text label into a safe identifier:
     - lowercase
     - strip punctuation at edges
-    # - collapse spaces -> underscores
     """
-    clean = " ".join(text.split()).strip().lower()
+    clean = " ".join(text.strip().split()).lower()
     # clean = clean.replace(" ", "_")
     return clean
 
@@ -45,9 +44,9 @@ def map_extracted_triplets_to_graph_relations(
         #     props["sentence"] = sentence_text
 
         rels.append({
-            "source": { "label": _normalize_label(subj) },
-            "target": { "label": _normalize_label(obj) },
-            "edge":   { "label": _normalize_label(rel), "properties": props },
+            "source": { "label": normalize_text(subj) },
+            "target": { "label": normalize_text(obj) },
+            "edge":   { "label": normalize_text(rel), "properties": props },
         })
 
     return rels

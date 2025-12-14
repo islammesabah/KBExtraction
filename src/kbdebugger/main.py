@@ -15,10 +15,13 @@ from .extraction.triplet_extraction import extract_triplets
 # from Requirement_Extraction.chunk_decompose import extract as chunk_decompose
 
 # from .graph.triplet_extraction import extract_triplets
-from .graph.neo4j_structure import map_extracted_triplets_to_graph_relations, query_graph, upsert_graph_relation
+from .graph import get_graph
+from .graph.utils import map_extracted_triplets_to_graph_relations
 from tqdm import tqdm
 from kbdebugger.compat.langchain import Document
 import rich
+
+graph = get_graph()
 
 # ENVIRONMENT VARIABLES
 DATA_SOURCE = "DSA"
@@ -45,7 +48,7 @@ def bulk_upload(documents):
                 triplets = extract_triplets(sentence)
                 for relation in map_extracted_triplets_to_graph_relations(triplets, doc):
                     print(relation)
-                    upsert_graph_relation(relation)
+                    graph.upsert_relation(relation)
                     relation_update += 1
         except:
             print(f"Not able to upload: {doc.page_content}")
@@ -106,7 +109,7 @@ def get_similar(
     """).strip()
 
     # Query our Knowledge Base (Graph)
-    graph_result = query_graph(cypher_query)
+    graph_result = graph.query(cypher_query)
 
     for source in graph_result:
         print("################################################################")
@@ -184,7 +187,7 @@ def get_similar(
                                 ["YES", "NO"]
                             ):
                             case "YES":
-                                upsert_graph_relation(relation)
+                                graph.upsert_relation(relation)
                                 print("✅ [UPSERT] relation upserted to knowledge graph\n\n")
                             case "NO":
                                 print("😢 [INFO] relation neglected")

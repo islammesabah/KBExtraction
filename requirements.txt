@@ -8,7 +8,6 @@ langchain-community
 langchain-openai
 langchainhub
 langchain-huggingface
-langchain-chroma
 
 # Let the container provide PyTorch + CUDA.
 # Don't pip install torch yourself unless you have a very specific reason (and matching CUDA wheels).
@@ -20,10 +19,10 @@ sentencepiece
 peft
 
 # --- data/graph/util ---
-neo4j
-chromadb
-pandas
-numpy
+neo4j==5.28.2
+pandas==2.3.3
+numpy==1.26.4
+pyarrow==22.0.0
 scikit-learn
 networkx
 

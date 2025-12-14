@@ -73,7 +73,7 @@ except Exception:
             EnsembleRetriever = None  # type: ignore
 
 from langchain_huggingface import HuggingFaceEmbeddings # type: ignore
-from langchain_chroma import Chroma # type: ignore
+# from langchain_chroma import Chroma # type: ignore
 
 from langchain_text_splitters import RecursiveCharacterTextSplitter # type: ignore
 
@@ -105,8 +105,6 @@ except Exception as exc:
         "    pip install unstructured unstructured-inference unstructured.pytesseract\n"
     ) from exc
 
-# ------------------ Graphs (Neo4j) ------------------
-from langchain_community.graphs import Neo4jGraph # type: ignore
 
 __all__ = [
     "Document",
@@ -116,9 +114,7 @@ __all__ = [
     "BM25Retriever",
     "EnsembleRetriever",
     "HuggingFaceEmbeddings",
-    "Chroma",
     "RecursiveCharacterTextSplitter",
     "PyMuPDFLoader",
     "UnstructuredPDFLoader",
-    "Neo4jGraph",
 ]

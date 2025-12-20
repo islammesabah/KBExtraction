@@ -1,28 +1,24 @@
 from __future__ import annotations
 
-from enum import Enum
+import os
+from typing import Optional, Sequence, Any
 
-from typing import List
-
-from .sentence_decompose import build_sentence_decomposer
-from .chunk_decompose import build_chunk_decomposer
-from .types import Qualities, TextDecomposer
-
-class DecomposeMode(str, Enum):
-    SENTENCES = "sentences"
-    CHUNKS = "chunks"
-
+from kbdebugger.compat.langchain import Document
+from .sentence_to_qualities import build_sentence_decomposer
+from .chunk_to_qualities import build_chunk_decomposer
+from .types import Qualities, TextDecomposer, DecomposeMode
+from .logging import save_qualities_json
 
 # Build default decomposers once at import time.
 # These are module-level singletons; if we ever want to swap them (e.g. for tests),
-# we can reassign _sentence_decomposer / _chunk_decomposer.
-_sentence_decomposer: TextDecomposer = build_sentence_decomposer()
-_chunk_decomposer: TextDecomposer = build_chunk_decomposer()
+# we can reassign.
+_sentence_to_qualities_decomposer: TextDecomposer = build_sentence_decomposer()
+_chunk_to_qualities_decomposer: TextDecomposer = build_chunk_decomposer()
 
 def decompose(
     text: str,
     *,
-    mode: DecomposeMode,
+    mode: DecomposeMode
 ) -> Qualities:
     """
     Decompose `text` into atomic strings per the selected mode.
@@ -55,11 +51,59 @@ def decompose(
     """
     match mode:
         case DecomposeMode.SENTENCES:
-            return _sentence_decomposer(text)
+            return _sentence_to_qualities_decomposer(text)
         case DecomposeMode.CHUNKS:
-            return _chunk_decomposer(text)
+            return _chunk_to_qualities_decomposer(text)
         case _:
             pass
-        
+
     # Defensive: this should never happen with the Enum, but keeps mypy happy
     raise ValueError(f"Unsupported DecomposeMode: {mode}")
+
+
+def decompose_documents(
+    docs: Sequence[Document],
+    *,
+    mode: DecomposeMode,
+) -> Qualities:
+    """
+    Decompose a list of LangChain Documents into a flat list of qualities.
+
+    This is the *second stage* of the Extractor pipeline:
+        INPUT: Document chunks -> OUTPUT: atomic qualities (decomposer LLM)
+
+
+    Parameters
+    ----------
+    docs:
+        Chunked LangChain Documents produced by the chunker stage.
+
+    mode:
+        How to interpret each doc.page_content for decomposition (sentences vs chunks).
+
+    log_path:
+        If provided, writes the final qualities list to a JSON file.
+        If None, uses a default path under logs/.
+
+    Returns
+    -------
+    Qualities:
+        Flat list of atomic sentences produced across the entire corpus.
+    """
+    all_qualities: Qualities = []
+
+    for doc in docs:
+        text = getattr(doc, "page_content", "")
+        qualities = decompose(text, mode=mode)
+        all_qualities.extend(qualities)
+
+    # Include small but useful metadata for demos and debugging
+    meta: dict[str, Any] = {
+        "mode": mode,
+        "num_docs": len(docs),
+    }
+
+    # Let the save function handle directory creation
+    save_qualities_json(qualities=all_qualities, meta=meta, mode=mode)
+
+    return all_qualities

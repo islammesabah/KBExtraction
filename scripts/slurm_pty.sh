@@ -52,7 +52,9 @@ WORKDIR=$(pwd)
 echo -e "📂 Working directory: $WORKDIR"
 
 # Set the docker container to use.
-CONTAINER="/netscratch/enroot/nvcr.io_nvidia_pytorch_${NVIDIA_CONTAINER_VERSION}-py3.sqsh"
+# CONTAINER="/netscratch/enroot/nvcr.io_nvidia_pytorch_${NVIDIA_CONTAINER_VERSION}-py3.sqsh"
+CONTAINER="/netscratch/abuali/containers/images/kbdebugger.sqsh"
+
 echo "🚢 Container: $CONTAINER"
 
 # Print the job details.

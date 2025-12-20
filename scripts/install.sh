@@ -55,6 +55,7 @@ fi
 # ⛓️🏷️ 3. Optional symlink so our run.sh file can 'source ./venv/bin/activate'
 ln -sfn "$VENV_DIR" .venv
 
+# Make src/ visible as a top-level package root
 export PYTHONPATH="${PYTHONPATH:-}:$(pwd)/src"
 
 # 4. Activate the virtual environment and install (excluding torch; container provides it)

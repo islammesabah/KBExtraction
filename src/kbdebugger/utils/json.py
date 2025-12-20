@@ -1,9 +1,10 @@
-from kbdebugger.types import ExtractionResult, TripletSOP
-from typing import Any, Dict
+from typing import Any, Dict, Mapping
 import re
 import json
 import ast
 import rich
+from pathlib import Path
+from datetime import datetime, timezone
 
 # -------------------------
 # Robust JSON post-processing helpers
@@ -135,3 +136,45 @@ def ensure_json_array(raw: str) -> Any:
         rich.print("[ensure_json_array] ⚠️ Extracted JSON array is invalid.")
 
     return []
+
+
+# -------------------------
+# JSON I/O helpers
+# -------------------------
+def now_utc_compact() -> str:
+    """
+    Return a compact UTC timestamp suitable for filenames.
+
+    Example:
+        20251220_184455Z
+    """
+    return datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%SZ")
+
+def write_json(
+    path: str | Path, 
+    data: Mapping[str, Any], 
+    *, 
+    indent: int = 2
+    ) -> None:
+    """
+    Write JSON data to disk, creating parent directories if needed.
+
+    Parameters
+    ----------
+    path:
+        Destination file path. Parent directories will be created automatically.
+
+    data:
+        JSON-serializable mapping (dict-like). Use `Mapping[str, Any]` to keep
+        the helper broadly usable.
+
+    indent:
+        JSON pretty-print indentation. Default: 2 (human-readable logs).
+    """
+    p = Path(path)
+    p.parent.mkdir(parents=True, exist_ok=True)
+    created_at = now_utc_compact()
+
+
+    with p.open("w", encoding="utf-8") as f:
+        json.dump(dict(data), f, ensure_ascii=False, indent=indent)

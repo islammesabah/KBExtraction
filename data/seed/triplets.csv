@@ -92,6 +92,5 @@ quantus_consistency;is;metric
 quantus_consistency;implements;explanation_consistency
 quantus_consistency;applies_to;tabular_data
 metric;is_subclass_of;thing
-metric;indimension;dimension
 explanation_consistency;is;measure
 explanation_consistency;contributes_to;explanation_robustness

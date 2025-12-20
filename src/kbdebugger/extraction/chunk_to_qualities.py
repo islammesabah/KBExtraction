@@ -6,7 +6,7 @@ import re
 
 from kbdebugger.extraction.types import TextDecomposer, Qualities
 from kbdebugger.llm.model_access import respond
-from kbdebugger.utils import parse_response, ensure_json_object
+from kbdebugger.utils import ensure_json_object
 from kbdebugger.prompts import render_prompt, load_json_resource
 from .utils import coerce_qualities
 

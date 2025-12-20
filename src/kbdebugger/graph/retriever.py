@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Literal, Optional, Sequence, TypedDict
+import json
+import os
+from typing import Any, Literal, Mapping, Optional, Sequence, TypedDict
 
 from rich.console import Console
 from rich.panel import Panel
@@ -10,6 +12,7 @@ from rich.text import Text
 from kbdebugger.graph import get_graph
 from kbdebugger.graph.utils import rows_to_graph_relations
 from kbdebugger.types import GraphRelation, EdgePropertyKey
+from kbdebugger.utils.json import write_json, now_utc_compact
 from .utils import normalize_text
 
 MatchPattern = Literal["source_label", "target_label", "rel_props"]
@@ -33,8 +36,8 @@ class KnowledgeGraphRetriever:
         keyword: str,
         *,
         limit_per_pattern: Optional[int] = None,
-        # include_match_pattern: bool = True,
     ) -> list[RetrievedRelation]:
+        
         kw = normalize_text(keyword)
         limit = int(limit_per_pattern or self.limit_per_pattern)
 
@@ -43,7 +46,7 @@ class KnowledgeGraphRetriever:
         results: list[RetrievedRelation] = []
 
         # --- Pattern 1: keyword in source node label ---
-        rows = graph.query_relations(
+        rels = graph.query_relations(
             """
             MATCH (n:Node)-[r:REL]->(m:Node)
             WHERE toLower(n.label) CONTAINS $keyword
@@ -60,11 +63,10 @@ class KnowledgeGraphRetriever:
             """,
             {"keyword": kw, "limit": limit},
         )
-        rels = rows_to_graph_relations(rows)
         results.extend({"relation": rel, "match_pattern": "source_label"} for rel in rels)
 
         # --- Pattern 2: keyword in target node label ---
-        rows = graph.query(
+        rels = graph.query_relations(
             """
             MATCH (n:Node)-[r:REL]->(m:Node)
             WHERE toLower(m.label) CONTAINS $keyword
@@ -81,19 +83,16 @@ class KnowledgeGraphRetriever:
             """,
             {"keyword": kw, "limit": limit},
         )
-        rels = rows_to_graph_relations(rows)
         results.extend({"relation": rel, "match_pattern": "target_label"} for rel in rels)
 
         # --- Pattern 3: keyword in relationship "semantic" fields ---
         # We avoid fancy APOC here; just check the usual fields you write.
-        rows = graph.query(
+        rels = graph.query_relations(
             """
             MATCH (n:Node)-[r:REL]->(m:Node)
             WHERE
                 toLower(coalesce(r.type, ""))              CONTAINS $keyword OR
                 toLower(coalesce(r.label, ""))             CONTAINS $keyword OR
-                toLower(coalesce(r.sentence, ""))          CONTAINS $keyword OR
-                toLower(coalesce(r.original_sentence, "")) CONTAINS $keyword OR
                 toLower(coalesce(r.source, ""))            CONTAINS $keyword
             RETURN
                 n.label AS source,
@@ -108,17 +107,21 @@ class KnowledgeGraphRetriever:
             """,
             {"keyword": kw, "limit": limit},
         )
-        rels = rows_to_graph_relations(rows)
         results.extend({"relation": rel, "match_pattern": "rel_props"} for rel in rels)
 
         # Optional: dedupe identical relations across patterns
         # (same source/target/predicate + same sentence/source if you want)
         results = self._dedupe(results)
 
+        
+        self.save_results_json(
+            keyword=keyword,
+            hits=results,
+            limit_per_pattern=limit,
+        )
+
         return results
-        # if include_match_pattern:
-        #     return results
-        # return [r["relation"] for r in results]
+
 
     @staticmethod
     def _dedupe(items: list[RetrievedRelation]) -> list[RetrievedRelation]:
@@ -137,6 +140,68 @@ class KnowledgeGraphRetriever:
             out.append(item)
 
         return out
+
+
+    @staticmethod
+    def save_results_json(
+        *,
+        keyword: str,
+        hits: Sequence[RetrievedRelation],
+        limit_per_pattern: int | None = None,
+        extra_metadata: Mapping[str, Any] | None = None,
+    ) -> None:
+        """
+        Save KG retrieval results to a JSON log file.
+
+        Parameters
+        ----------
+        keyword:
+            The user keyword used to retrieve the subgraph.
+
+        hits:
+            The retrieved results (a list of RetrievedRelation).
+            Each element contains:
+                - relation: GraphRelation
+                - match_pattern: str (provenance of how it matched)
+
+        path:
+            Output JSON path (e.g., "logs/kg_retrieval_results.json").
+            Parent directories will be created automatically.
+
+        limit_per_pattern:
+            Optional: include the retriever's `limit_per_pattern` setting in the log.
+            i.e., how many relations were retrieved per `MatchPattern`.
+
+        extra_metadata:
+            Optional: additional metadata to include in the JSON file
+            (e.g., commit hash, run id, corpus file name, etc.).
+
+        JSON Schema (high-level)
+        ------------------------
+        {
+          "keyword": "...",
+          "limit_per_pattern": 50,
+          "num_hits": 123,
+          "hits": [...],
+          "extra": {...}
+        }
+        """
+        created_at = now_utc_compact()
+        payload: dict[str, Any] = {
+            "keyword": keyword,
+            "limit_per_pattern": limit_per_pattern,
+            "num_hits": len(hits),
+            "hits": list(hits),
+            "created_at": created_at,
+        }
+
+        if extra_metadata:
+            payload["extra"] = dict(extra_metadata)
+
+        path = f"logs/kg_retrieval_{keyword}_{created_at}.json"
+        write_json(path, payload)
+
+        print(f"\n[INFO] Wrote KG retrieval log to {path}")
 
 
     def pretty_print(

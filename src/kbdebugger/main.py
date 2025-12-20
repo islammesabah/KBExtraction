@@ -8,7 +8,7 @@ from .utils.terminal_interface import interface
 from .extraction.text_to_sentences import extract_txt_sentences
 from .extraction.pdf_to_sentences import extract_pdf_sentences
 from .extraction.pdf_to_chunks import extract_pdf_chunks
-from .extraction.sentence_decompose import build_sentence_decomposer
+from .extraction.sentence_to_qualities import build_sentence_decomposer
 from .extraction.decompose import decompose, DecomposeMode
 from .extraction.triplet_extraction import extract_triplets
 # from chunk_decompose import build_chunk_decomposer  # (we'll add similarly later)

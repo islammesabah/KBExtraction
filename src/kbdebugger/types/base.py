@@ -1,5 +1,6 @@
-# protocol/aliases/common TypedDicts
 from __future__ import annotations
+
+from enum import Enum
 from typing import TypedDict, Any
 from typing_extensions import Literal, Required, NotRequired
 

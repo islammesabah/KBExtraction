@@ -21,6 +21,7 @@ from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
 from rich.text import Text
+
 console = Console()
 
 from kbdebugger.utils.warnings_config import install_warning_filters
@@ -32,13 +33,12 @@ from kbdebugger.extraction.pdf_to_chunks import extract_pdf_chunks
 
 from kbdebugger.extraction.decompose import decompose, DecomposeMode
 from kbdebugger.extraction.triplet_extraction_batch import extract_triplets_batch
-from kbdebugger.types import ExtractionResult
+from kbdebugger.types import ExtractionResult, SourceKind
 from kbdebugger.extraction.types import Qualities
 
 # ---------------------------------------------------------------------------
 # Configuration
 # ---------------------------------------------------------------------------
-SourceKind = Literal["TEXT", "PDF_SENTENCES", "PDF_CHUNKS"]
 
 @dataclass(frozen=True)
 class ExtractorConfig:
@@ -125,6 +125,7 @@ def load_documents(cfg: ExtractorConfig) -> Tuple[List[Document], DecomposeMode]
 
     return (docs, mode)
 
+
 def run_extractor(cfg: ExtractorConfig) -> List[ExtractionResult]:
     """
     End-to-end run of the Extractor component:
@@ -141,11 +142,12 @@ def run_extractor(cfg: ExtractorConfig) -> List[ExtractionResult]:
         all_qualities.extend(qualities)
 
     if not all_qualities:
-        raise ValueError("Decomposition produced no atomic sentences.")
+        raise ValueError("Decomposition produced no qualities.")
 
     # 3. Triplet extraction in batches
     results = extract_triplets_batch(all_qualities, batch_size=cfg.batch_size)
     return results
+
 
 def print_results(results: List[ExtractionResult]) -> None:
     """

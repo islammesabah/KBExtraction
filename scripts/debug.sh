@@ -23,9 +23,26 @@ for arg in "$@"; do
 done
 PORT="${DEBUG_PORT:-5678}"
 
-# Activate venv (./.venv symlinks to /netscratch/.../KBExtract)
-source ./.venv/bin/activate
+
+
+# Use the container venv (this image already has /venv and PATH set)
+# IMPORTANT: do NOT activate ./ .venv here, because that points to your old netscratch venv.
+# # Activate venv (./.venv symlinks to /netscratch/.../KBExtract)
+# # source ./.venv/bin/activate
+if [ -x /venv/bin/python ]; then
+  export VIRTUAL_ENV=/venv
+  export PATH="/venv/bin:${PATH}"
+else
+  echo "🚨 Error: /venv/bin/python not found. Are you running inside the kbdebugger.sqsh container?" >&2
+  exit 1
+fi
+
+
 echo "🐍 $(python --version) @ $(which python)"
+
+# print which venv got activated (great for debugging)
+python -c "import sys; print('sys.executable:', sys.executable)"
+
 echo "🪲🐞 Debugger will listen on 0.0.0.0:${PORT}"
 
 # Make src/ visible as a top-level package root
@@ -72,4 +89,4 @@ fi
 # Start debugpy and wait for VS Code to attach
 # Tip: 0.0.0.0 makes it reachable from the login node for tunneling
 # exec python -m debugpy --listen 0.0.0.0:$PORT --wait-for-client -m kbdebugger.main "$@"
-exec python -m debugpy --listen 0.0.0.0:$PORT --wait-for-client -m kbdebugger.graph_main "$@"
+exec python -m debugpy --listen 0.0.0.0:$PORT --wait-for-client -m kbdebugger.vector_main "$@"

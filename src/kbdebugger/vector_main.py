@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from kbdebugger.novelty.types import NoveltyDecision
+
 """
 Minimal entry point to test the Vector Similarity Filter component in isolation.
 
@@ -36,9 +38,6 @@ from rich.console import Console
 
 from kbdebugger.extraction.types import SourceKind
 
-# from kbdebugger.extraction.text_to_sentences import extract_txt_sentences
-# from kbdebugger.extraction.pdf_to_sentences import extract_pdf_sentences
-# from kbdebugger.extraction.pdf_to_chunks import extract_pdf_chunks
 from kbdebugger.extraction import chunk_corpus, decompose_documents
 from kbdebugger.extraction.types import Qualities
 
@@ -46,6 +45,8 @@ from kbdebugger.graph.retriever import KnowledgeGraphRetriever
 
 from kbdebugger.vector.encoder import SentenceTransformerEncoder
 from kbdebugger.vector.similarity_filter import VectorSimilarityFilter
+
+from kbdebugger.novelty.comparator import classify_qualities_novelty
 
 console = Console()
 
@@ -215,6 +216,10 @@ def main() -> None:
 
     # 6) Print results
     filt.pretty_print(kept=kept, dropped=dropped)
+
+    novelty_results = classify_qualities_novelty(kept, max_tokens=700, temperature=0.0)
+
+    # to_extract = [r.quality for r in novelty_results if r.decision == NoveltyDecision.PARTIALLY_NEW]
 
 
 if __name__ == "__main__":

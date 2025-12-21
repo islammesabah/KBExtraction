@@ -1,4 +1,3 @@
-# LLM_Access/llm_protocol.py
 from __future__ import annotations
 from typing import Protocol, runtime_checkable, Any, Dict
 

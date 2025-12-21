@@ -52,12 +52,6 @@ def _extract_batch_via_llm(sentences: list[str]) -> list[ExtractionResult]:
         json_mode=True
     )
 
-    # response = response.replace("\n", "").replace("\r", "").strip()
-    # results = parse_response(
-    #     raw,
-    #     coercer=lambda obj: coerce_triplets_batch(obj, sentences),
-    #     default=[],
-    # )
     parsed = ensure_json_object(response)
     triplets = coerce_triplets_batch(parsed, sentences)
 

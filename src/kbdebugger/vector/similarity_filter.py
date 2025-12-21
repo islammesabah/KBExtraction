@@ -455,7 +455,7 @@ class VectorSimilarityFilter:
             "created_at": created_at,
         }
 
-        path = f"logs/vector_similarity_filter_results_{created_at}.json"
+        path = f"logs/03_vector_similarity_filter_results_{created_at}.json"
         write_json(path, data)
 
         print(f"\n[INFO] 📚️📊 Wrote vector similarity results to {path}")

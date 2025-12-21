@@ -73,8 +73,4 @@ class GroqResponder:
         content = (resp.choices[0].message.content or "").strip()
 
         return content
-        # if json_mode:
-        #     return str(ensure_json_object(content))
-        # else:
-        #     return content
 

@@ -10,17 +10,6 @@ import requests
 from .groq_responder import GroqResponder
 from .llm_protocol import LLMResponder
 
-# -----------------------------
-# Public protocol (matches your code)
-# -----------------------------
-# class LLMResponder(Protocol):
-#     """
-#     Minimal interface expected by the rest of the codebase.
-#     Convention here: inputs MUST contain a "prompt" key with a string.
-#     """
-#     def invoke(self, inputs: dict[str, Any]) -> str: ...
-#     # def invoke(self, prompt: str) -> str: ...
-
 
 # -----------------------------
 # Environment / config

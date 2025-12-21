@@ -164,10 +164,6 @@ class KnowledgeGraphRetriever:
                 - relation: GraphRelation
                 - match_pattern: str (provenance of how it matched)
 
-        path:
-            Output JSON path (e.g., "logs/kg_retrieval_results.json").
-            Parent directories will be created automatically.
-
         limit_per_pattern:
             Optional: include the retriever's `limit_per_pattern` setting in the log.
             i.e., how many relations were retrieved per `MatchPattern`.
@@ -198,7 +194,7 @@ class KnowledgeGraphRetriever:
         if extra_metadata:
             payload["extra"] = dict(extra_metadata)
 
-        path = f"logs/kg_retrieval_{keyword}_{created_at}.json"
+        path = f"logs/02_kg_retrieval_{keyword}_{created_at}.json"
         write_json(path, payload)
 
         print(f"\n[INFO] Wrote KG retrieval log to {path}")

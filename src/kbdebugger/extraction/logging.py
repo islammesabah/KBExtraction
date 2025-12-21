@@ -36,7 +36,7 @@ def save_chunked_documents_json(
         "created_at": created_at,
     }
 
-    path = f"logs/chunker_output_docs_{source_kind}_{created_at}.json"
+    path = f"logs/01.1_chunker_output_docs_{source_kind}_{created_at}.json"
     write_json(path, payload)
 
     print(f"\n[INFO] Wrote decomposer input docs log to {path}")
@@ -73,7 +73,7 @@ def save_qualities_json(
     if meta:
         payload["meta"] = meta
 
-    path = f"logs/decomposer_qualities_{mode}_{created_at}.json"
+    path = f"logs/01.2_decomposer_qualities_{mode}_{created_at}.json"
     write_json(path, payload)
 
     print(f"\n[INFO] Wrote decomposer qualities log to {path}")

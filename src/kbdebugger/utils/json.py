@@ -173,8 +173,7 @@ def write_json(
     """
     p = Path(path)
     p.parent.mkdir(parents=True, exist_ok=True)
-    created_at = now_utc_compact()
-
+    # created_at = now_utc_compact()
 
     with p.open("w", encoding="utf-8") as f:
         json.dump(dict(data), f, ensure_ascii=False, indent=indent)

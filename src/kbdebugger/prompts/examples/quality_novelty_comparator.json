@@ -1,0 +1,62 @@
+[
+  {
+    "quality": "Train–test splitting or cross-validation may introduce bias.",
+    "neighbors": [
+      {"score": 0.73, "sentence": "traintestsplit might_introduce bias"},
+      {"score": 0.52, "sentence": "bias is risk"},
+      {"score": 0.49, "sentence": "bias is_threat_to fairness"}
+    ],
+    "json": {
+      "decision": "PARTIALLY_NEW",
+      "rationale": "The closest neighbor covers train-test split introducing bias, but the quality adds cross-validation as another potential source, which is not present in the neighbor.",
+      "novel_spans": ["cross-validation"],
+      "matched_neighbor_sentence": "traintestsplit might_introduce bias",
+      "confidence": 0.78
+    }
+  },
+  {
+    "quality": "Train–test splitting may introduce bias.",
+    "neighbors": [
+      {"score": 0.94, "sentence": "traintestsplit might_introduce bias"},
+      {"score": 0.51, "sentence": "bias is risk"},
+      {"score": 0.49, "sentence": "bias is_threat_to fairness"}
+    ],
+    "json": {
+      "decision": "EXISTING",
+      "rationale": "This is a direct paraphrase of the closest neighbor and adds no additional concept, condition, or scope.",
+      "novel_spans": [],
+      "matched_neighbor_sentence": "traintestsplit might_introduce bias",
+      "confidence": 0.92
+    }
+  },
+  {
+    "quality": "Fairness is an ethical consideration.",
+    "neighbors": [
+      {"score": 0.69, "sentence": "bias is_threat_to fairness"},
+      {"score": 0.44, "sentence": "bias is risk"},
+      {"score": 0.43, "sentence": "bias isalignedwith harm"}
+    ],
+    "json": {
+      "decision": "NEW",
+      "rationale": "Neighbors discuss bias harming or threatening fairness, but none assert that fairness is an ethical consideration. This introduces a different relation about fairness.",
+      "novel_spans": ["ethical consideration"],
+      "matched_neighbor_sentence": "bias is_threat_to fairness",
+      "confidence": 0.74
+    }
+  },
+  {
+    "quality": "Bias is introduced if the underlying data distribution is not carefully considered.",
+    "neighbors": [
+      {"score": 0.69, "sentence": "bias is risk"},
+      {"score": 0.64, "sentence": "bias is_subclass_of thing"},
+      {"score": 0.63, "sentence": "data gathered socially_constructed_biases"}
+    ],
+    "json": {
+      "decision": "PARTIALLY_NEW",
+      "rationale": "Neighbors mention bias generally but do not state a concrete causal condition. The quality adds a specific condition involving the underlying data distribution.",
+      "novel_spans": ["if the underlying data distribution is not carefully considered"],
+      "matched_neighbor_sentence": "bias is risk",
+      "confidence": 0.70
+    }
+  }
+]

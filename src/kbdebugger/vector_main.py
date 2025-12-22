@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from kbdebugger.extraction.triplet_extraction_batch import extract_triplets_from_novelty_results
+from kbdebugger.human_oversight.reviewer import review_triplets
 from kbdebugger.novelty.types import NoveltyDecision
 
 """
@@ -219,8 +221,9 @@ def main() -> None:
 
     novelty_results = classify_qualities_novelty(kept, max_tokens=700, temperature=0.0)
 
-    # to_extract = [r.quality for r in novelty_results if r.decision == NoveltyDecision.PARTIALLY_NEW]
+    extracted_triplets = extract_triplets_from_novelty_results(novelty_results)
 
+    accepted, rejected = review_triplets(extracted_triplets)
 
 if __name__ == "__main__":
     main()

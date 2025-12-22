@@ -1,0 +1,154 @@
+{
+  "results": [
+    {
+      "sentence": "Train–test splitting or cross-validation may introduce bias.",
+      "triplets": [
+        [
+          "bias",
+          "train–test splitting or cross-validation",
+          "may introduce"
+        ]
+      ]
+    },
+    {
+      "sentence": "Bias is introduced if the underlying data distribution is not carefully considered.",
+      "triplets": [
+        [
+          "bias",
+          "data distribution",
+          "is introduced if not carefully considered"
+        ]
+      ]
+    },
+    {
+      "sentence": "Fairness is a core requirement in machine learning models.",
+      "triplets": [
+        [
+          "fairness",
+          "machine learning models",
+          "is a core requirement in"
+        ]
+      ]
+    },
+    {
+      "sentence": "Fairness is an ethical consideration.",
+      "triplets": [
+        [
+          "fairness",
+          "ethical consideration",
+          "is an"
+        ]
+      ]
+    },
+    {
+      "sentence": "Classification models are often evaluated on fairness-related criteria.",
+      "triplets": [
+        [
+          "classification models",
+          "fairness-related criteria",
+          "are often evaluated on"
+        ]
+      ]
+    },
+    {
+      "sentence": "Fairness should not disadvantage individuals based on ethnicity.",
+      "triplets": [
+        [
+          "fairness",
+          "individuals",
+          "should not disadvantage based on"
+        ],
+        [
+          "individuals",
+          "ethnicity",
+          "are disadvantaged by"
+        ]
+      ]
+    },
+    {
+      "sentence": "Fairness should not disadvantage individuals based on gender.",
+      "triplets": [
+        [
+          "fairness",
+          "individuals",
+          "should not disadvantage based on"
+        ],
+        [
+          "individuals",
+          "gender",
+          "are disadvantaged by"
+        ]
+      ]
+    },
+    {
+      "sentence": "Bias can arise at multiple stages of the data science workflow.",
+      "triplets": [
+        [
+          "bias",
+          "data science workflow",
+          "can arise at"
+        ],
+        [
+          "bias",
+          "multiple stages",
+          "can arise at"
+        ]
+      ]
+    },
+    {
+      "sentence": "Data science applications should address fairness.",
+      "triplets": [
+        [
+          "data science applications",
+          "fairness",
+          "should address"
+        ]
+      ]
+    },
+    {
+      "sentence": "Fairness should not disadvantage individuals based on socioeconomic background.",
+      "triplets": [
+        [
+          "fairness",
+          "individuals",
+          "should not disadvantage based on"
+        ],
+        [
+          "individuals",
+          "socioeconomic background",
+          "are disadvantaged by"
+        ]
+      ]
+    },
+    {
+      "sentence": "Improving fairness may affect overall model accuracy.",
+      "triplets": [
+        [
+          "fairness",
+          "model accuracy",
+          "may affect"
+        ]
+      ]
+    },
+    {
+      "sentence": "Model selection techniques may introduce bias.",
+      "triplets": [
+        [
+          "model selection techniques",
+          "bias",
+          "may introduce"
+        ]
+      ]
+    },
+    {
+      "sentence": "Seemingly neutral choices can unintentionally amplify existing disparities.",
+      "triplets": [
+        [
+          "neutral choices",
+          "disparities",
+          "can unintentionally amplify"
+        ]
+      ]
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 {
   "keyword": "bias",
   "limit_per_pattern": 50,
-  "num_hits": 13,
+  "num_hits": 12,
   "hits": [
     {
       "relation": {
@@ -69,11 +69,11 @@
           "label": "application"
         },
         "edge": {
-          "label": "isassociatedto",
+          "label": "is associated to",
           "properties": {
-            "sentence": "bias isassociatedto application",
-            "type": "isassociatedto",
-            "label": "isassociatedto"
+            "sentence": "bias is associated to application",
+            "type": "is associated to",
+            "label": "is associated to"
           }
         }
       },
@@ -88,30 +88,11 @@
           "label": "harm"
         },
         "edge": {
-          "label": "isalignedwith",
+          "label": "is aligned with",
           "properties": {
-            "sentence": "bias isalignedwith harm",
-            "type": "isalignedwith",
-            "label": "isalignedwith"
-          }
-        }
-      },
-      "match_pattern": "source_label"
-    },
-    {
-      "relation": {
-        "source": {
-          "label": "bias"
-        },
-        "target": {
-          "label": "biasmeasure"
-        },
-        "edge": {
-          "label": "hasbiasmeasure",
-          "properties": {
-            "sentence": "bias hasbiasmeasure biasmeasure",
-            "type": "hasbiasmeasure",
-            "label": "hasbiasmeasure"
+            "sentence": "bias is aligned with harm",
+            "type": "is aligned with",
+            "label": "is aligned with"
           }
         }
       },
@@ -251,5 +232,5 @@
       "match_pattern": "target_label"
     }
   ],
-  "created_at": "20251220_220209Z"
+  "created_at": "20251222_104540Z"
 }

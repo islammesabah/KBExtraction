@@ -52,6 +52,40 @@ def map_extracted_triplets_to_graph_relations(
     return rels
 
 
+def map_extracted_triplets_to_graph_relations_(
+    extraction: ExtractionResult,
+) -> List[GraphRelation]:
+    """
+    Map an ExtractionResult to graph-ready relation dicts.
+    - extraction: {"sentence": str, "triplets": [(subj,obj,rel), ...]}
+    - source_doc: LangChain Document (for provenance: page_content + metadata)
+    """
+    # defensive: accept partially-typed dicts
+    sentence_text = extraction.get("sentence")
+    triplets = extraction.get("triplets", [])
+
+    rels: List[GraphRelation] = []
+    for subj, obj, rel in triplets:
+
+        props: EdgeProperties = {
+            # for provenance
+            'sentence': sentence_text,
+            # 'original_sentence': getattr(source_doc, "page_content", ""),
+            # **getattr(source_doc, "metadata", {})  # type: ignore[arg-type]
+        }
+
+        # if include_sentence:
+        #     # human-readable extracted sentence (from the extractor)
+        #     props["sentence"] = sentence_text
+
+        rels.append({
+            "source": { "label": normalize_text(subj) },
+            "target": { "label": normalize_text(obj) },
+            "edge":   { "label": normalize_text(rel), "properties": props },
+        })
+
+    return rels
+
 def rows_to_graph_relations(
     rows: Iterable[Mapping[str, Any]],
     *,

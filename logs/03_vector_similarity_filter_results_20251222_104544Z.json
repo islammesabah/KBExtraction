@@ -1,8 +1,10 @@
 {
+  "number_kept": 13,
+  "number_dropped": 19,
   "kept": [
     {
-      "quality": "Train–test splitting or cross-validation can introduce bias.",
-      "max_score": 0.69886714220047,
+      "quality": "Train–test splitting or cross-validation may introduce bias.",
+      "max_score": 0.7252731919288635,
       "neighbors": [
         {
           "relation": {
@@ -21,7 +23,7 @@
               }
             }
           },
-          "score": 0.69886714220047
+          "score": 0.7252731919288635
         },
         {
           "relation": {
@@ -40,7 +42,26 @@
               }
             }
           },
-          "score": 0.5371255278587341
+          "score": 0.5155847072601318
+        },
+        {
+          "relation": {
+            "source": {
+              "label": "bias"
+            },
+            "target": {
+              "label": "application"
+            },
+            "edge": {
+              "label": "is associated to",
+              "properties": {
+                "sentence": "bias is associated to application",
+                "type": "is associated to",
+                "label": "is associated to"
+              }
+            }
+          },
+          "score": 0.5121198892593384
         },
         {
           "relation": {
@@ -59,89 +80,7 @@
               }
             }
           },
-          "score": 0.46427780389785767
-        },
-        {
-          "relation": {
-            "source": {
-              "label": "data"
-            },
-            "target": {
-              "label": "socially_constructed_biases"
-            },
-            "edge": {
-              "label": "gathered",
-              "properties": {
-                "sentence": "data gathered socially_constructed_biases",
-                "type": "gathered",
-                "label": "gathered"
-              }
-            }
-          },
-          "score": 0.438132643699646
-        },
-        {
-          "relation": {
-            "source": {
-              "label": "bias"
-            },
-            "target": {
-              "label": "application"
-            },
-            "edge": {
-              "label": "isassociatedto",
-              "properties": {
-                "sentence": "bias isassociatedto application",
-                "type": "isassociatedto",
-                "label": "isassociatedto"
-              }
-            }
-          },
-          "score": 0.4368278980255127
-        }
-      ]
-    },
-    {
-      "quality": "Bias can be introduced if the underlying data distribution is not carefully considered.",
-      "max_score": 0.6847970485687256,
-      "neighbors": [
-        {
-          "relation": {
-            "source": {
-              "label": "bias"
-            },
-            "target": {
-              "label": "risk"
-            },
-            "edge": {
-              "label": "is",
-              "properties": {
-                "sentence": "bias is risk",
-                "type": "is",
-                "label": "is"
-              }
-            }
-          },
-          "score": 0.6847970485687256
-        },
-        {
-          "relation": {
-            "source": {
-              "label": "bias"
-            },
-            "target": {
-              "label": "application"
-            },
-            "edge": {
-              "label": "isassociatedto",
-              "properties": {
-                "sentence": "bias isassociatedto application",
-                "type": "isassociatedto",
-                "label": "isassociatedto"
-              }
-            }
-          },
-          "score": 0.6287868022918701
+          "score": 0.4904550313949585
         },
         {
           "relation": {
@@ -152,59 +91,21 @@
               "label": "harm"
             },
             "edge": {
-              "label": "isalignedwith",
+              "label": "is aligned with",
               "properties": {
-                "sentence": "bias isalignedwith harm",
-                "type": "isalignedwith",
-                "label": "isalignedwith"
+                "sentence": "bias is aligned with harm",
+                "type": "is aligned with",
+                "label": "is aligned with"
               }
             }
           },
-          "score": 0.6180589199066162
-        },
-        {
-          "relation": {
-            "source": {
-              "label": "data"
-            },
-            "target": {
-              "label": "socially_constructed_biases"
-            },
-            "edge": {
-              "label": "gathered",
-              "properties": {
-                "sentence": "data gathered socially_constructed_biases",
-                "type": "gathered",
-                "label": "gathered"
-              }
-            }
-          },
-          "score": 0.6072957515716553
-        },
-        {
-          "relation": {
-            "source": {
-              "label": "bias"
-            },
-            "target": {
-              "label": "fairness"
-            },
-            "edge": {
-              "label": "is_threat_to",
-              "properties": {
-                "sentence": "bias is_threat_to fairness",
-                "type": "is_threat_to",
-                "label": "is_threat_to"
-              }
-            }
-          },
-          "score": 0.5897027254104614
+          "score": 0.4728088974952698
         }
       ]
     },
     {
-      "quality": "Achieving fairness in classification models requires trade-offs.",
-      "max_score": 0.6571822166442871,
+      "quality": "Bias is introduced if the underlying data distribution is not carefully considered.",
+      "max_score": 0.7043099999427795,
       "neighbors": [
         {
           "relation": {
@@ -212,18 +113,37 @@
               "label": "bias"
             },
             "target": {
-              "label": "fairness"
+              "label": "application"
             },
             "edge": {
-              "label": "is_threat_to",
+              "label": "is associated to",
               "properties": {
-                "sentence": "bias is_threat_to fairness",
-                "type": "is_threat_to",
-                "label": "is_threat_to"
+                "sentence": "bias is associated to application",
+                "type": "is associated to",
+                "label": "is associated to"
               }
             }
           },
-          "score": 0.6571822166442871
+          "score": 0.7043099999427795
+        },
+        {
+          "relation": {
+            "source": {
+              "label": "bias"
+            },
+            "target": {
+              "label": "risk"
+            },
+            "edge": {
+              "label": "is",
+              "properties": {
+                "sentence": "bias is risk",
+                "type": "is",
+                "label": "is"
+              }
+            }
+          },
+          "score": 0.6907138824462891
         },
         {
           "relation": {
@@ -242,7 +162,70 @@
               }
             }
           },
-          "score": 0.46630412340164185
+          "score": 0.6433879137039185
+        },
+        {
+          "relation": {
+            "source": {
+              "label": "data"
+            },
+            "target": {
+              "label": "socially_constructed_biases"
+            },
+            "edge": {
+              "label": "gathered",
+              "properties": {
+                "sentence": "data gathered socially_constructed_biases",
+                "type": "gathered",
+                "label": "gathered"
+              }
+            }
+          },
+          "score": 0.6326252222061157
+        },
+        {
+          "relation": {
+            "source": {
+              "label": "bias"
+            },
+            "target": {
+              "label": "harm"
+            },
+            "edge": {
+              "label": "is aligned with",
+              "properties": {
+                "sentence": "bias is aligned with harm",
+                "type": "is aligned with",
+                "label": "is aligned with"
+              }
+            }
+          },
+          "score": 0.6307575702667236
+        }
+      ]
+    },
+    {
+      "quality": "Fairness is a core requirement in machine learning models.",
+      "max_score": 0.7003606557846069,
+      "neighbors": [
+        {
+          "relation": {
+            "source": {
+              "label": "bias"
+            },
+            "target": {
+              "label": "fairness"
+            },
+            "edge": {
+              "label": "is_threat_to",
+              "properties": {
+                "sentence": "bias is_threat_to fairness",
+                "type": "is_threat_to",
+                "label": "is_threat_to"
+              }
+            }
+          },
+          "score": 0.7003606557846069
         },
         {
           "relation": {
@@ -261,26 +244,7 @@
               }
             }
           },
-          "score": 0.4463574290275574
-        },
-        {
-          "relation": {
-            "source": {
-              "label": "data"
-            },
-            "target": {
-              "label": "socially_constructed_biases"
-            },
-            "edge": {
-              "label": "gathered",
-              "properties": {
-                "sentence": "data gathered socially_constructed_biases",
-                "type": "gathered",
-                "label": "gathered"
-              }
-            }
-          },
-          "score": 0.44364094734191895
+          "score": 0.5169543027877808
         },
         {
           "relation": {
@@ -299,51 +263,7 @@
               }
             }
           },
-          "score": 0.43904316425323486
-        }
-      ]
-    },
-    {
-      "quality": "Bias can arise during data collection.",
-      "max_score": 0.6480305194854736,
-      "neighbors": [
-        {
-          "relation": {
-            "source": {
-              "label": "data"
-            },
-            "target": {
-              "label": "socially_constructed_biases"
-            },
-            "edge": {
-              "label": "gathered",
-              "properties": {
-                "sentence": "data gathered socially_constructed_biases",
-                "type": "gathered",
-                "label": "gathered"
-              }
-            }
-          },
-          "score": 0.6480305194854736
-        },
-        {
-          "relation": {
-            "source": {
-              "label": "bias"
-            },
-            "target": {
-              "label": "risk"
-            },
-            "edge": {
-              "label": "is",
-              "properties": {
-                "sentence": "bias is risk",
-                "type": "is",
-                "label": "is"
-              }
-            }
-          },
-          "score": 0.6324180364608765
+          "score": 0.46498632431030273
         },
         {
           "relation": {
@@ -354,16 +274,41 @@
               "label": "harm"
             },
             "edge": {
-              "label": "isalignedwith",
+              "label": "is aligned with",
               "properties": {
-                "sentence": "bias isalignedwith harm",
-                "type": "isalignedwith",
-                "label": "isalignedwith"
+                "sentence": "bias is aligned with harm",
+                "type": "is aligned with",
+                "label": "is aligned with"
               }
             }
           },
-          "score": 0.5900089740753174
+          "score": 0.4535268545150757
         },
+        {
+          "relation": {
+            "source": {
+              "label": "bias"
+            },
+            "target": {
+              "label": "application"
+            },
+            "edge": {
+              "label": "is associated to",
+              "properties": {
+                "sentence": "bias is associated to application",
+                "type": "is associated to",
+                "label": "is associated to"
+              }
+            }
+          },
+          "score": 0.45050936937332153
+        }
+      ]
+    },
+    {
+      "quality": "Fairness is an ethical consideration.",
+      "max_score": 0.693520188331604,
+      "neighbors": [
         {
           "relation": {
             "source": {
@@ -381,7 +326,7 @@
               }
             }
           },
-          "score": 0.5681617259979248
+          "score": 0.693520188331604
         },
         {
           "relation": {
@@ -389,25 +334,19 @@
               "label": "bias"
             },
             "target": {
-              "label": "application"
+              "label": "harm"
             },
             "edge": {
-              "label": "isassociatedto",
+              "label": "is aligned with",
               "properties": {
-                "sentence": "bias isassociatedto application",
-                "type": "isassociatedto",
-                "label": "isassociatedto"
+                "sentence": "bias is aligned with harm",
+                "type": "is aligned with",
+                "label": "is aligned with"
               }
             }
           },
-          "score": 0.5601206421852112
-        }
-      ]
-    },
-    {
-      "quality": "Transparent explanations can help identify potential sources of bias.",
-      "max_score": 0.6152001619338989,
-      "neighbors": [
+          "score": 0.49498987197875977
+        },
         {
           "relation": {
             "source": {
@@ -425,64 +364,7 @@
               }
             }
           },
-          "score": 0.6152001619338989
-        },
-        {
-          "relation": {
-            "source": {
-              "label": "bias"
-            },
-            "target": {
-              "label": "fairness"
-            },
-            "edge": {
-              "label": "is_threat_to",
-              "properties": {
-                "sentence": "bias is_threat_to fairness",
-                "type": "is_threat_to",
-                "label": "is_threat_to"
-              }
-            }
-          },
-          "score": 0.5805726051330566
-        },
-        {
-          "relation": {
-            "source": {
-              "label": "data"
-            },
-            "target": {
-              "label": "socially_constructed_biases"
-            },
-            "edge": {
-              "label": "gathered",
-              "properties": {
-                "sentence": "data gathered socially_constructed_biases",
-                "type": "gathered",
-                "label": "gathered"
-              }
-            }
-          },
-          "score": 0.5400657653808594
-        },
-        {
-          "relation": {
-            "source": {
-              "label": "bias"
-            },
-            "target": {
-              "label": "application"
-            },
-            "edge": {
-              "label": "isassociatedto",
-              "properties": {
-                "sentence": "bias isassociatedto application",
-                "type": "isassociatedto",
-                "label": "isassociatedto"
-              }
-            }
-          },
-          "score": 0.4784930348396301
+          "score": 0.4359164237976074
         },
         {
           "relation": {
@@ -501,253 +383,7 @@
               }
             }
           },
-          "score": 0.46095937490463257
-        }
-      ]
-    },
-    {
-      "quality": "Fairness is a core requirement in machine learning model design and deployment.",
-      "max_score": 0.6090908050537109,
-      "neighbors": [
-        {
-          "relation": {
-            "source": {
-              "label": "bias"
-            },
-            "target": {
-              "label": "fairness"
-            },
-            "edge": {
-              "label": "is_threat_to",
-              "properties": {
-                "sentence": "bias is_threat_to fairness",
-                "type": "is_threat_to",
-                "label": "is_threat_to"
-              }
-            }
-          },
-          "score": 0.6090908050537109
-        },
-        {
-          "relation": {
-            "source": {
-              "label": "bias"
-            },
-            "target": {
-              "label": "risk"
-            },
-            "edge": {
-              "label": "is",
-              "properties": {
-                "sentence": "bias is risk",
-                "type": "is",
-                "label": "is"
-              }
-            }
-          },
-          "score": 0.4079049825668335
-        },
-        {
-          "relation": {
-            "source": {
-              "label": "bias"
-            },
-            "target": {
-              "label": "application"
-            },
-            "edge": {
-              "label": "isassociatedto",
-              "properties": {
-                "sentence": "bias isassociatedto application",
-                "type": "isassociatedto",
-                "label": "isassociatedto"
-              }
-            }
-          },
-          "score": 0.40055668354034424
-        },
-        {
-          "relation": {
-            "source": {
-              "label": "algorithmic_bias"
-            },
-            "target": {
-              "label": "bias"
-            },
-            "edge": {
-              "label": "is_subclass_of",
-              "properties": {
-                "sentence": "algorithmic_bias is_subclass_of bias",
-                "type": "is_subclass_of",
-                "label": "is_subclass_of"
-              }
-            }
-          },
-          "score": 0.3973845839500427
-        },
-        {
-          "relation": {
-            "source": {
-              "label": "bias"
-            },
-            "target": {
-              "label": "harm"
-            },
-            "edge": {
-              "label": "isalignedwith",
-              "properties": {
-                "sentence": "bias isalignedwith harm",
-                "type": "isalignedwith",
-                "label": "isalignedwith"
-              }
-            }
-          },
-          "score": 0.37391364574432373
-        }
-      ]
-    },
-    {
-      "quality": "Improving fairness may affect overall model accuracy.",
-      "max_score": 0.5787856578826904,
-      "neighbors": [
-        {
-          "relation": {
-            "source": {
-              "label": "bias"
-            },
-            "target": {
-              "label": "fairness"
-            },
-            "edge": {
-              "label": "is_threat_to",
-              "properties": {
-                "sentence": "bias is_threat_to fairness",
-                "type": "is_threat_to",
-                "label": "is_threat_to"
-              }
-            }
-          },
-          "score": 0.5787856578826904
-        },
-        {
-          "relation": {
-            "source": {
-              "label": "bias"
-            },
-            "target": {
-              "label": "harm"
-            },
-            "edge": {
-              "label": "isalignedwith",
-              "properties": {
-                "sentence": "bias isalignedwith harm",
-                "type": "isalignedwith",
-                "label": "isalignedwith"
-              }
-            }
-          },
-          "score": 0.4435790777206421
-        },
-        {
-          "relation": {
-            "source": {
-              "label": "bias"
-            },
-            "target": {
-              "label": "risk"
-            },
-            "edge": {
-              "label": "is",
-              "properties": {
-                "sentence": "bias is risk",
-                "type": "is",
-                "label": "is"
-              }
-            }
-          },
-          "score": 0.42936813831329346
-        },
-        {
-          "relation": {
-            "source": {
-              "label": "bias"
-            },
-            "target": {
-              "label": "application"
-            },
-            "edge": {
-              "label": "isassociatedto",
-              "properties": {
-                "sentence": "bias isassociatedto application",
-                "type": "isassociatedto",
-                "label": "isassociatedto"
-              }
-            }
-          },
-          "score": 0.39243489503860474
-        },
-        {
-          "relation": {
-            "source": {
-              "label": "traintestsplit"
-            },
-            "target": {
-              "label": "bias"
-            },
-            "edge": {
-              "label": "might_introduce",
-              "properties": {
-                "sentence": "traintestsplit might_introduce bias",
-                "type": "might_introduce",
-                "label": "might_introduce"
-              }
-            }
-          },
-          "score": 0.3911712169647217
-        }
-      ]
-    },
-    {
-      "quality": "Ethical considerations include fairness.",
-      "max_score": 0.5695734024047852,
-      "neighbors": [
-        {
-          "relation": {
-            "source": {
-              "label": "bias"
-            },
-            "target": {
-              "label": "fairness"
-            },
-            "edge": {
-              "label": "is_threat_to",
-              "properties": {
-                "sentence": "bias is_threat_to fairness",
-                "type": "is_threat_to",
-                "label": "is_threat_to"
-              }
-            }
-          },
-          "score": 0.5695734024047852
-        },
-        {
-          "relation": {
-            "source": {
-              "label": "gender"
-            },
-            "target": {
-              "label": "subject_to_bias"
-            },
-            "edge": {
-              "label": "can_be",
-              "properties": {
-                "sentence": "gender can_be subject_to_bias",
-                "type": "can_be",
-                "label": "can_be"
-              }
-            }
-          },
-          "score": 0.4362565279006958
+          "score": 0.4001445174217224
         },
         {
           "relation": {
@@ -766,51 +402,13 @@
               }
             }
           },
-          "score": 0.41533076763153076
-        },
-        {
-          "relation": {
-            "source": {
-              "label": "bias"
-            },
-            "target": {
-              "label": "risk"
-            },
-            "edge": {
-              "label": "is",
-              "properties": {
-                "sentence": "bias is risk",
-                "type": "is",
-                "label": "is"
-              }
-            }
-          },
-          "score": 0.4071579575538635
-        },
-        {
-          "relation": {
-            "source": {
-              "label": "socioeconomic_status"
-            },
-            "target": {
-              "label": "subject_to_bias"
-            },
-            "edge": {
-              "label": "can_be",
-              "properties": {
-                "sentence": "socioeconomic_status can_be subject_to_bias",
-                "type": "can_be",
-                "label": "can_be"
-              }
-            }
-          },
-          "score": 0.3973560929298401
+          "score": 0.39028429985046387
         }
       ]
     },
     {
-      "quality": "Model selection techniques can introduce bias.",
-      "max_score": 0.5672942399978638,
+      "quality": "Classification models are often evaluated on fairness-related criteria.",
+      "max_score": 0.6772478222846985,
       "neighbors": [
         {
           "relation": {
@@ -818,18 +416,18 @@
               "label": "bias"
             },
             "target": {
-              "label": "risk"
+              "label": "fairness"
             },
             "edge": {
-              "label": "is",
+              "label": "is_threat_to",
               "properties": {
-                "sentence": "bias is risk",
-                "type": "is",
-                "label": "is"
+                "sentence": "bias is_threat_to fairness",
+                "type": "is_threat_to",
+                "label": "is_threat_to"
               }
             }
           },
-          "score": 0.5672942399978638
+          "score": 0.6772478222846985
         },
         {
           "relation": {
@@ -840,15 +438,53 @@
               "label": "application"
             },
             "edge": {
-              "label": "isassociatedto",
+              "label": "is associated to",
               "properties": {
-                "sentence": "bias isassociatedto application",
-                "type": "isassociatedto",
-                "label": "isassociatedto"
+                "sentence": "bias is associated to application",
+                "type": "is associated to",
+                "label": "is associated to"
               }
             }
           },
-          "score": 0.5312593579292297
+          "score": 0.47697144746780396
+        },
+        {
+          "relation": {
+            "source": {
+              "label": "bias"
+            },
+            "target": {
+              "label": "thing"
+            },
+            "edge": {
+              "label": "is_subclass_of",
+              "properties": {
+                "sentence": "bias is_subclass_of thing",
+                "type": "is_subclass_of",
+                "label": "is_subclass_of"
+              }
+            }
+          },
+          "score": 0.4636951684951782
+        },
+        {
+          "relation": {
+            "source": {
+              "label": "algorithmic_bias"
+            },
+            "target": {
+              "label": "bias"
+            },
+            "edge": {
+              "label": "is_subclass_of",
+              "properties": {
+                "sentence": "algorithmic_bias is_subclass_of bias",
+                "type": "is_subclass_of",
+                "label": "is_subclass_of"
+              }
+            }
+          },
+          "score": 0.45986831188201904
         },
         {
           "relation": {
@@ -867,7 +503,32 @@
               }
             }
           },
-          "score": 0.5168886184692383
+          "score": 0.4445909261703491
+        }
+      ]
+    },
+    {
+      "quality": "Fairness should not disadvantage individuals based on ethnicity.",
+      "max_score": 0.6682966947555542,
+      "neighbors": [
+        {
+          "relation": {
+            "source": {
+              "label": "ethnicity"
+            },
+            "target": {
+              "label": "subject_to_bias"
+            },
+            "edge": {
+              "label": "can_be",
+              "properties": {
+                "sentence": "ethnicity can_be subject_to_bias",
+                "type": "can_be",
+                "label": "can_be"
+              }
+            }
+          },
+          "score": 0.6682966947555542
         },
         {
           "relation": {
@@ -886,33 +547,191 @@
               }
             }
           },
-          "score": 0.47779393196105957
+          "score": 0.6052912473678589
         },
         {
           "relation": {
             "source": {
-              "label": "traintestsplit"
+              "label": "socioeconomic_status"
             },
             "target": {
-              "label": "bias"
+              "label": "subject_to_bias"
             },
             "edge": {
-              "label": "might_introduce",
+              "label": "can_be",
               "properties": {
-                "sentence": "traintestsplit might_introduce bias",
-                "type": "might_introduce",
-                "label": "might_introduce"
+                "sentence": "socioeconomic_status can_be subject_to_bias",
+                "type": "can_be",
+                "label": "can_be"
               }
             }
           },
-          "score": 0.43556785583496094
+          "score": 0.47963225841522217
+        },
+        {
+          "relation": {
+            "source": {
+              "label": "bias"
+            },
+            "target": {
+              "label": "harm"
+            },
+            "edge": {
+              "label": "is aligned with",
+              "properties": {
+                "sentence": "bias is aligned with harm",
+                "type": "is aligned with",
+                "label": "is aligned with"
+              }
+            }
+          },
+          "score": 0.4589518904685974
+        },
+        {
+          "relation": {
+            "source": {
+              "label": "gender"
+            },
+            "target": {
+              "label": "subject_to_bias"
+            },
+            "edge": {
+              "label": "can_be",
+              "properties": {
+                "sentence": "gender can_be subject_to_bias",
+                "type": "can_be",
+                "label": "can_be"
+              }
+            }
+          },
+          "score": 0.4238814115524292
+        }
+      ]
+    },
+    {
+      "quality": "Fairness should not disadvantage individuals based on gender.",
+      "max_score": 0.6667301654815674,
+      "neighbors": [
+        {
+          "relation": {
+            "source": {
+              "label": "gender"
+            },
+            "target": {
+              "label": "subject_to_bias"
+            },
+            "edge": {
+              "label": "can_be",
+              "properties": {
+                "sentence": "gender can_be subject_to_bias",
+                "type": "can_be",
+                "label": "can_be"
+              }
+            }
+          },
+          "score": 0.6667301654815674
+        },
+        {
+          "relation": {
+            "source": {
+              "label": "bias"
+            },
+            "target": {
+              "label": "fairness"
+            },
+            "edge": {
+              "label": "is_threat_to",
+              "properties": {
+                "sentence": "bias is_threat_to fairness",
+                "type": "is_threat_to",
+                "label": "is_threat_to"
+              }
+            }
+          },
+          "score": 0.6177191138267517
+        },
+        {
+          "relation": {
+            "source": {
+              "label": "socioeconomic_status"
+            },
+            "target": {
+              "label": "subject_to_bias"
+            },
+            "edge": {
+              "label": "can_be",
+              "properties": {
+                "sentence": "socioeconomic_status can_be subject_to_bias",
+                "type": "can_be",
+                "label": "can_be"
+              }
+            }
+          },
+          "score": 0.47249144315719604
+        },
+        {
+          "relation": {
+            "source": {
+              "label": "ethnicity"
+            },
+            "target": {
+              "label": "subject_to_bias"
+            },
+            "edge": {
+              "label": "can_be",
+              "properties": {
+                "sentence": "ethnicity can_be subject_to_bias",
+                "type": "can_be",
+                "label": "can_be"
+              }
+            }
+          },
+          "score": 0.4563915729522705
+        },
+        {
+          "relation": {
+            "source": {
+              "label": "bias"
+            },
+            "target": {
+              "label": "harm"
+            },
+            "edge": {
+              "label": "is aligned with",
+              "properties": {
+                "sentence": "bias is aligned with harm",
+                "type": "is aligned with",
+                "label": "is aligned with"
+              }
+            }
+          },
+          "score": 0.4526529312133789
         }
       ]
     },
     {
       "quality": "Bias can arise at multiple stages of the data science workflow.",
-      "max_score": 0.5661883354187012,
+      "max_score": 0.6628962755203247,
       "neighbors": [
+        {
+          "relation": {
+            "source": {
+              "label": "bias"
+            },
+            "target": {
+              "label": "application"
+            },
+            "edge": {
+              "label": "is associated to",
+              "properties": {
+                "sentence": "bias is associated to application",
+                "type": "is associated to",
+                "label": "is associated to"
+              }
+            }
+          },
+          "score": 0.6628962755203247
+        },
         {
           "relation": {
             "source": {
@@ -930,7 +749,26 @@
               }
             }
           },
-          "score": 0.5661883354187012
+          "score": 0.5661882162094116
+        },
+        {
+          "relation": {
+            "source": {
+              "label": "bias"
+            },
+            "target": {
+              "label": "fairness"
+            },
+            "edge": {
+              "label": "is_threat_to",
+              "properties": {
+                "sentence": "bias is_threat_to fairness",
+                "type": "is_threat_to",
+                "label": "is_threat_to"
+              }
+            }
+          },
+          "score": 0.5643839240074158
         },
         {
           "relation": {
@@ -949,329 +787,7 @@
               }
             }
           },
-          "score": 0.5515997409820557
-        },
-        {
-          "relation": {
-            "source": {
-              "label": "bias"
-            },
-            "target": {
-              "label": "application"
-            },
-            "edge": {
-              "label": "isassociatedto",
-              "properties": {
-                "sentence": "bias isassociatedto application",
-                "type": "isassociatedto",
-                "label": "isassociatedto"
-              }
-            }
-          },
-          "score": 0.5243532657623291
-        },
-        {
-          "relation": {
-            "source": {
-              "label": "bias"
-            },
-            "target": {
-              "label": "fairness"
-            },
-            "edge": {
-              "label": "is_threat_to",
-              "properties": {
-                "sentence": "bias is_threat_to fairness",
-                "type": "is_threat_to",
-                "label": "is_threat_to"
-              }
-            }
-          },
-          "score": 0.5144279599189758
-        },
-        {
-          "relation": {
-            "source": {
-              "label": "gender"
-            },
-            "target": {
-              "label": "subject_to_bias"
-            },
-            "edge": {
-              "label": "can_be",
-              "properties": {
-                "sentence": "gender can_be subject_to_bias",
-                "type": "can_be",
-                "label": "can_be"
-              }
-            }
-          },
-          "score": 0.4523369073867798
-        }
-      ]
-    },
-    {
-      "quality": "A fair system should not disadvantage individuals or groups based on gender.",
-      "max_score": 0.565130352973938,
-      "neighbors": [
-        {
-          "relation": {
-            "source": {
-              "label": "gender"
-            },
-            "target": {
-              "label": "subject_to_bias"
-            },
-            "edge": {
-              "label": "can_be",
-              "properties": {
-                "sentence": "gender can_be subject_to_bias",
-                "type": "can_be",
-                "label": "can_be"
-              }
-            }
-          },
-          "score": 0.565130352973938
-        },
-        {
-          "relation": {
-            "source": {
-              "label": "bias"
-            },
-            "target": {
-              "label": "fairness"
-            },
-            "edge": {
-              "label": "is_threat_to",
-              "properties": {
-                "sentence": "bias is_threat_to fairness",
-                "type": "is_threat_to",
-                "label": "is_threat_to"
-              }
-            }
-          },
-          "score": 0.42595547437667847
-        },
-        {
-          "relation": {
-            "source": {
-              "label": "socioeconomic_status"
-            },
-            "target": {
-              "label": "subject_to_bias"
-            },
-            "edge": {
-              "label": "can_be",
-              "properties": {
-                "sentence": "socioeconomic_status can_be subject_to_bias",
-                "type": "can_be",
-                "label": "can_be"
-              }
-            }
-          },
-          "score": 0.4092943072319031
-        },
-        {
-          "relation": {
-            "source": {
-              "label": "ethnicity"
-            },
-            "target": {
-              "label": "subject_to_bias"
-            },
-            "edge": {
-              "label": "can_be",
-              "properties": {
-                "sentence": "ethnicity can_be subject_to_bias",
-                "type": "can_be",
-                "label": "can_be"
-              }
-            }
-          },
-          "score": 0.3745514154434204
-        },
-        {
-          "relation": {
-            "source": {
-              "label": "bias"
-            },
-            "target": {
-              "label": "harm"
-            },
-            "edge": {
-              "label": "isalignedwith",
-              "properties": {
-                "sentence": "bias isalignedwith harm",
-                "type": "isalignedwith",
-                "label": "isalignedwith"
-              }
-            }
-          },
-          "score": 0.3225681781768799
-        }
-      ]
-    },
-    {
-      "quality": "A fair system should not disadvantage individuals or groups based on ethnicity.",
-      "max_score": 0.5604865550994873,
-      "neighbors": [
-        {
-          "relation": {
-            "source": {
-              "label": "ethnicity"
-            },
-            "target": {
-              "label": "subject_to_bias"
-            },
-            "edge": {
-              "label": "can_be",
-              "properties": {
-                "sentence": "ethnicity can_be subject_to_bias",
-                "type": "can_be",
-                "label": "can_be"
-              }
-            }
-          },
-          "score": 0.5604865550994873
-        },
-        {
-          "relation": {
-            "source": {
-              "label": "socioeconomic_status"
-            },
-            "target": {
-              "label": "subject_to_bias"
-            },
-            "edge": {
-              "label": "can_be",
-              "properties": {
-                "sentence": "socioeconomic_status can_be subject_to_bias",
-                "type": "can_be",
-                "label": "can_be"
-              }
-            }
-          },
-          "score": 0.41089797019958496
-        },
-        {
-          "relation": {
-            "source": {
-              "label": "bias"
-            },
-            "target": {
-              "label": "fairness"
-            },
-            "edge": {
-              "label": "is_threat_to",
-              "properties": {
-                "sentence": "bias is_threat_to fairness",
-                "type": "is_threat_to",
-                "label": "is_threat_to"
-              }
-            }
-          },
-          "score": 0.40554285049438477
-        },
-        {
-          "relation": {
-            "source": {
-              "label": "gender"
-            },
-            "target": {
-              "label": "subject_to_bias"
-            },
-            "edge": {
-              "label": "can_be",
-              "properties": {
-                "sentence": "gender can_be subject_to_bias",
-                "type": "can_be",
-                "label": "can_be"
-              }
-            }
-          },
-          "score": 0.33694130182266235
-        },
-        {
-          "relation": {
-            "source": {
-              "label": "bias"
-            },
-            "target": {
-              "label": "harm"
-            },
-            "edge": {
-              "label": "isalignedwith",
-              "properties": {
-                "sentence": "bias isalignedwith harm",
-                "type": "isalignedwith",
-                "label": "isalignedwith"
-              }
-            }
-          },
-          "score": 0.3182815909385681
-        }
-      ]
-    },
-    {
-      "quality": "Classification models are often evaluated on accuracy and fairness-related criteria.",
-      "max_score": 0.5600839853286743,
-      "neighbors": [
-        {
-          "relation": {
-            "source": {
-              "label": "bias"
-            },
-            "target": {
-              "label": "fairness"
-            },
-            "edge": {
-              "label": "is_threat_to",
-              "properties": {
-                "sentence": "bias is_threat_to fairness",
-                "type": "is_threat_to",
-                "label": "is_threat_to"
-              }
-            }
-          },
-          "score": 0.5600839853286743
-        },
-        {
-          "relation": {
-            "source": {
-              "label": "bias"
-            },
-            "target": {
-              "label": "application"
-            },
-            "edge": {
-              "label": "isassociatedto",
-              "properties": {
-                "sentence": "bias isassociatedto application",
-                "type": "isassociatedto",
-                "label": "isassociatedto"
-              }
-            }
-          },
-          "score": 0.3957785367965698
-        },
-        {
-          "relation": {
-            "source": {
-              "label": "data"
-            },
-            "target": {
-              "label": "socially_constructed_biases"
-            },
-            "edge": {
-              "label": "gathered",
-              "properties": {
-                "sentence": "data gathered socially_constructed_biases",
-                "type": "gathered",
-                "label": "gathered"
-              }
-            }
-          },
-          "score": 0.3884050250053406
+          "score": 0.5569928884506226
         },
         {
           "relation": {
@@ -1290,7 +806,392 @@
               }
             }
           },
-          "score": 0.38416266441345215
+          "score": 0.550995945930481
+        }
+      ]
+    },
+    {
+      "quality": "Data science applications should address fairness.",
+      "max_score": 0.6510710716247559,
+      "neighbors": [
+        {
+          "relation": {
+            "source": {
+              "label": "bias"
+            },
+            "target": {
+              "label": "fairness"
+            },
+            "edge": {
+              "label": "is_threat_to",
+              "properties": {
+                "sentence": "bias is_threat_to fairness",
+                "type": "is_threat_to",
+                "label": "is_threat_to"
+              }
+            }
+          },
+          "score": 0.6510710716247559
+        },
+        {
+          "relation": {
+            "source": {
+              "label": "bias"
+            },
+            "target": {
+              "label": "application"
+            },
+            "edge": {
+              "label": "is associated to",
+              "properties": {
+                "sentence": "bias is associated to application",
+                "type": "is associated to",
+                "label": "is associated to"
+              }
+            }
+          },
+          "score": 0.5218796730041504
+        },
+        {
+          "relation": {
+            "source": {
+              "label": "data"
+            },
+            "target": {
+              "label": "socially_constructed_biases"
+            },
+            "edge": {
+              "label": "gathered",
+              "properties": {
+                "sentence": "data gathered socially_constructed_biases",
+                "type": "gathered",
+                "label": "gathered"
+              }
+            }
+          },
+          "score": 0.48191672563552856
+        },
+        {
+          "relation": {
+            "source": {
+              "label": "bias"
+            },
+            "target": {
+              "label": "harm"
+            },
+            "edge": {
+              "label": "is aligned with",
+              "properties": {
+                "sentence": "bias is aligned with harm",
+                "type": "is aligned with",
+                "label": "is aligned with"
+              }
+            }
+          },
+          "score": 0.4350632429122925
+        },
+        {
+          "relation": {
+            "source": {
+              "label": "bias"
+            },
+            "target": {
+              "label": "risk"
+            },
+            "edge": {
+              "label": "is",
+              "properties": {
+                "sentence": "bias is risk",
+                "type": "is",
+                "label": "is"
+              }
+            }
+          },
+          "score": 0.3985000252723694
+        }
+      ]
+    },
+    {
+      "quality": "Fairness should not disadvantage individuals based on socioeconomic background.",
+      "max_score": 0.6437979936599731,
+      "neighbors": [
+        {
+          "relation": {
+            "source": {
+              "label": "bias"
+            },
+            "target": {
+              "label": "fairness"
+            },
+            "edge": {
+              "label": "is_threat_to",
+              "properties": {
+                "sentence": "bias is_threat_to fairness",
+                "type": "is_threat_to",
+                "label": "is_threat_to"
+              }
+            }
+          },
+          "score": 0.6437979936599731
+        },
+        {
+          "relation": {
+            "source": {
+              "label": "socioeconomic_status"
+            },
+            "target": {
+              "label": "subject_to_bias"
+            },
+            "edge": {
+              "label": "can_be",
+              "properties": {
+                "sentence": "socioeconomic_status can_be subject_to_bias",
+                "type": "can_be",
+                "label": "can_be"
+              }
+            }
+          },
+          "score": 0.6296365857124329
+        },
+        {
+          "relation": {
+            "source": {
+              "label": "ethnicity"
+            },
+            "target": {
+              "label": "subject_to_bias"
+            },
+            "edge": {
+              "label": "can_be",
+              "properties": {
+                "sentence": "ethnicity can_be subject_to_bias",
+                "type": "can_be",
+                "label": "can_be"
+              }
+            }
+          },
+          "score": 0.46884679794311523
+        },
+        {
+          "relation": {
+            "source": {
+              "label": "bias"
+            },
+            "target": {
+              "label": "harm"
+            },
+            "edge": {
+              "label": "is aligned with",
+              "properties": {
+                "sentence": "bias is aligned with harm",
+                "type": "is aligned with",
+                "label": "is aligned with"
+              }
+            }
+          },
+          "score": 0.46533656120300293
+        },
+        {
+          "relation": {
+            "source": {
+              "label": "data"
+            },
+            "target": {
+              "label": "socially_constructed_biases"
+            },
+            "edge": {
+              "label": "gathered",
+              "properties": {
+                "sentence": "data gathered socially_constructed_biases",
+                "type": "gathered",
+                "label": "gathered"
+              }
+            }
+          },
+          "score": 0.4434731602668762
+        }
+      ]
+    },
+    {
+      "quality": "Improving fairness may affect overall model accuracy.",
+      "max_score": 0.6301404237747192,
+      "neighbors": [
+        {
+          "relation": {
+            "source": {
+              "label": "bias"
+            },
+            "target": {
+              "label": "fairness"
+            },
+            "edge": {
+              "label": "is_threat_to",
+              "properties": {
+                "sentence": "bias is_threat_to fairness",
+                "type": "is_threat_to",
+                "label": "is_threat_to"
+              }
+            }
+          },
+          "score": 0.6301404237747192
+        },
+        {
+          "relation": {
+            "source": {
+              "label": "bias"
+            },
+            "target": {
+              "label": "harm"
+            },
+            "edge": {
+              "label": "is aligned with",
+              "properties": {
+                "sentence": "bias is aligned with harm",
+                "type": "is aligned with",
+                "label": "is aligned with"
+              }
+            }
+          },
+          "score": 0.45870959758758545
+        },
+        {
+          "relation": {
+            "source": {
+              "label": "bias"
+            },
+            "target": {
+              "label": "application"
+            },
+            "edge": {
+              "label": "is associated to",
+              "properties": {
+                "sentence": "bias is associated to application",
+                "type": "is associated to",
+                "label": "is associated to"
+              }
+            }
+          },
+          "score": 0.4370760917663574
+        },
+        {
+          "relation": {
+            "source": {
+              "label": "bias"
+            },
+            "target": {
+              "label": "risk"
+            },
+            "edge": {
+              "label": "is",
+              "properties": {
+                "sentence": "bias is risk",
+                "type": "is",
+                "label": "is"
+              }
+            }
+          },
+          "score": 0.4293680787086487
+        },
+        {
+          "relation": {
+            "source": {
+              "label": "traintestsplit"
+            },
+            "target": {
+              "label": "bias"
+            },
+            "edge": {
+              "label": "might_introduce",
+              "properties": {
+                "sentence": "traintestsplit might_introduce bias",
+                "type": "might_introduce",
+                "label": "might_introduce"
+              }
+            }
+          },
+          "score": 0.42188799381256104
+        }
+      ]
+    },
+    {
+      "quality": "Model selection techniques may introduce bias.",
+      "max_score": 0.6144795417785645,
+      "neighbors": [
+        {
+          "relation": {
+            "source": {
+              "label": "bias"
+            },
+            "target": {
+              "label": "application"
+            },
+            "edge": {
+              "label": "is associated to",
+              "properties": {
+                "sentence": "bias is associated to application",
+                "type": "is associated to",
+                "label": "is associated to"
+              }
+            }
+          },
+          "score": 0.6144795417785645
+        },
+        {
+          "relation": {
+            "source": {
+              "label": "bias"
+            },
+            "target": {
+              "label": "risk"
+            },
+            "edge": {
+              "label": "is",
+              "properties": {
+                "sentence": "bias is risk",
+                "type": "is",
+                "label": "is"
+              }
+            }
+          },
+          "score": 0.5669219493865967
+        },
+        {
+          "relation": {
+            "source": {
+              "label": "bias"
+            },
+            "target": {
+              "label": "thing"
+            },
+            "edge": {
+              "label": "is_subclass_of",
+              "properties": {
+                "sentence": "bias is_subclass_of thing",
+                "type": "is_subclass_of",
+                "label": "is_subclass_of"
+              }
+            }
+          },
+          "score": 0.5043431520462036
+        },
+        {
+          "relation": {
+            "source": {
+              "label": "data"
+            },
+            "target": {
+              "label": "socially_constructed_biases"
+            },
+            "edge": {
+              "label": "gathered",
+              "properties": {
+                "sentence": "data gathered socially_constructed_biases",
+                "type": "gathered",
+                "label": "gathered"
+              }
+            }
+          },
+          "score": 0.5007662773132324
         },
         {
           "relation": {
@@ -1309,100 +1210,189 @@
               }
             }
           },
-          "score": 0.3789069652557373
+          "score": 0.4925057888031006
+        }
+      ]
+    },
+    {
+      "quality": "Seemingly neutral choices can unintentionally amplify existing disparities.",
+      "max_score": 0.5577723979949951,
+      "neighbors": [
+        {
+          "relation": {
+            "source": {
+              "label": "bias"
+            },
+            "target": {
+              "label": "fairness"
+            },
+            "edge": {
+              "label": "is_threat_to",
+              "properties": {
+                "sentence": "bias is_threat_to fairness",
+                "type": "is_threat_to",
+                "label": "is_threat_to"
+              }
+            }
+          },
+          "score": 0.5577723979949951
+        },
+        {
+          "relation": {
+            "source": {
+              "label": "bias"
+            },
+            "target": {
+              "label": "harm"
+            },
+            "edge": {
+              "label": "is aligned with",
+              "properties": {
+                "sentence": "bias is aligned with harm",
+                "type": "is aligned with",
+                "label": "is aligned with"
+              }
+            }
+          },
+          "score": 0.5448278188705444
+        },
+        {
+          "relation": {
+            "source": {
+              "label": "socioeconomic_status"
+            },
+            "target": {
+              "label": "subject_to_bias"
+            },
+            "edge": {
+              "label": "can_be",
+              "properties": {
+                "sentence": "socioeconomic_status can_be subject_to_bias",
+                "type": "can_be",
+                "label": "can_be"
+              }
+            }
+          },
+          "score": 0.46548783779144287
+        },
+        {
+          "relation": {
+            "source": {
+              "label": "ethnicity"
+            },
+            "target": {
+              "label": "subject_to_bias"
+            },
+            "edge": {
+              "label": "can_be",
+              "properties": {
+                "sentence": "ethnicity can_be subject_to_bias",
+                "type": "can_be",
+                "label": "can_be"
+              }
+            }
+          },
+          "score": 0.4629078507423401
+        },
+        {
+          "relation": {
+            "source": {
+              "label": "data"
+            },
+            "target": {
+              "label": "socially_constructed_biases"
+            },
+            "edge": {
+              "label": "gathered",
+              "properties": {
+                "sentence": "data gathered socially_constructed_biases",
+                "type": "gathered",
+                "label": "gathered"
+              }
+            }
+          },
+          "score": 0.4482053518295288
         }
       ]
     }
   ],
   "dropped": [
     {
-      "quality": "A fair system should not disadvantage individuals or groups based on socioeconomic background.",
-      "max_score": 0.5155832767486572
-    },
-    {
-      "quality": "The data itself may reflect historical and social inequalities.",
-      "max_score": 0.511881947517395
-    },
-    {
-      "quality": "Seemingly neutral choices can unintentionally amplify existing disparities.",
-      "max_score": 0.5077643394470215
-    },
-    {
       "quality": "Historical and social inequalities may be reflected in the data itself.",
-      "max_score": 0.5072332620620728
+      "max_score": 0.5313556790351868
     },
     {
-      "quality": "The data may reflect skewed representations of certain populations.",
-      "max_score": 0.4691047668457031
+      "quality": "Transparent explanations can help identify potential sources of bias and support accountability.",
+      "max_score": 0.5242504477500916
     },
     {
-      "quality": "Skewed representations of certain populations may be reflected in the data.",
-      "max_score": 0.44565892219543457
+      "quality": "Data itself may lead to skewed representations of certain populations.",
+      "max_score": 0.5146962404251099
     },
     {
-      "quality": "Classification models are evaluated on demographic parity.",
-      "max_score": 0.41365891695022583
+      "quality": "Failing to address ethical concerns causes harm.",
+      "max_score": 0.5098733305931091
+    },
+    {
+      "quality": "A fair system should not disadvantage individuals or groups.",
+      "max_score": 0.48278486728668213
+    },
+    {
+      "quality": "A fair system should not disadvantage individuals based on personal characteristics.",
+      "max_score": 0.4685686230659485
+    },
+    {
+      "quality": "A fair system should not disadvantage groups based on personal characteristics.",
+      "max_score": 0.4428158402442932
+    },
+    {
+      "quality": "Failing to address ethical concerns undermines public trust.",
+      "max_score": 0.42504048347473145
     },
     {
       "quality": "Feature selection or normalization can unintentionally amplify existing disparities.",
-      "max_score": 0.39620351791381836
+      "max_score": 0.40395599603652954
     },
     {
-      "quality": "Data science applications that fail to address ethical concerns risk undermining public trust.",
-      "max_score": 0.3592522144317627
+      "quality": "Ethical considerations are important in data science applications.",
+      "max_score": 0.39466923475265503
     },
     {
-      "quality": "Ethical considerations guide the development of data science applications.",
-      "max_score": 0.33718299865722656
-    },
-    {
-      "quality": "Classification models are evaluated on equal accuracy.",
-      "max_score": 0.33290624618530273
-    },
-    {
-      "quality": "Data science applications that fail to address ethical concerns risk causing harm.",
-      "max_score": 0.33233803510665894
-    },
-    {
-      "quality": "Transparent explanations support accountability.",
-      "max_score": 0.3318589925765991
-    },
-    {
-      "quality": "Robust explanations ensure that small changes in the input data do not lead to misleading justifications.",
-      "max_score": 0.32712918519973755
-    },
-    {
-      "quality": "Ethical considerations include transparency.",
-      "max_score": 0.3214305639266968
-    },
-    {
-      "quality": "Stakeholders must understand the outcome in high-stakes contexts.",
-      "max_score": 0.3176839351654053
-    },
-    {
-      "quality": "Predictive performance is distributed equitably across different groups.",
-      "max_score": 0.3148759603500366
+      "quality": "Transparency is an ethical consideration.",
+      "max_score": 0.3699716329574585
     },
     {
       "quality": "Stakeholders must be able to understand why a model produces a particular outcome.",
-      "max_score": 0.31277596950531006
+      "max_score": 0.3645179271697998
     },
     {
-      "quality": "Robust explanations ensure that small changes in the input data do not lead to inconsistent justifications.",
-      "max_score": 0.30953800678253174
+      "quality": "Data science applications should address transparency.",
+      "max_score": 0.34860795736312866
+    },
+    {
+      "quality": "Data science applications should address respect for human dignity.",
+      "max_score": 0.3483637571334839
+    },
+    {
+      "quality": "Metrics are used to assess whether predictive performance is distributed equitably across different groups.",
+      "max_score": 0.3194206953048706
+    },
+    {
+      "quality": "Robust explanations are also important to ensure that small changes in the input data do not lead to inconsistent or misleading justifications",
+      "max_score": 0.2974478006362915
     },
     {
       "quality": "Explainability plays a crucial role in building trust in automated decision-making systems.",
-      "max_score": 0.2942159175872803
+      "max_score": 0.2942160367965698
     },
     {
-      "quality": "Data science applications that perform well according to traditional technical metrics do not address ethical concerns.",
-      "max_score": 0.2640106678009033
+      "quality": "Respect for human dignity is an ethical consideration.",
+      "max_score": 0.2723129987716675
     },
     {
-      "quality": "Ethical considerations include respect for human dignity.",
-      "max_score": 0.26230716705322266
+      "quality": "Performing well in technical metrics does not guarantee ethical considerations.",
+      "max_score": 0.2550222873687744
     }
   ],
-  "created_at": "20251220_203635Z"
+  "created_at": "20251222_104544Z"
 }

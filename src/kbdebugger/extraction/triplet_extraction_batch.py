@@ -1,9 +1,11 @@
+import os
 from typing import Iterable, List, Sequence
 from kbdebugger.llm.hf_backend import use_hf_local, get_hf_causal_model
 from kbdebugger.llm.model_access import respond
+from kbdebugger.novelty.types import NoveltyDecision, QualityNoveltyResult
 from kbdebugger.prompts import load_json_resource, render_prompt
 from kbdebugger.utils.json import ensure_json_object
-from kbdebugger.extraction.utils import coerce_triplets_batch
+from kbdebugger.extraction.utils import coerce_triplets_batch, save_results_json
 from kbdebugger.types import ExtractionResult
 import json
 import torch # type: ignore
@@ -110,5 +112,86 @@ def extract_triplets_batch(
             batch_results = _extract_batch_via_llm(batch)
         all_results.extend(batch_results)
 
+    save_results_json(all_results)
+    
     return all_results
 
+
+
+def _load_triplet_qualifying_decisions() -> set[NoveltyDecision]:
+    """
+    Load which novelty decisions qualify a quality for triplet extraction.
+
+    Environment variable:
+        KB_TRIPLET_QUALIFY_DECISIONS=PARTIALLY_NEW,NEW
+
+    Defaults to:
+        {"PARTIALLY_NEW", "NEW"}
+    """
+    raw = os.getenv("KB_TRIPLET_QUALIFY_DECISIONS", "").strip()
+
+    if not raw:
+        return {
+            NoveltyDecision.PARTIALLY_NEW,
+            NoveltyDecision.NEW,
+        }
+
+    decisions: set[NoveltyDecision] = set()
+    for token in raw.split(","):
+        token = token.strip().upper()
+        if not token:
+            continue
+        try:
+            decisions.add(NoveltyDecision(token))
+        except ValueError:
+            # Ignore unknown tokens silently
+            continue
+
+    # Safety fallback
+    if not decisions:
+        decisions = {
+            NoveltyDecision.PARTIALLY_NEW,
+            NoveltyDecision.NEW,
+        }
+
+    return decisions
+
+
+def extract_triplets_from_novelty_results(
+    results: Sequence[QualityNoveltyResult],
+    *,
+    batch_size: int = 5,
+) -> List[ExtractionResult]:
+    """
+    Extract KG triplets from novelty results based on decision policy.
+
+    This function:
+    1) Reads KB_TRIPLET_QUALIFY_DECISIONS from env
+    2) Filters QualityNoveltyResult by decision
+    3) Extracts the corresponding quality sentences
+    4) Calls extract_triplets_batch on them
+
+    Args:
+        results:
+            Novelty comparator results.
+        batch_size:
+            Batch size for LLM triplet extraction.
+
+    Returns:
+        List of ExtractionResult.
+    """
+    qualifying_decisions = _load_triplet_qualifying_decisions()
+
+    sentences: List[str] = [
+        r.quality
+        for r in results
+        if r.decision in qualifying_decisions
+    ]
+
+    if not sentences:
+        return []
+
+    return extract_triplets_batch(
+        sentences,
+        batch_size=batch_size,
+    )

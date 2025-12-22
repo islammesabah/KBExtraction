@@ -1,6 +1,6 @@
 {
   "number_kept": 13,
-  "number_dropped": 17,
+  "number_dropped": 19,
   "kept": [
     {
       "quality": "Train–test splitting or cross-validation may introduce bias.",
@@ -508,6 +508,208 @@
       ]
     },
     {
+      "quality": "Fairness should not disadvantage individuals based on ethnicity.",
+      "max_score": 0.6682966947555542,
+      "neighbors": [
+        {
+          "relation": {
+            "source": {
+              "label": "ethnicity"
+            },
+            "target": {
+              "label": "subject_to_bias"
+            },
+            "edge": {
+              "label": "can_be",
+              "properties": {
+                "sentence": "ethnicity can_be subject_to_bias",
+                "type": "can_be",
+                "label": "can_be"
+              }
+            }
+          },
+          "score": 0.6682966947555542
+        },
+        {
+          "relation": {
+            "source": {
+              "label": "bias"
+            },
+            "target": {
+              "label": "fairness"
+            },
+            "edge": {
+              "label": "is_threat_to",
+              "properties": {
+                "sentence": "bias is_threat_to fairness",
+                "type": "is_threat_to",
+                "label": "is_threat_to"
+              }
+            }
+          },
+          "score": 0.6052912473678589
+        },
+        {
+          "relation": {
+            "source": {
+              "label": "socioeconomic_status"
+            },
+            "target": {
+              "label": "subject_to_bias"
+            },
+            "edge": {
+              "label": "can_be",
+              "properties": {
+                "sentence": "socioeconomic_status can_be subject_to_bias",
+                "type": "can_be",
+                "label": "can_be"
+              }
+            }
+          },
+          "score": 0.47963225841522217
+        },
+        {
+          "relation": {
+            "source": {
+              "label": "bias"
+            },
+            "target": {
+              "label": "harm"
+            },
+            "edge": {
+              "label": "is aligned with",
+              "properties": {
+                "sentence": "bias is aligned with harm",
+                "type": "is aligned with",
+                "label": "is aligned with"
+              }
+            }
+          },
+          "score": 0.4589518904685974
+        },
+        {
+          "relation": {
+            "source": {
+              "label": "gender"
+            },
+            "target": {
+              "label": "subject_to_bias"
+            },
+            "edge": {
+              "label": "can_be",
+              "properties": {
+                "sentence": "gender can_be subject_to_bias",
+                "type": "can_be",
+                "label": "can_be"
+              }
+            }
+          },
+          "score": 0.4238814115524292
+        }
+      ]
+    },
+    {
+      "quality": "Fairness should not disadvantage individuals based on gender.",
+      "max_score": 0.6667301654815674,
+      "neighbors": [
+        {
+          "relation": {
+            "source": {
+              "label": "gender"
+            },
+            "target": {
+              "label": "subject_to_bias"
+            },
+            "edge": {
+              "label": "can_be",
+              "properties": {
+                "sentence": "gender can_be subject_to_bias",
+                "type": "can_be",
+                "label": "can_be"
+              }
+            }
+          },
+          "score": 0.6667301654815674
+        },
+        {
+          "relation": {
+            "source": {
+              "label": "bias"
+            },
+            "target": {
+              "label": "fairness"
+            },
+            "edge": {
+              "label": "is_threat_to",
+              "properties": {
+                "sentence": "bias is_threat_to fairness",
+                "type": "is_threat_to",
+                "label": "is_threat_to"
+              }
+            }
+          },
+          "score": 0.6177191138267517
+        },
+        {
+          "relation": {
+            "source": {
+              "label": "socioeconomic_status"
+            },
+            "target": {
+              "label": "subject_to_bias"
+            },
+            "edge": {
+              "label": "can_be",
+              "properties": {
+                "sentence": "socioeconomic_status can_be subject_to_bias",
+                "type": "can_be",
+                "label": "can_be"
+              }
+            }
+          },
+          "score": 0.47249144315719604
+        },
+        {
+          "relation": {
+            "source": {
+              "label": "ethnicity"
+            },
+            "target": {
+              "label": "subject_to_bias"
+            },
+            "edge": {
+              "label": "can_be",
+              "properties": {
+                "sentence": "ethnicity can_be subject_to_bias",
+                "type": "can_be",
+                "label": "can_be"
+              }
+            }
+          },
+          "score": 0.4563915729522705
+        },
+        {
+          "relation": {
+            "source": {
+              "label": "bias"
+            },
+            "target": {
+              "label": "harm"
+            },
+            "edge": {
+              "label": "is aligned with",
+              "properties": {
+                "sentence": "bias is aligned with harm",
+                "type": "is aligned with",
+                "label": "is aligned with"
+              }
+            }
+          },
+          "score": 0.4526529312133789
+        }
+      ]
+    },
+    {
       "quality": "Bias can arise at multiple stages of the data science workflow.",
       "max_score": 0.6628962755203247,
       "neighbors": [
@@ -706,6 +908,107 @@
             }
           },
           "score": 0.3985000252723694
+        }
+      ]
+    },
+    {
+      "quality": "Fairness should not disadvantage individuals based on socioeconomic background.",
+      "max_score": 0.6437979936599731,
+      "neighbors": [
+        {
+          "relation": {
+            "source": {
+              "label": "bias"
+            },
+            "target": {
+              "label": "fairness"
+            },
+            "edge": {
+              "label": "is_threat_to",
+              "properties": {
+                "sentence": "bias is_threat_to fairness",
+                "type": "is_threat_to",
+                "label": "is_threat_to"
+              }
+            }
+          },
+          "score": 0.6437979936599731
+        },
+        {
+          "relation": {
+            "source": {
+              "label": "socioeconomic_status"
+            },
+            "target": {
+              "label": "subject_to_bias"
+            },
+            "edge": {
+              "label": "can_be",
+              "properties": {
+                "sentence": "socioeconomic_status can_be subject_to_bias",
+                "type": "can_be",
+                "label": "can_be"
+              }
+            }
+          },
+          "score": 0.6296365857124329
+        },
+        {
+          "relation": {
+            "source": {
+              "label": "ethnicity"
+            },
+            "target": {
+              "label": "subject_to_bias"
+            },
+            "edge": {
+              "label": "can_be",
+              "properties": {
+                "sentence": "ethnicity can_be subject_to_bias",
+                "type": "can_be",
+                "label": "can_be"
+              }
+            }
+          },
+          "score": 0.46884679794311523
+        },
+        {
+          "relation": {
+            "source": {
+              "label": "bias"
+            },
+            "target": {
+              "label": "harm"
+            },
+            "edge": {
+              "label": "is aligned with",
+              "properties": {
+                "sentence": "bias is aligned with harm",
+                "type": "is aligned with",
+                "label": "is aligned with"
+              }
+            }
+          },
+          "score": 0.46533656120300293
+        },
+        {
+          "relation": {
+            "source": {
+              "label": "data"
+            },
+            "target": {
+              "label": "socially_constructed_biases"
+            },
+            "edge": {
+              "label": "gathered",
+              "properties": {
+                "sentence": "data gathered socially_constructed_biases",
+                "type": "gathered",
+                "label": "gathered"
+              }
+            }
+          },
+          "score": 0.4434731602668762
         }
       ]
     },
@@ -912,309 +1215,6 @@
       ]
     },
     {
-      "quality": "A fair system should not disadvantage individuals based on gender.",
-      "max_score": 0.5912643671035767,
-      "neighbors": [
-        {
-          "relation": {
-            "source": {
-              "label": "gender"
-            },
-            "target": {
-              "label": "subject_to_bias"
-            },
-            "edge": {
-              "label": "can_be",
-              "properties": {
-                "sentence": "gender can_be subject_to_bias",
-                "type": "can_be",
-                "label": "can_be"
-              }
-            }
-          },
-          "score": 0.5912643671035767
-        },
-        {
-          "relation": {
-            "source": {
-              "label": "bias"
-            },
-            "target": {
-              "label": "fairness"
-            },
-            "edge": {
-              "label": "is_threat_to",
-              "properties": {
-                "sentence": "bias is_threat_to fairness",
-                "type": "is_threat_to",
-                "label": "is_threat_to"
-              }
-            }
-          },
-          "score": 0.4716477394104004
-        },
-        {
-          "relation": {
-            "source": {
-              "label": "socioeconomic_status"
-            },
-            "target": {
-              "label": "subject_to_bias"
-            },
-            "edge": {
-              "label": "can_be",
-              "properties": {
-                "sentence": "socioeconomic_status can_be subject_to_bias",
-                "type": "can_be",
-                "label": "can_be"
-              }
-            }
-          },
-          "score": 0.40673476457595825
-        },
-        {
-          "relation": {
-            "source": {
-              "label": "bias"
-            },
-            "target": {
-              "label": "harm"
-            },
-            "edge": {
-              "label": "is aligned with",
-              "properties": {
-                "sentence": "bias is aligned with harm",
-                "type": "is aligned with",
-                "label": "is aligned with"
-              }
-            }
-          },
-          "score": 0.35971325635910034
-        },
-        {
-          "relation": {
-            "source": {
-              "label": "ethnicity"
-            },
-            "target": {
-              "label": "subject_to_bias"
-            },
-            "edge": {
-              "label": "can_be",
-              "properties": {
-                "sentence": "ethnicity can_be subject_to_bias",
-                "type": "can_be",
-                "label": "can_be"
-              }
-            }
-          },
-          "score": 0.3480338454246521
-        }
-      ]
-    },
-    {
-      "quality": "A fair system should not disadvantage individuals based on ethnicity.",
-      "max_score": 0.5699713230133057,
-      "neighbors": [
-        {
-          "relation": {
-            "source": {
-              "label": "ethnicity"
-            },
-            "target": {
-              "label": "subject_to_bias"
-            },
-            "edge": {
-              "label": "can_be",
-              "properties": {
-                "sentence": "ethnicity can_be subject_to_bias",
-                "type": "can_be",
-                "label": "can_be"
-              }
-            }
-          },
-          "score": 0.5699713230133057
-        },
-        {
-          "relation": {
-            "source": {
-              "label": "bias"
-            },
-            "target": {
-              "label": "fairness"
-            },
-            "edge": {
-              "label": "is_threat_to",
-              "properties": {
-                "sentence": "bias is_threat_to fairness",
-                "type": "is_threat_to",
-                "label": "is_threat_to"
-              }
-            }
-          },
-          "score": 0.46337926387786865
-        },
-        {
-          "relation": {
-            "source": {
-              "label": "socioeconomic_status"
-            },
-            "target": {
-              "label": "subject_to_bias"
-            },
-            "edge": {
-              "label": "can_be",
-              "properties": {
-                "sentence": "socioeconomic_status can_be subject_to_bias",
-                "type": "can_be",
-                "label": "can_be"
-              }
-            }
-          },
-          "score": 0.4296548366546631
-        },
-        {
-          "relation": {
-            "source": {
-              "label": "bias"
-            },
-            "target": {
-              "label": "harm"
-            },
-            "edge": {
-              "label": "is aligned with",
-              "properties": {
-                "sentence": "bias is aligned with harm",
-                "type": "is aligned with",
-                "label": "is aligned with"
-              }
-            }
-          },
-          "score": 0.3680500388145447
-        },
-        {
-          "relation": {
-            "source": {
-              "label": "gender"
-            },
-            "target": {
-              "label": "subject_to_bias"
-            },
-            "edge": {
-              "label": "can_be",
-              "properties": {
-                "sentence": "gender can_be subject_to_bias",
-                "type": "can_be",
-                "label": "can_be"
-              }
-            }
-          },
-          "score": 0.3370095491409302
-        }
-      ]
-    },
-    {
-      "quality": "A fair system should not disadvantage individuals based on socioeconomic background.",
-      "max_score": 0.5625619292259216,
-      "neighbors": [
-        {
-          "relation": {
-            "source": {
-              "label": "socioeconomic_status"
-            },
-            "target": {
-              "label": "subject_to_bias"
-            },
-            "edge": {
-              "label": "can_be",
-              "properties": {
-                "sentence": "socioeconomic_status can_be subject_to_bias",
-                "type": "can_be",
-                "label": "can_be"
-              }
-            }
-          },
-          "score": 0.5625619292259216
-        },
-        {
-          "relation": {
-            "source": {
-              "label": "bias"
-            },
-            "target": {
-              "label": "fairness"
-            },
-            "edge": {
-              "label": "is_threat_to",
-              "properties": {
-                "sentence": "bias is_threat_to fairness",
-                "type": "is_threat_to",
-                "label": "is_threat_to"
-              }
-            }
-          },
-          "score": 0.4716818332672119
-        },
-        {
-          "relation": {
-            "source": {
-              "label": "bias"
-            },
-            "target": {
-              "label": "harm"
-            },
-            "edge": {
-              "label": "is aligned with",
-              "properties": {
-                "sentence": "bias is aligned with harm",
-                "type": "is aligned with",
-                "label": "is aligned with"
-              }
-            }
-          },
-          "score": 0.3585697412490845
-        },
-        {
-          "relation": {
-            "source": {
-              "label": "data"
-            },
-            "target": {
-              "label": "socially_constructed_biases"
-            },
-            "edge": {
-              "label": "gathered",
-              "properties": {
-                "sentence": "data gathered socially_constructed_biases",
-                "type": "gathered",
-                "label": "gathered"
-              }
-            }
-          },
-          "score": 0.35003483295440674
-        },
-        {
-          "relation": {
-            "source": {
-              "label": "ethnicity"
-            },
-            "target": {
-              "label": "subject_to_bias"
-            },
-            "edge": {
-              "label": "can_be",
-              "properties": {
-                "sentence": "ethnicity can_be subject_to_bias",
-                "type": "can_be",
-                "label": "can_be"
-              }
-            }
-          },
-          "score": 0.3446529507637024
-        }
-      ]
-    },
-    {
       "quality": "Seemingly neutral choices can unintentionally amplify existing disparities.",
       "max_score": 0.5577723979949951,
       "neighbors": [
@@ -1338,6 +1338,14 @@
       "max_score": 0.48278486728668213
     },
     {
+      "quality": "A fair system should not disadvantage individuals based on personal characteristics.",
+      "max_score": 0.4685686230659485
+    },
+    {
+      "quality": "A fair system should not disadvantage groups based on personal characteristics.",
+      "max_score": 0.4428158402442932
+    },
+    {
       "quality": "Failing to address ethical concerns undermines public trust.",
       "max_score": 0.42504048347473145
     },
@@ -1386,5 +1394,5 @@
       "max_score": 0.2550222873687744
     }
   ],
-  "created_at": "20251221_203049Z"
+  "created_at": "20251222_105535Z"
 }

@@ -1,6 +1,7 @@
 from typing import Any, List
 
 from kbdebugger.types import ExtractionResult, TripletSOP
+from kbdebugger.utils.json import write_json
 from .types import Qualities
 from typing import Any, Dict
 
@@ -73,3 +74,15 @@ def coerce_qualities(obj: Dict) -> Qualities:
             if s:
                 out.append(s)
     return out
+
+
+def save_results_json(results: List[ExtractionResult]) -> None:
+    """
+    Write extraction results to a JSON file.
+    """
+    data = {
+        "results": results,
+    }
+    path = f"logs/05_triplet_extraction_results.json"
+    write_json(path, data)
+    print(f"\n[INFO] Wrote JSON results to {path}")

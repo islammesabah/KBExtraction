@@ -8,7 +8,7 @@ from typing import Any, Dict, Iterable, List, Optional
 from kbdebugger.compat.langchain import (
     RecursiveCharacterTextSplitter,
     Document,
-    PyMuPDFLoader,
+    PyMuPDFLoader, # use Docling
 )
 
 logger = logging.getLogger(__name__)

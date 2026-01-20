@@ -1,10 +1,11 @@
 from typing import Any, Dict, Mapping
 import re
 import json
-import ast
 import rich
 from pathlib import Path
-from datetime import datetime, timezone
+from datetime import datetime, timezone, date, time
+import dataclasses
+# import ast
 
 # -------------------------
 # Robust JSON post-processing helpers
@@ -150,6 +151,42 @@ def now_utc_compact() -> str:
     """
     return datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%SZ")
 
+def _json_default(obj: Any) -> Any:
+    """
+    Fallback encoder for objects that the stdlib json module can't serialize.
+
+    Handles:
+      - datetime/date/time -> ISO 8601 strings
+      - pathlib.Path -> string
+      - dataclasses -> dict
+      - objects with .isoformat() (e.g., neo4j.time.DateTime) -> ISO string
+      - objects with .dict() / model_dump() (pydantic) -> dict
+      - otherwise -> string repr as a last resort
+    """
+    if isinstance(obj, (datetime, date, time)):
+        return obj.isoformat()
+
+    if isinstance(obj, Path):
+        return str(obj)
+
+    if dataclasses.is_dataclass(obj):
+        return dataclasses.asdict(obj) # type: ignore
+
+    # Neo4j temporal types (neo4j.time.DateTime, Date, etc.) typically support isoformat()
+    iso = getattr(obj, "isoformat", None)
+    if callable(iso):
+        return iso()
+
+    # Pydantic v1 / v2
+    if hasattr(obj, "model_dump") and callable(getattr(obj, "model_dump")):
+        return obj.model_dump()
+    if hasattr(obj, "dict") and callable(getattr(obj, "dict")):
+        return obj.dict()
+
+    # Last resort: stringify
+    return str(obj)
+
+
 def write_json(
     path: str | Path, 
     data: Mapping[str, Any], 
@@ -176,4 +213,10 @@ def write_json(
     # created_at = now_utc_compact()
 
     with p.open("w", encoding="utf-8") as f:
-        json.dump(dict(data), f, ensure_ascii=False, indent=indent)
+        json.dump(
+            dict(data),
+            f,
+            ensure_ascii=False,
+            indent=indent,
+            default=_json_default,
+        )

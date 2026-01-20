@@ -130,12 +130,14 @@ def _load_triplet_qualifying_decisions() -> set[NoveltyDecision]:
     """
     raw = os.getenv("KB_TRIPLET_QUALIFY_DECISIONS", "").strip()
 
-    if not raw:
-        return {
-            NoveltyDecision.PARTIALLY_NEW,
-            NoveltyDecision.NEW,
-        }
+    fallback = {
+        NoveltyDecision.PARTIALLY_NEW,
+        NoveltyDecision.NEW,
+    }
 
+    if not raw:
+        return fallback
+    
     decisions: set[NoveltyDecision] = set()
     for token in raw.split(","):
         token = token.strip().upper()
@@ -149,10 +151,7 @@ def _load_triplet_qualifying_decisions() -> set[NoveltyDecision]:
 
     # Safety fallback
     if not decisions:
-        decisions = {
-            NoveltyDecision.PARTIALLY_NEW,
-            NoveltyDecision.NEW,
-        }
+        decisions = fallback
 
     return decisions
 

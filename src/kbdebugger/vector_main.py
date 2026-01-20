@@ -1,9 +1,5 @@
 from __future__ import annotations
 
-from kbdebugger.extraction.triplet_extraction_batch import extract_triplets_from_novelty_results
-from kbdebugger.human_oversight.reviewer import review_triplets
-from kbdebugger.novelty.types import NoveltyDecision
-
 """
 Minimal entry point to test the Vector Similarity Filter component in isolation.
 
@@ -47,8 +43,6 @@ from kbdebugger.graph.retriever import KnowledgeGraphRetriever
 
 from kbdebugger.vector.encoder import SentenceTransformerEncoder
 from kbdebugger.vector.similarity_filter import VectorSimilarityFilter
-
-from kbdebugger.novelty.comparator import classify_qualities_novelty
 
 console = Console()
 
@@ -218,12 +212,6 @@ def main() -> None:
 
     # 6) Print results
     filt.pretty_print(kept=kept, dropped=dropped)
-
-    novelty_results = classify_qualities_novelty(kept, max_tokens=700, temperature=0.0)
-
-    extracted_triplets = extract_triplets_from_novelty_results(novelty_results)
-
-    accepted, rejected = review_triplets(extracted_triplets)
 
 if __name__ == "__main__":
     main()

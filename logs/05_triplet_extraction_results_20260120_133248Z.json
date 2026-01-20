@@ -41,27 +41,27 @@
       ]
     },
     {
-      "sentence": "Fairness should not disadvantage individuals based on ethnicity.",
+      "sentence": "Fairness should not disadvantage individuals or groups based on ethnicity.",
       "triplets": [
         [
           "fairness",
-          "individuals",
+          "individuals or groups",
           "should not disadvantage based on ethnicity"
         ]
       ]
     },
     {
-      "sentence": "Fairness should not disadvantage individuals based on gender.",
+      "sentence": "Fairness should not disadvantage individuals or groups based on gender.",
       "triplets": [
         [
           "fairness",
-          "individuals",
+          "individuals or groups",
           "should not disadvantage based on"
         ],
         [
-          "individuals",
+          "fairness",
           "gender",
-          "are disadvantaged by"
+          "should not disadvantage based on"
         ]
       ]
     },
@@ -76,17 +76,17 @@
       ]
     },
     {
-      "sentence": "Fairness should not disadvantage individuals based on socioeconomic background.",
+      "sentence": "Fairness should not disadvantage individuals or groups based on socioeconomic background.",
       "triplets": [
         [
           "fairness",
-          "individuals",
+          "individuals or groups",
           "should not disadvantage based on"
         ],
         [
-          "individuals",
+          "fairness",
           "socioeconomic background",
-          "are disadvantaged by"
+          "should not disadvantage based on"
         ]
       ]
     },

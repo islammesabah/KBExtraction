@@ -14,6 +14,11 @@ HOURS=$8 # Time to request in hours.
 shift 8 # This removes the first 8 arguments from the argument list so that $@ contains only user arguments.
 ARGS=$@
 
+
+echo -e "🤗 HF TOKEN: $HF_TOKEN"
+echo -e "🤗 HF HOME: $HF_HOME"
+
+
 # Load environment variables from .env file.
 if [ -f .env ]; then
   echo "💡 Loaded .env file."
@@ -23,19 +28,58 @@ else
   exit 1
 fi
 
-echo -e "🤗 HF TOKEN: $HF_TOKEN"
-echo -e "🤗 HF HOME: $HF_HOME"
 
-# export HF_TOKEN=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
+# ---- Ensure we're using the container venv (/venv) ----
+if [ -x /venv/bin/python ]; then
+  export VIRTUAL_ENV=/venv
+  export PATH="/venv/bin:${PATH}"
+else
+  echo "🚨 Error: /venv/bin/python not found. Are you running inside the kbdebugger.sqsh container?" >&2
+  exit 1
+fi
 
-# Make src/ visible as a top-level package root
-export PYTHONPATH="${PYTHONPATH:-}:$(pwd)/src"
+echo "🐍 $(python --version) @ $(which python)"
+python -c "import sys; print('sys.executable:', sys.executable)"
 
-# Activate the virtual environment.
-source ./.venv/bin/activate # Because ./.venv now symlinks to /netscratch/abuali/envs/KBExtract
-# # fallback in case the symlink didn't work
-# source "$VENV_DIR/bin/activate"
-echo -e "🐍 Using $(python --version) ($(which python))"
+
+# ---- Portable hnswlib install (wheelhouse-first, optional rebuild fallback) ----
+# Put your wheelhouse on a shared path visible from all nodes:
+# e.g. /netscratch/abuali/wheelhouse (recommended) or in the repo if it lives on /home.
+WHEELHOUSE="${WHEELHOUSE:-/netscratch/abuali/wheelhouse}"
+
+install_hnswlib_portably() {
+  # 1) Prefer installing a prebuilt *portable* wheel you built earlier
+  if [ -d "$WHEELHOUSE" ] && ls -1 "$WHEELHOUSE"/*.whl >/dev/null 2>&1; then
+    echo "📦 Installing hnswlib from wheelhouse: $WHEELHOUSE"
+    python -m pip install --no-index --no-deps --find-links="$WHEELHOUSE" --force-reinstall hnswlib >/dev/null
+    python -c "import hnswlib; print('✅ hnswlib ok:', hnswlib.__file__)"
+    return 0
+  fi
+
+  # 2) If no wheelhouse, try importing; if it fails, rebuild with generic CPU flags
+  echo "⚠️ Wheelhouse missing/empty at: $WHEELHOUSE"
+  echo "   Trying current hnswlib import (may SIGILL if it was built on a newer CPU)..."
+
+  set +e
+  python -c "import hnswlib; print('✅ hnswlib import ok')" >/dev/null 2>&1
+  rc=$?
+  set -e
+
+  if [ "$rc" -ne 0 ]; then
+    echo "🛠️ Rebuilding hnswlib with portable CPU flags (x86-64 generic)..."
+    python -m pip uninstall -y hnswlib || true
+
+    export CFLAGS="-O3 -march=x86-64 -mtune=generic"
+    export CXXFLAGS="-O3 -march=x86-64 -mtune=generic"
+
+    python -m pip install --no-binary=:all: --no-build-isolation hnswlib
+    python -c "import hnswlib; print('✅ hnswlib rebuilt ok:', hnswlib.__file__)"
+  fi
+}
+
+install_hnswlib_portably
+# ---------------------------------------------------------------------------
 
 # python main.py $MACHINE_NAME $JOB_NAME $NUM_NODES $NUM_TASKS_PER_NODE $NUM_GPUS_PER_TASK $NUM_CPUS_PER_TASK $MEM $HOURS $ARGS
+export PYTHONPATH="${PYTHONPATH:-}:$(pwd)/src"
 python -m kbdebugger.main

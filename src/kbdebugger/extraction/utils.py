@@ -1,7 +1,7 @@
 from typing import Any, List
 
 from kbdebugger.types import ExtractionResult, TripletSOP
-from kbdebugger.utils.json import write_json
+from kbdebugger.utils.json import now_utc_compact, write_json
 from .types import Qualities
 from typing import Any, Dict
 
@@ -80,9 +80,10 @@ def save_results_json(results: List[ExtractionResult]) -> None:
     """
     Write extraction results to a JSON file.
     """
+    created_at = now_utc_compact()
     data = {
         "results": results,
     }
-    path = f"logs/05_triplet_extraction_results.json"
+    path = f"logs/05_triplet_extraction_results_{created_at}.json"
     write_json(path, data)
     print(f"\n[INFO] Wrote JSON results to {path}")

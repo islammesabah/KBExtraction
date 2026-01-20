@@ -6,13 +6,13 @@ from kbdebugger.graph.utils import map_extracted_triplets_to_graph_relations_
 from rich.console import Console
 from rich.panel import Panel
 from rich.prompt import Prompt
-from rich.rule import Rule
-from rich.text import Text
+# from rich.rule import Rule
+# from rich.text import Text
 
 from kbdebugger.graph.store import GraphStore
 from kbdebugger.types import GraphRelation
 from kbdebugger.graph import get_graph
-from temp.core.types import ExtractionResult
+from kbdebugger.types import ExtractionResult
 from .logger import save_human_oversight_log
 
 console = Console()
@@ -92,7 +92,7 @@ def review_triplets(
         elif action == "q":
             console.print("[yellow]⏹ Review stopped by user[/yellow]")
             break
-
-    save_human_oversight_log(accepted=accepted, rejected=rejected)
+    
+    # save_human_oversight_log(accepted=accepted, rejected=rejected)
 
     return accepted, rejected

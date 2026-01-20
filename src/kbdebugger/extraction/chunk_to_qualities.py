@@ -48,7 +48,7 @@ def build_chunk_decomposer(
         )
 
         # 3. Call LLM
-        response = respond(
+        raw_response = respond(
             prompt_str,
             max_tokens=2048,
             temperature=0.0,
@@ -57,19 +57,21 @@ def build_chunk_decomposer(
 
         # 4. Parse JSON into Python object
         # qualities = parse_response(response, coercer=coerce_qualities, default=[])
-        response = ensure_json_object(response)
-        qualities = coerce_qualities(response)
+        obj = ensure_json_object(raw_response)
+        qualities = coerce_qualities(obj)
 
         # # 5. Coerce into list[str] (qualities)
         if qualities:
             return qualities
 
-        # 6. Fallback: salvage any plain-text lines as best-effort qualities
+
+        # 6. Fallback: salvage any plain-text lines from the *raw text*
         fallback = [
             line.strip("-• ").strip()  # strip common bullet prefixes
-            for line in response.splitlines()
+            for line in str(raw_response).splitlines()
             if line.strip()
         ]
         return fallback if fallback else []
+    
 
     return decompose_chunk

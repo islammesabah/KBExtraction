@@ -3,18 +3,21 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass
 from datetime import datetime, timezone
-from typing import Any, Optional, cast
+from typing import Any, List, Optional, Sequence, cast
 from typing_extensions import LiteralString
 
 from dotenv import load_dotenv
-import rich
 
 from neo4j import GraphDatabase, Driver, Query
 from neo4j.exceptions import Neo4jError
 
 from kbdebugger.types import GraphRelation, EdgeProperties
 from .utils import rows_to_graph_relations
+from .types import BatchUpsertSummary
 
+import rich
+from rich.console import Console
+from rich.panel import Panel
 
 # Load env vars once here
 load_dotenv(override=True)
@@ -259,3 +262,83 @@ class GraphStore:
                 "on_match": on_match_props, # set only on match (update) of the relationship
             },
         )
+
+
+    def upsert_relations(
+            self, 
+            relations: Sequence[GraphRelation],
+            *,
+            pretty_print: bool = True,
+    ) -> BatchUpsertSummary:
+        """
+        Upsert multiple GraphRelation objects into Neo4j.
+
+        This is a convenience wrapper around `upsert_relation()` that:
+        - preserves the dedupe semantics of the single-upsert operation
+        - continues on individual failures (best-effort write)
+        - returns a typed summary for logging and monitoring
+
+        Parameters
+        ----------
+        relations:
+            Relations to be inserted/merged into the KG.
+
+        Returns
+        -------
+        BatchUpsertSummary
+            Counts and error strings describing any failures.
+
+        Notes
+        -----
+        - This method performs no client-side deduplication.
+          Deduplication is handled inside `upsert_relation()` via the APOC merge policy.
+        - If you later want "fail-fast" semantics, add a flag like `stop_on_error`.
+        """
+        attempted = len(relations)
+        succeeded = 0
+        errors: List[str] = []
+
+        for i, rel in enumerate(relations, start=1):
+            try:
+                self.upsert_relation(rel)
+                succeeded += 1
+            except Exception as e:  # pylint: disable=broad-exception-caught
+                src = rel.get("source", {}).get("label", "?")
+                tgt = rel.get("target", {}).get("label", "?")
+                pred = rel.get("edge", {}).get("label", "?")
+                errors.append(f"[{i}/{attempted}] {src} - {pred} -> {tgt}: {e}")
+
+        failed = attempted - succeeded
+        
+        summary = BatchUpsertSummary(
+            attempted=attempted,
+            succeeded=succeeded,
+            failed=failed,
+            errors=errors,
+        )
+
+        if pretty_print:
+            console = Console()
+
+            body_lines = [
+                f"[bold]Attempted:[/bold] {summary.attempted}",
+                f"[bold green]Succeeded:[/bold green] {summary.succeeded}",
+                f"[bold red]Failed:[/bold red] {summary.failed}",
+            ]
+
+            if summary.failed > 0:
+                body_lines.append("\n[bold red]Errors:[/bold red]")
+                for err in summary.errors:
+                    body_lines.append(f"  • {err}")
+
+            console.print(
+                Panel(
+                    "\n".join(body_lines),
+                    title="[bold cyan]🧠📊 Knowledge Graph Upsert Summary[/bold cyan]",
+                    border_style="cyan",
+                    padding=(1, 2),
+                )
+            )
+
+
+        return summary

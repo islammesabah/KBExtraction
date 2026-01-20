@@ -40,6 +40,7 @@ This module should remain stable and boring.
 """
 
 from kbdebugger.graph.api import retrieve_keyword_subgraph
+from kbdebugger.graph import get_graph
 from kbdebugger.extraction.api import extract_qualities_from_corpus
 from kbdebugger.vector.api import run_vector_similarity_filter
 from kbdebugger.novelty.comparator import classify_qualities_novelty
@@ -118,4 +119,10 @@ def run_pipeline(cfg: PipelineConfig) -> None:
     # ---------------------------------------------------------------------
     # Stage 6: Human oversight + KG upsert + decision logging
     # ---------------------------------------------------------------------
-    run_human_oversight(extracted_relations)
+    oversight_result = run_human_oversight(extracted_relations)
+
+    # graph = get_graph()
+    # graph.upsert_relations(
+    #     oversight_result.accepted,
+    #     pretty_print=True,
+    # )

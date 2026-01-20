@@ -97,6 +97,7 @@ def decompose_documents(
         qualities = decompose(text, mode=mode)
         all_qualities.extend(qualities)
 
+
     # Include small but useful metadata for demos and debugging
     meta: dict[str, Any] = {
         "mode": mode,

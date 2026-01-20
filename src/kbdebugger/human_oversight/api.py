@@ -8,7 +8,6 @@ from .reviewer import review_triplets
 
 from kbdebugger.types import ExtractionResult, GraphRelation
 
-
 @dataclass(frozen=True, slots=True)
 class HumanOversightResult:
     accepted: list[GraphRelation]

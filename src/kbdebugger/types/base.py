@@ -30,7 +30,7 @@ class EdgeProperties(TypedDict, total=False):
     # ------- Required (minimum we rely on) -------
     label: NotRequired[str]                        # e.g., "is" when the sentence is: "AI is transformative"
     sentence: NotRequired[str]                  # human-readable sentence (from extractor or synthesized)
-    predicate_text: NotRequired[str]            # original predicate text (before normalization)
+    # predicate_text: NotRequired[str]            # original predicate text (before normalization)
 
     # ------- Strongly recommended provenance -------
     original_sentence: NotRequired[str]      # the raw text from the Document chunk

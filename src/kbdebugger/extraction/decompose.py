@@ -1,19 +1,24 @@
 from __future__ import annotations
 
 import os
-from typing import Optional, Sequence, Any
+from typing import List, Optional, Sequence, Any
 
 from kbdebugger.compat.langchain import Document
+from kbdebugger.extraction.utils import batched
 from .sentence_to_qualities import build_sentence_decomposer
-from .chunk_to_qualities import build_chunk_decomposer
-from .types import Qualities, TextDecomposer, DecomposeMode
+from .chunk_to_qualities import build_chunk_decomposer, build_chunk_batch_decomposer
+from .types import Qualities, TextDecomposer, BatchTextDecomposer, DecomposeMode
 from .logging import save_qualities_json
 
-# Build default decomposers once at import time.
-# These are module-level singletons; if we ever want to swap them (e.g. for tests),
-# we can reassign.
+# ---------------------------------------------------------------------------
+# Module-level decomposer singletons
+# ---------------------------------------------------------------------------
+# These are initialized once at import time to avoid re-loading prompt resources
+# and few-shot examples repeatedly inside tight loops.
 _sentence_to_qualities_decomposer: TextDecomposer = build_sentence_decomposer()
 _chunk_to_qualities_decomposer: TextDecomposer = build_chunk_decomposer()
+_chunk_batch_to_qualities_decomposer: BatchTextDecomposer = build_chunk_batch_decomposer()
+
 
 def decompose(
     text: str,
@@ -21,7 +26,7 @@ def decompose(
     mode: DecomposeMode
 ) -> Qualities:
     """
-    Decompose `text` into atomic strings per the selected mode.
+    Decompose a single input text into "qualities" under the selected mode.
 
     Parameters
     ----------
@@ -47,7 +52,7 @@ def decompose(
     Returns
     -------
     list[str]
-        A list of short, atomic sentences/qualities.
+        A list of short, atomic sentences (qualities).
     """
     match mode:
         case DecomposeMode.SENTENCES:
@@ -61,16 +66,28 @@ def decompose(
     raise ValueError(f"Unsupported DecomposeMode: {mode}")
 
 
+# ---------------------------------------------------------------------------
+# Public API
+# ---------------------------------------------------------------------------
 def decompose_documents(
     docs: Sequence[Document],
     *,
     mode: DecomposeMode,
+    batch_size: int = 4,
+    use_batch_decomposer: bool = True,
 ) -> Qualities:
     """
     Decompose a list of LangChain Documents into a flat list of qualities.
 
     This is the *second stage* of the Extractor pipeline:
-        INPUT: Document chunks -> OUTPUT: atomic qualities (decomposer LLM)
+        INPUT: Document chunks
+        OUTPUT: atomic qualities (decomposer LLM)
+
+    🚀 Performance rationale
+    ---------------------
+    Decomposing one chunk per LLM call scales poorly for realistic PDFs.
+    When `mode == DecomposeMode.CHUNKS`, this function can use a batched decomposer
+    to reduce LLM round-trips by processing multiple chunks per call.
 
 
     Parameters
@@ -81,30 +98,73 @@ def decompose_documents(
     mode:
         How to interpret each doc.page_content for decomposition (sentences vs chunks).
 
-    log_path:
-        If provided, writes the final qualities list to a JSON file.
-        If None, uses a default path under logs/.
+    batch_size:
+        Number of chunk texts to send per LLM request when batching is enabled.
+        Typical values: 3-8. Start at 5.
+    
+    use_batch_decomposer:
+        If True and `mode == DecomposeMode.CHUNKS`, use the batched decomposer.
+        If False, always fall back to single-text decomposition.
 
     Returns
     -------
     Qualities:
-        Flat list of atomic sentences produced across the entire corpus.
+        A flat list of atomic qualities produced across the entire corpus.
+
+
+    Notes
+    -----
+    - The batch decomposer returns `List[Qualities]` aligned to the input order.
+      We flatten it here because the rest of the pipeline expects a flat list.
+    - Missing or malformed per-chunk outputs are handled inside the batch decomposer
+      (yielding empty lists), so this function remains robust.
     """
     all_qualities: Qualities = []
 
-    for doc in docs:
-        text = getattr(doc, "page_content", "")
+    if not docs:
+        # Save empty output for consistent downstream behavior / debugging.
+        meta: dict[str, Any] = {
+            "mode": mode,
+            "num_docs": 0,
+            "use_batch_decomposer": use_batch_decomposer,
+            "batch_size": batch_size,
+        }
+        save_qualities_json(qualities=all_qualities, meta=meta, mode=mode)
+        return all_qualities
+    
+    # Extract texts once for easier batching and consistent behavior.
+    texts: List[str] = [getattr(doc, "page_content", "") for doc in docs]
+    
+    # --- Fast path: batched chunk decomposition ---
+    if mode == DecomposeMode.CHUNKS and use_batch_decomposer:
+        for group in batched(texts, batch_size=batch_size):
+            group_results: List[Qualities] = _chunk_batch_to_qualities_decomposer(group)
+            # Flatten group results into the global list.
+            for q in group_results:
+                all_qualities.extend(q)
+
+        meta: dict[str, Any] = {
+            "mode": mode,
+            "num_docs": len(docs),
+            "use_batch_decomposer": True,
+            "batch_size": batch_size,
+            "num_batches": (len(docs) + batch_size - 1) // batch_size,
+        }
+        save_qualities_json(qualities=all_qualities, meta=meta, mode=mode)
+        return all_qualities
+    
+
+    # --- Default path: one document -> one decompose() call ---
+    for text in texts:
         qualities = decompose(text, mode=mode)
         all_qualities.extend(qualities)
 
-
-    # Include small but useful metadata for demos and debugging
     meta: dict[str, Any] = {
         "mode": mode,
         "num_docs": len(docs),
+        "use_batch_decomposer": False,
+        "batch_size": None,
     }
-
-    # Let the save function handle directory creation
     save_qualities_json(qualities=all_qualities, meta=meta, mode=mode)
 
     return all_qualities

@@ -3,18 +3,45 @@ from __future__ import annotations
 from dataclasses import dataclass
 import json
 import re
+from typing import List
 
-from kbdebugger.extraction.types import TextDecomposer, Qualities
+from kbdebugger.extraction.types import BatchTextDecomposer, TextDecomposer, Qualities
 from kbdebugger.llm.model_access import respond
 from kbdebugger.utils import ensure_json_object
 from kbdebugger.prompts import render_prompt, load_json_resource
-from .utils import coerce_qualities
+from .utils import coerce_batch_qualities, coerce_qualities, sanitize_chunk
 
 
 @dataclass(frozen=True)
 class ChunkDecomposeConfig:
     # chunks can be longer, so allow more newlines than for single sentences
     prompt_max_newlines: int = 20
+
+
+@dataclass(frozen=True)
+class ChunkBatchDecomposeConfig:
+    """
+    Configuration for batched chunk decomposition.
+
+    This controls the *output shape* (per-chunk qualities) and the size of a
+    single batched request (handled in the caller that groups chunks). This
+    builder itself accepts a list of texts and returns a list of qualities with
+    matching order.
+
+    Parameters
+    ----------
+    max_qualities_per_chunk:
+        Soft cap enforced in the prompt and hard-capped again in post-processing.
+        Keeps output bounded and stable.
+    max_tokens:
+        LLM output limit for the batched call.
+        If you increase batch size substantially, you may need to raise this.
+    temperature:
+        Should generally remain 0.0 for deterministic, parseable JSON.
+    """
+    max_qualities_per_chunk: int = 12
+    max_tokens: int = 4096
+    temperature: float = 0.0
 
 
 def build_chunk_decomposer(
@@ -75,3 +102,86 @@ def build_chunk_decomposer(
     
 
     return decompose_chunk
+
+
+def build_chunk_batch_decomposer(
+    config: ChunkBatchDecomposeConfig | None = None,
+) -> BatchTextDecomposer:
+    """
+    Build a decomposer for a BATCH of chunks.
+
+    This is the scalable alternative to calling the single-chunk decomposer in a
+    tight loop. It issues *one* LLM call per batch and returns per-chunk results.
+
+    Input/Output contract
+    ---------------------
+    - Input:  List[str] texts (each treated independently)
+    - Output: List[Qualities] in the SAME order and SAME length as input
+
+    Notes
+    -----
+    - This function does NOT decide batch size. The caller (e.g. `decompose_documents`)
+      should group documents into batches and call this decomposer per batch.
+    - This decomposer is robust: if the model response is malformed or missing
+      entries, the missing chunks receive [] rather than failing the pipeline.
+    """
+    cfg = config or ChunkBatchDecomposeConfig()
+
+    # Reuse the exact same few-shot examples used by the single-chunk prompt.
+    examples = load_json_resource("chunk_decompose")
+    examples_json = json.dumps(examples, ensure_ascii=False)
+
+    def decompose_chunks(texts: List[str]) -> List[Qualities]:
+        """
+        Decompose many chunk texts in one LLM call.
+
+        Parameters
+        ----------
+        texts:
+            Chunk texts (raw). Each text is sanitized to a single line for stability.
+
+        Returns
+        -------
+        list[Qualities]
+            A list aligned with `texts`, where each entry is the extracted qualities
+            for the corresponding chunk.
+        """
+        if not texts:
+            return []
+
+        sanitized: List[str] = [sanitize_chunk(t) for t in texts]
+        # If some chunks are empty, we still preserve alignment.
+        # We'll send them as empty strings; model should return empty qualities.
+        chunks_payload = {
+            "chunks": [{"id": i, "text": sanitized[i]} for i in range(len(sanitized))]
+        }
+        chunks_json = json.dumps(chunks_payload, ensure_ascii=False)
+
+        prompt_str = render_prompt(
+            "chunk_decompose_batch",
+            examples_json=examples_json,
+            chunks_json=chunks_json,
+            max_qualities_per_chunk=str(cfg.max_qualities_per_chunk),
+        )
+
+        raw_response = respond(
+            prompt_str,
+            max_tokens=cfg.max_tokens,
+            temperature=cfg.temperature,
+            json_mode=True,
+        )
+
+        obj = ensure_json_object(raw_response)
+        id_to_qualities = coerce_batch_qualities(obj, expected_n=len(texts))
+
+        # Reconstruct a dense, ordered list, applying a hard cap for safety.
+        out: List[Qualities] = []
+        for i in range(len(texts)):
+            q = id_to_qualities.get(i, [])
+            if q and cfg.max_qualities_per_chunk > 0:
+                q = q[: cfg.max_qualities_per_chunk]
+            out.append(q)
+
+        return out
+
+    return decompose_chunks

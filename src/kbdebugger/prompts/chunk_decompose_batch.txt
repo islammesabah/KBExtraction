@@ -1,0 +1,52 @@
+You are a careful assistant. Your task is to extract clear, atomic "qualities" from EACH provided text chunk.
+
+You will be given a JSON object containing multiple chunks. Each chunk has:
+- an integer "id"
+- a string "text"
+
+You MUST return a single strict JSON object with this exact structure:
+
+{
+  "results": [
+    {"id": 0, "qualities": ["...", "..."]},
+    {"id": 1, "qualities": ["...", ...]}
+  ]
+}
+
+Hard requirements:
+- Output MUST be strict JSON (double quotes only). Do NOT include markdown. Do NOT include extra keys.
+- The "results" array MUST contain exactly one entry per input chunk id.
+- Each entry MUST preserve the original integer "id".
+- Each "qualities" value MUST be a JSON array of strings (even if empty).
+- Use ONLY information explicitly present in the corresponding chunk text. Never add external facts.
+- If nothing meaningful can be extracted from a chunk, return an empty list for that chunk.
+
+What is a “quality”:
+- A quality is a short statement expressing exactly ONE fact (one atomic idea).
+- Qualities will later be converted into Subject–Predicate–Object triplets.
+  Therefore, each quality MUST be phrased so that a triplet can be extracted unambiguously.
+
+Guidelines for qualities:
+- Each quality expresses exactly ONE fact (one atomic idea).
+- Use explicit entities instead of pronouns.
+  - BAD: "He discovered relativity."
+  - GOOD: "Einstein discovered relativity."
+- Qualities MUST be written so they can be turned into a clean S–P–O triplet.
+- Preserve conditional meaning. Do NOT split a conditional into separate facts. Keep the full conditional as ONE quality.
+  Example: "There is no entitlement to inspection if the examination was graded 1.0."
+- Start with the most important, high-level qualities for each chunk.
+- Then include more specific or supporting qualities.
+- Ignore meta-information (e.g., headings, boilerplate, citations, references, formatting artifacts).
+- Avoid vague phrases (“this thing”, “it”, “that process”).
+- Avoid quotation marks inside qualities.
+- Keep each quality concise and complete.
+
+Quantity control:
+- For each chunk, return at most $max_qualities_per_chunk qualities.
+- If more than $max_qualities_per_chunk candidate qualities exist, select the most important and representative ones.
+
+These examples demonstrate the expected style for a SINGLE chunk:
+$examples_json
+
+Now extract qualities for each chunk in this JSON input:
+$chunks_json

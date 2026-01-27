@@ -53,7 +53,9 @@ echo -e "📂 Working directory: $WORKDIR"
 
 # Set the docker container to use.
 # CONTAINER="/netscratch/enroot/nvcr.io_nvidia_pytorch_${NVIDIA_CONTAINER_VERSION}-py3.sqsh"
-CONTAINER="/netscratch/abuali/containers/images/kbdebugger.sqsh"
+# CONTAINER="/netscratch/abuali/containers/images/kbdebugger.sqsh"
+# CONTAINER="/netscratch/abuali/containers/images/kbdebugger-pre-docling.sqsh"
+CONTAINER="/netscratch/abuali/containers/images/kbdebugger-20260127-notorch.sqsh"
 
 echo "🚢 Container: $CONTAINER"
 

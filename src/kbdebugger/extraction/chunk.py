@@ -15,7 +15,7 @@ from .types import *
 from kbdebugger.compat.langchain import Document
 from kbdebugger.extraction.decompose import DecomposeMode
 from kbdebugger.extraction.text_to_sentences import extract_txt_sentences
-from kbdebugger.extraction.pdf_to_sentences import extract_pdf_sentences
+# from kbdebugger.extraction.pdf_to_sentences import extract_pdf_sentences
 from kbdebugger.extraction.pdf_to_chunks import extract_pdf_chunks
 
 
@@ -61,9 +61,9 @@ def chunk_corpus(
             docs = extract_txt_sentences(path)
             mode = DecomposeMode.SENTENCES
 
-        case SourceKind.PDF_SENTENCES:
-            docs = extract_pdf_sentences(path)
-            mode = DecomposeMode.SENTENCES
+        # case SourceKind.PDF_SENTENCES:
+        #     docs = extract_pdf_sentences(path)
+        #     mode = DecomposeMode.SENTENCES
 
         case SourceKind.PDF_CHUNKS:
             docs = extract_pdf_chunks(path)

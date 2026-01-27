@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from typing import Any, List, Mapping, Sequence, Tuple
+import numpy as np
 
 from rich.console import Console
 from rich.panel import Panel
@@ -267,13 +268,16 @@ class VectorSimilarityFilter:
 
         Implementation details
         ----------------------
-        We batch-embed all qualities first (efficient), then perform k-NN search
-        per embedded vector.
+            - embeds all qualities in one batch (already done)
+            - performs **one batch k-NN search** for all qualities
+            - thresholding is vectorized
+            - only lightweight Python work remains to assemble results
+            - This removes the bottleneck of calling `index.search(...)` 1000+ times.
 
         This method does NOT:
-        - call any LLM
-        - extract triplets
-        - write to Neo4j
+            - call any LLM
+            - extract triplets
+            - write to Neo4j
         """
         if not qualities:
             return ([], [])
@@ -282,40 +286,107 @@ class VectorSimilarityFilter:
         texts = [quality_to_text(q) for q in qualities]
 
         # 2. Batch-embed qualities
-        vectors = self.encoder.encode(texts)
+        vectors = self.encoder.encode(texts) # shape: (num_qualities, dim)
+        vectors_np = np.ascontiguousarray(np.asarray(vectors), dtype=np.float32)
 
         kept: List[KeptQuality] = []
         dropped: List[DroppedQuality] = []
 
-        # 3. Nearest-neighbor search per quality (query) vector
-        for q, vec in zip(qualities, vectors):
-            neighbors = index.search(vec, k=self.top_k)
-            max_score = max((score for _, score in neighbors), default=0.0)
 
-            if max_score < self.threshold:
-                dropped.append({"quality": q, "max_score": max_score})
+        # 3) Batch ANN (Approximate Nearest Neighbor) search: 
+        #    returns (neighbors_per_quality, scores_matrix)
+        #       - neighbors_per_quality: 
+        #           - shape: (Q, k) 
+        #               - where Q = number of qualities, 
+        #               - k = top-k closest neighbors to the quality
+        #               - i.e. List[List[GraphRelation]] length Q
+        #       
+        #       - scores_matrix: np.ndarray shape (Q, k) of cosine similarities
+        neighbors_per_q, scores = index.search_batch(vectors_np, k=self.top_k)
+
+
+        # 4) Vectorized max score per quality
+        #    scores is (Q, k). max_scores is (Q,)
+        #  i.e we keep only the max score for each quality
+        if scores.size == 0:
+            max_scores = np.zeros((len(qualities),), dtype=np.float32)
+        else:
+            max_scores = scores.max(axis=1)
+
+
+        # 5) Vectorized thresholding (boolean mask)
+        keep_mask = max_scores >= float(self.threshold)
+
+
+        # 6) Assemble outputs (still a loop, but *cheap*; no ANN calls inside)
+        for i, q in enumerate(qualities):
+            ms = float(max_scores[i])
+
+            if not keep_mask[i]:
+                dropped.append({"quality": q, "max_score": ms})
                 continue
+
+            neighs = neighbors_per_q[i] # shape (k,)
+            row_scores = scores[i]  # shape (k,)
+
+            # Important: neighbors_per_q[i] may be shorter than k if labels contained -1.
+            # We align by taking min length.
+            n = min(len(neighs), int(row_scores.shape[0]))
 
             kept.append(
                 {
                     "quality": q,
-                    "max_score": max_score,
+                    "max_score": ms,
                     "neighbors": [
-                        {"relation": rel, "score": score}
-                        for (rel, score) in neighbors[: self.top_k]
+                        {"relation": neighs[j], "score": float(row_scores[j])}
+                        for j in range(n)
                     ],
                 }
             )
 
-        # ------------------------------------------------------------------
-        # 4. Sort results by similarity score (descending)
-        # ------------------------------------------------------------------
         kept.sort(key=lambda x: x["max_score"], reverse=True)
         dropped.sort(key=lambda x: x["max_score"], reverse=True)
 
         self.save_similarity_results_json(kept=kept, dropped=dropped)
-
         return (kept, dropped)
+
+
+        # kept.sort(key=lambda x: x["max_score"], reverse=True)
+        # dropped.sort(key=lambda x: x["max_score"], reverse=True)
+
+        # self.save_similarity_results_json(kept=kept, dropped=dropped)
+        # return (kept, dropped)
+
+
+        # # 3. Nearest-neighbor search per quality (query) vector
+        # for q, vec in zip(qualities, vectors):
+        #     neighbors = index.search(vec, k=self.top_k)
+        #     max_score = max((score for _, score in neighbors), default=0.0)
+
+        #     if max_score < self.threshold:
+        #         dropped.append({"quality": q, "max_score": max_score})
+        #         continue
+
+        #     kept.append(
+        #         {
+        #             "quality": q,
+        #             "max_score": max_score,
+        #             "neighbors": [
+        #                 {"relation": rel, "score": score}
+        #                 for (rel, score) in neighbors[: self.top_k]
+        #             ],
+        #         }
+        #     )
+
+        # # ------------------------------------------------------------------
+        # # 4. Sort results by similarity score (descending)
+        # # ------------------------------------------------------------------
+        # kept.sort(key=lambda x: x["max_score"], reverse=True)
+        # dropped.sort(key=lambda x: x["max_score"], reverse=True)
+
+        # self.save_similarity_results_json(kept=kept, dropped=dropped)
+
+        # return (kept, dropped)
 
 
     def pretty_print(

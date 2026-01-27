@@ -151,6 +151,23 @@ def now_utc_compact() -> str:
     """
     return datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%SZ")
 
+
+def now_utc_human() -> str:
+    """
+    Return a human-friendly UTC timestamp for logs and reports.
+
+    Format:
+        Dec 20, 2025, 18:44 UTC
+
+    Design goals:
+    - Month spelled out (no numeric ambiguity)
+    - 24-hour clock (no AM/PM confusion)
+    - Explicit UTC marker
+    - Optimized for instant human readability
+    """
+    return datetime.now(timezone.utc).strftime("%b %d, %Y, %H:%M UTC")
+
+
 def _json_default(obj: Any) -> Any:
     """
     Fallback encoder for objects that the stdlib json module can't serialize.

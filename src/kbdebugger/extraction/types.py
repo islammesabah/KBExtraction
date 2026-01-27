@@ -5,7 +5,8 @@ class SourceKind(str, Enum):
     TEXT = "TEXT"
     PDF_SENTENCES = "PDF_SENTENCES"
     PDF_CHUNKS = "PDF_CHUNKS"
-
+    PDF_PARAGRAPHS = "PDF_PARAGRAPHS"
+    
 Qualities = list[str]  # e.g., ["Transparency is a property of KI system.", ...]
 TextDecomposer = Callable[[str], Qualities] # e.g., decompose("some text") -> ["quality1", "quality2", ...]
 BatchTextDecomposer = Callable[[List[str]], List[Qualities]] # e.g., decompose_batch(["text1", "text2"]) -> [["quality1", ...], ["qualityA", ...]]

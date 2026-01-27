@@ -28,7 +28,7 @@ from kbdebugger.utils.warnings_config import install_warning_filters
 from kbdebugger.compat.langchain import Document
 
 from kbdebugger.extraction.text_to_sentences import extract_txt_sentences
-from kbdebugger.extraction.pdf_to_sentences import extract_pdf_sentences
+# from kbdebugger.extraction.pdf_to_sentences import extract_pdf_sentences
 from kbdebugger.extraction.pdf_to_chunks import extract_pdf_chunks
 
 from kbdebugger.extraction.decompose import decompose, DecomposeMode
@@ -112,9 +112,9 @@ def load_documents(cfg: ExtractorConfig) -> Tuple[List[Document], DecomposeMode]
             docs = extract_txt_sentences(cfg.text_path)
             mode = DecomposeMode.SENTENCES
 
-        case "PDF_SENTENCES":
-            docs = extract_pdf_sentences(cfg.pdf_path)
-            mode = DecomposeMode.SENTENCES
+        # case "PDF_SENTENCES":
+        #     docs = extract_pdf_sentences(cfg.pdf_path)
+        #     mode = DecomposeMode.SENTENCES
 
         case "PDF_CHUNKS":
             docs = extract_pdf_chunks(cfg.pdf_path)

@@ -243,3 +243,82 @@ class VectorIndex(Generic[T]):
             results.append((payload, similarity))
 
         return results
+
+
+    def search_batch(self, query_vecs: np.ndarray, k: int) -> Tuple[List[List[T]], np.ndarray]:
+        """
+        Perform a batch cosine-similarity search over the index.
+
+        This is the vectorized / "matrix mindset" equivalent of calling `search()`
+        in a Python loop, and is typically *much* faster when you have many queries
+        (e.g., 1000+ qualities), because it reduces Python-to-hnswlib overhead to
+        a single call.
+
+        Parameters
+        ----------
+        query_vecs:
+            NumPy array of shape (Q, dim) containing Q query embedding vectors.
+
+        k:
+            Number of nearest neighbors to retrieve per query.
+
+        Returns
+        -------
+        (neighbors, scores):
+            neighbors:
+                A Python list of length Q; each entry is a list of payload objects
+                (length up to k) corresponding to the nearest neighbors.
+
+            scores:
+                A float32 NumPy array of shape (Q, k) with cosine similarity scores
+                in [0, 1], aligned with `neighbors`.
+
+        Notes
+        -----
+        - hnswlib returns cosine *distance*: dist = 1 - cosine_similarity
+          We convert to cosine similarity via: sim = 1 - dist.
+        - hnswlib may return label -1 when it cannot return k neighbors.
+          In that case, we keep a score of 0.0 and do not add a payload.
+        - For performance, we always convert inputs to contiguous float32.
+        """
+        if k <= 0:
+            # Return an empty neighbor list per query, and an empty score matrix.
+            q = np.asarray(query_vecs)
+            num_q = int(q.shape[0]) if q.ndim == 2 else 0
+            return ([[] for _ in range(num_q)], np.zeros((num_q, 0), dtype=np.float32))
+
+        # Ensure contiguous float32 array
+        q = np.ascontiguousarray(np.asarray(query_vecs, dtype=np.float32))
+
+        if q.ndim != 2 or q.shape[1] != self.dim:
+            raise ValueError(
+                f"❌ Shape Missmatch: Expected query_vecs of shape (Q, {self.dim}), got {q.shape}"
+            )
+
+        labels, distances = self.index.knn_query(q, k=k)
+        # labels:    (Q, k) int64/uint64 (internal IDs, -1 if missing)
+        # distances: (Q, k) float32 cosine distances
+
+        # Convert distance -> similarity (vectorized).
+        # If label == -1, distance can be garbage; we'll mask below.
+        scores = (1.0 - distances).astype(np.float32, copy=False)
+
+        neighbors: List[List[T]] = []
+        for row_labels in labels:
+            row_payloads: List[T] = []
+            for idx in row_labels:
+                if idx < 0:
+                    # Not enough neighbors; skip adding payload.
+                    continue
+                row_payloads.append(self.payloads[int(idx)])
+            neighbors.append(row_payloads)
+
+        # Ensure that scores for invalid (-1) labels are 0.0 for safety.
+        # (This makes thresholding deterministic.)
+        invalid_mask = labels < 0
+        if np.any(invalid_mask):
+            scores = scores.copy()
+            scores[invalid_mask] = 0.0
+
+        return neighbors, scores
+

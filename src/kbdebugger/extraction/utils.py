@@ -1,5 +1,7 @@
+from random import random
 import re
-from typing import Any, Iterator, List, Optional, Sequence, TypeVar
+from time import time
+from typing import Any, Callable, Iterator, List, Optional, Sequence, TypeVar
 
 from kbdebugger.types import ExtractionResult, TripletSOP
 from kbdebugger.utils.json import now_utc_compact, write_json
@@ -209,3 +211,81 @@ def batched(items: Sequence[T], batch_size: int) -> Iterator[List[T]]:
     for i in range(0, len(items), batch_size):
         yield list(items[i : i + batch_size])
 
+
+# ---------------------------------------------------------------------------
+# Parallelism helpers
+# ---------------------------------------------------------------------------
+T = TypeVar("T")
+
+_RETRY_AFTER_RE = re.compile(r"try again in\s+([0-9]*\.?[0-9]+)s", re.IGNORECASE)
+
+
+def _extract_retry_after_seconds(error_text: str) -> Optional[float]:
+    """
+    Extract a retry delay (in seconds) from Groq-style 429 error messages.
+
+    Example message fragment:
+        "Please try again in 13.45s."
+
+    Returns
+    -------
+    Optional[float]
+        The parsed delay in seconds if present, otherwise None.
+    """
+    match = _RETRY_AFTER_RE.search(error_text or "")
+    if not match:
+        return None
+
+    try:
+        return float(match.group(1))
+    except ValueError:
+        return None
+    
+
+def _call_with_rate_limit_retries(
+    fn: Callable[[], T],
+    *,
+    max_retries: int = 8,
+    default_backoff_s: float = 2.0,
+    max_sleep_s: float = 30.0,
+) -> T:
+    """
+    Call `fn()` with rate-limit-aware retries.
+
+    Strategy
+    --------
+    - If the exception message contains "try again in Xs", sleep for X seconds
+      (+ small jitter) and retry.
+    - Otherwise, use a conservative exponential backoff.
+
+    Why this exists
+    ---------------
+    Groq on-demand has strict TPM (Token-per-Minute) limits. When we batch or parallelize,
+    occasional 429s are expected. Dropping a batch silently corrupts results.
+
+    Raises
+    ------
+    RuntimeError
+        If all retry attempts fail.
+    """
+    last_err: Exception | None = None
+
+    for attempt in range(1, max_retries + 1):
+        try:
+            return fn()
+        except Exception as e:  # SDKs often raise generic exceptions
+            last_err = e
+            msg = str(e)
+
+            retry_after = _extract_retry_after_seconds(msg)
+            if retry_after is not None:
+                # Add a tiny jitter to avoid synchronizing retries across threads.
+                sleep_s = retry_after + random.uniform(0.1, 0.4)
+            else:
+                # Exponential backoff for unknown transient failures
+                sleep_s = default_backoff_s * (2 ** (attempt - 1))
+
+            sleep_s = min(sleep_s, max_sleep_s)
+            time.sleep(sleep_s)
+
+    raise RuntimeError(f"LLM call failed after {max_retries} retries") from last_err

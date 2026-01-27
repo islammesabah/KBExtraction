@@ -1,0 +1,9 @@
+# LangChain band
+langchain>=0.3,<0.4
+langchain-core>=0.3,<0.4
+langchain-community>=0.3,<0.4
+langchain-openai>=0.2,<0.3
+langchainhub>=0.1,<0.2
+
+# Docling integration (requires langchain-core >=0.3)
+langchain-docling>=0.2,<0.3

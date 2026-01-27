@@ -76,6 +76,8 @@ python -m pip install --upgrade pip setuptools wheel
 if [ -f requirements.txt ]; then
   echo "💡 Installing requirements.txt into $(which python)"
   python -m pip install -r requirements.txt
+  # pip install -qU langchain-docling
+  # pip install bertopic
 else
   echo "⚠️ No requirements.txt found; skipping."
 fi

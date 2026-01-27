@@ -34,8 +34,10 @@ def render_prompt(name: str, **kwargs) -> str:
     Render a named prompt template with the given variables.
 
     Usage:
-        render_prompt("triplets_single", sentence_json=...)
-        render_prompt("triplets_batch", payload_json=...)
+    ```
+    render_prompt("triplets_single", sentence_json=...)
+    render_prompt("triplets_batch", payload_json=...)
+    ```
     """
     tmpl = _load_template(name)
     return tmpl.safe_substitute(**kwargs) 

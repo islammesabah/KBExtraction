@@ -3,14 +3,13 @@ from __future__ import annotations
 from dataclasses import dataclass
 import json
 import re
-from typing import List
+from typing import List, TypeVar
 
 from kbdebugger.extraction.types import BatchTextDecomposer, TextDecomposer, Qualities
 from kbdebugger.llm.model_access import respond
 from kbdebugger.utils import ensure_json_object
 from kbdebugger.prompts import render_prompt, load_json_resource
-from .utils import coerce_batch_qualities, coerce_qualities, sanitize_chunk
-
+from .utils import _call_with_rate_limit_retries, coerce_batch_qualities, coerce_qualities, sanitize_chunk
 
 @dataclass(frozen=True)
 class ChunkDecomposeConfig:
@@ -40,8 +39,10 @@ class ChunkBatchDecomposeConfig:
         Should generally remain 0.0 for deterministic, parseable JSON.
     """
     max_qualities_per_chunk: int = 12
-    max_tokens: int = 4096
+    max_tokens: int = 1024
     temperature: float = 0.0
+    # Retry policy (kept simple and explicit)
+    max_retries: int = 8
 
 
 def build_chunk_decomposer(
@@ -75,11 +76,23 @@ def build_chunk_decomposer(
         )
 
         # 3. Call LLM
-        raw_response = respond(
-            prompt_str,
-            max_tokens=2048,
-            temperature=0.0,
-            json_mode=True,
+        # raw_response = respond(
+        #     prompt_str,
+        #     max_tokens=2048,
+        #     temperature=0.0,
+        #     json_mode=True,
+        # )
+
+        # ✅ This ensures: 429 never silently kills a batch.
+        # It will wait and retry as Groq instructs.
+        raw_response = _call_with_rate_limit_retries(
+            lambda: respond(
+                prompt_str,
+                max_tokens=cfg.max_tokens,
+                temperature=cfg.temperature,
+                json_mode=True,
+            ),
+            max_retries=cfg.max_retries,
         )
 
         # 4. Parse JSON into Python object

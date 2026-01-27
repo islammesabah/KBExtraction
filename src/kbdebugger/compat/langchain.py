@@ -72,7 +72,7 @@ except Exception:
         except Exception:
             EnsembleRetriever = None  # type: ignore
 
-from langchain_huggingface import HuggingFaceEmbeddings # type: ignore
+# from langchain_huggingface import HuggingFaceEmbeddings # type: ignore
 # from langchain_chroma import Chroma # type: ignore
 
 from langchain_text_splitters import RecursiveCharacterTextSplitter # type: ignore
@@ -113,7 +113,6 @@ __all__ = [
     "BaseRetriever",
     "BM25Retriever",
     "EnsembleRetriever",
-    "HuggingFaceEmbeddings",
     "RecursiveCharacterTextSplitter",
     "PyMuPDFLoader",
     "UnstructuredPDFLoader",

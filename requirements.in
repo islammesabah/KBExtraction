@@ -1,0 +1,59 @@
+# DO NOT pip install from requirements.in on cluster
+# Always install from *.lock.txt
+# Resolver WILL OOM or fill disk
+
+
+# --- core NLP ---
+spacy==3.7.4
+en-core-web-sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.1/en_core_web_sm-3.7.1-py3-none-any.whl
+
+# --- topic modeling ---
+bertopic
+
+# --- langchain ecosystem (bounded to reduce resolver explosion) ---
+langchain>=0.3,<0.4
+langchain-core>=0.3,<0.4
+langchain-community>=0.3,<0.4
+langchain-openai>=0.2,<0.3
+langchainhub>=0.1,<0.2
+
+# Docling integration (requires langchain-core >=0.3)
+langchain-docling>=0.2,<0.3
+
+
+# --- huggingface ---
+transformers
+accelerate
+sentencepiece
+peft
+sentence-transformers
+
+# --- data/graph/util ---
+neo4j==5.28.2
+pandas==2.3.3
+numpy==1.26.4
+pyarrow==22.0.0
+scikit-learn
+networkx
+
+# --- pdf & tooling ---
+pymupdf
+pypdf
+pdfminer.six
+
+# --- cli/config ---
+typer<0.10.0,>=0.3.0
+rich
+python-dotenv
+configparser
+typing_extensions
+
+# --- retrieval ---
+rank-bm25
+
+# --- providers ---
+groq
+
+# === Compatibility pins you already had ===
+regex>=2023.6.0
+packaging<25,>=23.2

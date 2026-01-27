@@ -7,7 +7,9 @@ langchain
 langchain-community
 langchain-openai
 langchainhub
-langchain-huggingface
+# langchain-huggingface
+langchain-docling
+
 
 # Let the container provide PyTorch + CUDA.
 # Don't pip install torch yourself unless you have a very specific reason (and matching CUDA wheels).
@@ -57,3 +59,6 @@ debugpy
 
 # HNSW (Hierarchical Navigable Small World graphs) for vector search
 hnswlib
+
+# Topic modeling
+bertopic

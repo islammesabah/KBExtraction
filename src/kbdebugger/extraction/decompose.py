@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 import os
-from typing import List, Optional, Sequence, Any
+from typing import List, Optional, Sequence, Any, Tuple
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from kbdebugger.compat.langchain import Document
 from kbdebugger.extraction.utils import batched
@@ -66,6 +67,21 @@ def decompose(
     raise ValueError(f"Unsupported DecomposeMode: {mode}")
 
 
+def _decompose_one_batch(
+    batch_id: int,
+    group: List[str],
+) -> Tuple[int, List[Qualities]]:
+    """
+    Worker wrapper for parallel batch decomposition.
+
+    Returns
+    -------
+    (batch_id, batch_results)
+        batch_id is used to optionally re-order results deterministically.
+    """
+    return batch_id, _chunk_batch_to_qualities_decomposer(group)
+
+
 # ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
@@ -75,6 +91,8 @@ def decompose_documents(
     mode: DecomposeMode,
     batch_size: int = 4,
     use_batch_decomposer: bool = True,
+    parallel: bool = False,
+    max_workers: Optional[int] = 2,
 ) -> Qualities:
     """
     Decompose a list of LangChain Documents into a flat list of qualities.
@@ -137,11 +155,59 @@ def decompose_documents(
     
     # --- Fast path: batched chunk decomposition ---
     if mode == DecomposeMode.CHUNKS and use_batch_decomposer:
-        for group in batched(texts, batch_size=batch_size):
-            group_results: List[Qualities] = _chunk_batch_to_qualities_decomposer(group)
-            # Flatten group results into the global list.
-            for q in group_results:
-                all_qualities.extend(q)
+        # groups is a list of lists of chunk texts.
+        # e.g. Each list has length == batch_size, except possibly the last one.
+        groups = list(batched(texts, batch_size=batch_size))
+
+        # Parallelism is optional; keep it controlled.
+        if parallel:
+            # Submit all groups but limit concurrency by max_workers.
+            results_by_batch: dict[int, List[Qualities]] = {}
+
+            # with ThreadPoolExecutor(max_workers=max_workers) as pool:
+            #     futures = [
+            #         pool.submit(_decompose_one_batch, i, group)
+            #         for i, group in enumerate(groups)
+            #     ]
+
+            #     for fut in as_completed(futures):
+            #         try:
+            #             batch_id, batch_results = fut.result()
+            #             results_by_batch[batch_id] = batch_results
+            #         except Exception as e:
+            #             print(f"Error in batch decomposition: {e}")
+            #             results_by_batch[batch_id] = []   # but we need batch_id: so store it in closure
+                    
+            with ThreadPoolExecutor(max_workers=max_workers) as pool:
+                future_to_batch_id: dict[Any, int] = {}
+
+                for i, group in enumerate(groups):
+                    fut = pool.submit(_decompose_one_batch, i, group)
+                    future_to_batch_id[fut] = i
+
+                for fut in as_completed(future_to_batch_id):
+                    batch_id = future_to_batch_id[fut]
+                    try:
+                        _, batch_results = fut.result()
+                        results_by_batch[batch_id] = batch_results
+                    except Exception as e:
+                        print(f"[decompose_documents] Batch {batch_id} failed: {e}")
+                        # Preserve alignment: return empty per-chunk outputs for that batch
+                        results_by_batch[batch_id] = [[] for _ in groups[batch_id]]
+
+
+
+            # Flatten in deterministic order (0..N-1) regardless of completion order
+            for i in range(len(groups)):
+                for qualities in results_by_batch.get(i, []):
+                    all_qualities.extend(qualities)
+
+        else:
+            for group in groups:
+                group_results: List[Qualities] = _chunk_batch_to_qualities_decomposer(group)
+                # Flatten group results into the global list.
+                for qualities in group_results:
+                    all_qualities.extend(qualities)
 
         meta: dict[str, Any] = {
             "mode": mode,
@@ -149,6 +215,8 @@ def decompose_documents(
             "use_batch_decomposer": True,
             "batch_size": batch_size,
             "num_batches": (len(docs) + batch_size - 1) // batch_size,
+            "parallel": parallel,
+            "max_workers": max_workers if parallel else None,
         }
         save_qualities_json(qualities=all_qualities, meta=meta, mode=mode)
         return all_qualities

@@ -6,7 +6,7 @@ install_warning_filters()
 
 from .utils.terminal_interface import interface
 from .extraction.text_to_sentences import extract_txt_sentences
-from .extraction.pdf_to_sentences import extract_pdf_sentences
+# from .extraction.pdf_to_sentences import extract_pdf_sentences
 from .extraction.pdf_to_chunks import extract_pdf_chunks
 from .extraction.sentence_to_qualities import build_sentence_decomposer
 from .extraction.decompose import decompose, DecomposeMode
@@ -226,8 +226,8 @@ def main():
                 "Do you want to extract sentences or chunks?", 
                 ["Sentences", "Chunks"]
             ):
-                case "Sentences":
-                    documents = extract_pdf_sentences(file)
+                # case "Sentences":
+                #     documents = extract_pdf_sentences(file)
                 case "Chunks":
                     EXTRACT_TYPE = "Chunks"
                     documents = extract_pdf_chunks(file)

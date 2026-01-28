@@ -86,9 +86,9 @@ def extract_paragraphs_with_docling(
     )
 
     docs: List[Document] = loader.load()
-    for d in docs:
-        # d.metadata["source"] = Path(d.metadata.get("source", "unknown")).name
-        rich.print(f" - {d.page_content=}")
+    # for d in docs:
+    #     # d.metadata["source"] = Path(d.metadata.get("source", "unknown")).name
+    #     rich.print(f" - {d.page_content=}")
 
     rich.print(f"👁️ [DOCLING] OCR enabled: {do_ocr}")
     rich.print(f"📊 [DOCLING] Table recognition enabled: {do_table_structure}")

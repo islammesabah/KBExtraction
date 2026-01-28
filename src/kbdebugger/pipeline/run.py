@@ -84,7 +84,6 @@ def run_pipeline(cfg: PipelineConfig) -> None:
         limit_per_pattern=cfg.kg_limit_per_pattern,
     )
 
-
     # ---------------------------------------------------------------------
     # Stage 2: Extract candidate qualities from corpus (chunk + decompose)
     # ---------------------------------------------------------------------
@@ -112,11 +111,11 @@ def run_pipeline(cfg: PipelineConfig) -> None:
         synonyms=synonyms
     )
 
-    topic_matches, topic_model = extract_topics_from_paragraphs(
-        paragraphs=paragraphs,
-        keyword=cfg.kg_retrieval_keyword,
-        synonyms=synonyms
-    )
+    # topic_matches, topic_model = extract_topics_from_paragraphs(
+    #     paragraphs=paragraphs,
+    #     keyword=cfg.kg_retrieval_keyword,
+    #     synonyms=synonyms
+    # )
 
 
     # # ---------------------------------------------------------------------

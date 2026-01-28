@@ -113,6 +113,10 @@ class PipelineConfig:
     source_kind: SourceKind
     corpus_path: str
 
+    # 🦆 Docling
+    docling_enable_OCR: bool
+    docling_enable_table_recognition: bool
+
     # ----------------------------
     # Vector similarity filter
     # ----------------------------
@@ -128,6 +132,8 @@ class PipelineConfig:
     # Triplet extraction
     # ----------------------------
     triplet_extraction_batch_size: int
+
+
 
 
     @classmethod
@@ -172,6 +178,9 @@ class PipelineConfig:
         pdf_path = os.getenv("KB_PDF_PATH", "data/SDS/InstructCIR.pdf").strip()
 
         corpus_path = text_path if source_kind == SourceKind.TEXT else pdf_path
+
+        docling_enable_OCR = os.getenv("DOCLING_ENABLE_OCR", "false").lower() == "true"
+        docling_enable_table_recognition = os.getenv("DOCLING_ENABLE_TABLE_RECOGNITION", "false").lower() == "true"
 
         # ---------- Vector similarity ----------
         encoder_model_name = os.getenv(
@@ -224,4 +233,7 @@ class PipelineConfig:
             novelty_llm_temperature=novelty_llm_temperature,
             
             triplet_extraction_batch_size=triplet_extraction_batch_size,
+
+            docling_enable_OCR=docling_enable_OCR,
+            docling_enable_table_recognition=docling_enable_table_recognition
         )

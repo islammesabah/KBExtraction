@@ -44,6 +44,7 @@ from kbdebugger.graph import get_graph
 # from kbdebugger.extraction.api import extract_qualities_from_corpus
 from kbdebugger.extraction.pdf_to_paragraphs import extract_paragraphs_with_docling
 from kbdebugger.topic_modelling.BERTopic import extract_topics_from_paragraphs
+from kbdebugger.topic_modelling.keyBERT import run_keybert_matching 
 from kbdebugger.topic_modelling.keyword_synonyms import generate_synonyms_for_keyword
 
 from kbdebugger.vector.api import run_vector_similarity_filter
@@ -92,7 +93,11 @@ def run_pipeline(cfg: PipelineConfig) -> None:
     #     path=cfg.corpus_path,
     # )
 
-    paragraph_docs = extract_paragraphs_with_docling(pdf_path=cfg.corpus_path)
+    paragraph_docs = extract_paragraphs_with_docling(
+        pdf_path=cfg.corpus_path,
+        do_ocr=cfg.docling_enable_OCR,
+        do_table_structure=cfg.docling_enable_table_recognition
+    )
 
     # extract only page_content from each Document:
     paragraphs = [d.page_content for d in paragraph_docs if d.page_content and d.page_content.strip()]
@@ -101,11 +106,18 @@ def run_pipeline(cfg: PipelineConfig) -> None:
     # Extract synonyms from LLM
     synonyms = generate_synonyms_for_keyword(cfg.kg_retrieval_keyword)
 
+    matched, unmatched = run_keybert_matching(
+        paragraphs=paragraphs,
+        search_keyword=cfg.kg_retrieval_keyword,
+        synonyms=synonyms
+    )
+
     topic_matches, topic_model = extract_topics_from_paragraphs(
         paragraphs=paragraphs,
         keyword=cfg.kg_retrieval_keyword,
         synonyms=synonyms
     )
+
 
     # # ---------------------------------------------------------------------
     # # Stage 3: Vector similarity filtering (kept qualities + neighbor context)

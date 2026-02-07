@@ -25,7 +25,6 @@ class ParagraphMatch:
     keywords: List[str]
     match_type: Optional[MatchType]
     matched_terms: List[str]
-    embedding_model_name: str
     score: Optional[float] = None
 
 
@@ -164,7 +163,7 @@ def run_keybert_matching(
             match_type=match_type,
             matched_terms=matched_terms,
             score=score,
-            embedding_model_name=cfg.embedding_model,
+            # embedding_model_name=cfg.embedding_model,
         )
 
         if match_type:
@@ -176,7 +175,8 @@ def run_keybert_matching(
         matched=matched,
         unmatched=unmatched,
         keyword=search_keyword,
-        synonyms=synonyms
+        synonyms=synonyms,
+        config=cfg
     )
 
     return matched, unmatched
@@ -188,18 +188,23 @@ def save_keybert_matched_paragrahs(
         unmatched: List[ParagraphMatch],
         keyword: str,
         synonyms: Optional[List[str]] = None,
-        output_dir: str = "logs"
+        config: KeyBERTConfig,
+        output_dir: str = "logs",
 ) -> None:
     """
     Save full KeyBERT paragraph match results including matched and unmatched paragraphs.
     """
     timestamp = now_utc_compact()
+    num_matched = len(matched)
+    num_unmatched = len(unmatched)
     payload: Dict[str, Any] = {
         "created_at": timestamp,
         "keyword": keyword,
         "generated_synonyms": synonyms or [],
-        "num_matched": len(matched),
-        "num_unmatched": len(unmatched),
+        "num_total_paragraphs": num_matched + num_unmatched, 
+        "num_matched": num_matched,
+        "num_unmatched": num_unmatched,
+        "keyBERT_config": config.__dict__,
         "matched": [m.__dict__ for m in matched],
         "unmatched": [u.__dict__ for u in unmatched],
     }

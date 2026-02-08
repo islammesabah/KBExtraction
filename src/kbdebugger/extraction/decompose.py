@@ -89,7 +89,7 @@ def decompose_documents(
     docs: Sequence[Document],
     *,
     mode: DecomposeMode,
-    batch_size: int = 4,
+    batch_size: int = 5,
     use_batch_decomposer: bool = True,
     parallel: bool = False,
     max_workers: Optional[int] = 2,

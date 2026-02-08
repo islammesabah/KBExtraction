@@ -5,8 +5,12 @@ from typing import List
 from kbdebugger.extraction.types import SourceKind
 import rich
 
-from langchain_core.documents import Document
 from langchain_docling.loader import DoclingLoader
+
+# from langchain_core.documents import Document
+from kbdebugger.compat.langchain import (
+    Document,
+)
 
 # from docling import (
 #     InputFormat, 
@@ -71,7 +75,7 @@ def extract_paragraphs_with_docling(
     #     )
     # })
 
-    pdf_options = PdfPipelineOptions(do_ocr=False)
+    pdf_options = PdfPipelineOptions(do_ocr=do_ocr, do_table_structure=do_table_structure)
 
     doc_converter = DocumentConverter(
         format_options={
@@ -79,10 +83,9 @@ def extract_paragraphs_with_docling(
         }
     )
 
-
     loader = DoclingLoader(
         str(pdf_path),
-        # converter=doc_converter
+        converter=doc_converter
     )
 
     docs: List[Document] = loader.load()
@@ -90,8 +93,9 @@ def extract_paragraphs_with_docling(
     #     # d.metadata["source"] = Path(d.metadata.get("source", "unknown")).name
     #     rich.print(f" - {d.page_content=}")
 
-    rich.print(f"👁️ [DOCLING] OCR enabled: {do_ocr}")
-    rich.print(f"📊 [DOCLING] Table recognition enabled: {do_table_structure}")
+    rich.print("\n\n===> 🦆 Docling extraction complete <===")
+    rich.print(f"👁️  [DOCLING] OCR enabled: {do_ocr}")
+    rich.print(f"📊  [DOCLING] Table recognition enabled: {do_table_structure}")
 
     save_chunked_documents_json(docs=docs, source_kind=SourceKind.PDF_PARAGRAPHS)
 

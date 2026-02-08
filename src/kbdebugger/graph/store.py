@@ -14,6 +14,7 @@ from neo4j.exceptions import Neo4jError
 from kbdebugger.types import GraphRelation, EdgeProperties
 from .utils import rows_to_graph_relations
 from .types import BatchUpsertSummary
+from .aura_api import ensure_aura_running_from_env 
 
 import rich
 from rich.console import Console
@@ -56,6 +57,9 @@ class GraphStore:
         """
         if auto_env:
             load_dotenv(override=True)
+
+        # ✅ Preflight: make sure Aura is running before Neo4j driver even tries DNS
+        ensure_aura_running_from_env(verbose=verbose)
 
         neo4j_uri = uri or os.getenv("NEO4J_URI")
         neo4j_user = username or os.getenv("NEO4J_USERNAME", "neo4j")

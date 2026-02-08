@@ -1,47 +1,17 @@
 from __future__ import annotations
 
-from typing import List, Literal, Dict, Any, Optional, Tuple
-from dataclasses import dataclass
-from unittest import result
+from typing import List, Dict, Any, Optional, Tuple
 
 import rich
 
 from keybert import KeyBERT
 from sentence_transformers import SentenceTransformer, util as sbert_util
 from kbdebugger.utils.json import now_utc_compact, write_json
-
-
-MatchType = Literal[
-    "exact",
-    "synonym",
-    "near_paragraph_global",
-    "near_paragraph_keywords"
-]
-
-@dataclass(frozen=True)
-class ParagraphMatch:
-    index: int
-    paragraph: str
-    keywords: List[str]
-    match_type: Optional[MatchType]
-    matched_terms: List[str]
-    score: Optional[float] = None
-
-
-@dataclass(frozen=True)
-class KeyBERTConfig:
-    embedding_model: str = "all-mpnet-base-v2"
-    # embedding_model: str = "all-MiniLM-L6-v2"
-
-    ngram_range: Tuple[int, int] = (1, 1)
-    # To extract keyphrases, simply set keyphrase_ngram_range to (1, 2) or higher 
-    # depending on the number of words you would like in the resulting keyphrases.
-
-    top_n: int = 8 # top_n keywords to be extracted by paragraph
-
-    search_kw_to_paragraph_similarity_threshold: float = 0.45  # Fallback semantic similarity (paragraph vs keyword)
-    search_kw_to_keywords_similarity_threshold: float = 0.65
-
+from .types import (
+    KeyBERTConfig,
+    ParagraphMatch,
+    MatchType,
+)
 
 
 def run_keybert_matching(
@@ -56,8 +26,6 @@ def run_keybert_matching(
     """
     Extract keywords from paragraphs using KeyBERT and match them to a target keyword.
     Includes exact match, synonym match, and two levels of semantic similarity fallbacks.
-
-
 
     Parameters
     ----------
@@ -119,7 +87,7 @@ def run_keybert_matching(
         else:
             # Step 3: Fallback to semantic similarity
 
-            # Fallback 1: Cosine similarity with paragraph as a whole
+            # Fallback 1: Cosine similarity with the paragraph as a whole
             paragraph_embedding = sentence_model.encode(paragraph, convert_to_tensor=True)
             similarity_score = float(
                 sbert_util.cos_sim(

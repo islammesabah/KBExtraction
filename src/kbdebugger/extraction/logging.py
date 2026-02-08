@@ -1,9 +1,9 @@
-import json
-import os
 from typing import Any, Sequence
+import rich
+
 from kbdebugger.compat.langchain import Document
-from .types import Qualities, SourceKind, DecomposeMode
 from kbdebugger.utils.json import write_json, now_utc_compact
+from .types import Qualities, SourceKind, DecomposeMode
 
 def save_chunked_documents_json(
     *, 
@@ -39,7 +39,7 @@ def save_chunked_documents_json(
     path = f"logs/01.1_chunker_output_docs_{source_kind}_{created_at}.json"
     write_json(path, payload)
 
-    print(f"\n[INFO] Wrote decomposer input docs log to {path}")
+    rich.print(f"\n[INFO] Wrote chunker output log to {path}")
 
 
 
@@ -76,4 +76,4 @@ def save_qualities_json(
     path = f"logs/01.2_decomposer_qualities_{mode}_{created_at}.json"
     write_json(path, payload)
 
-    print(f"\n[INFO] Wrote decomposer qualities log to {path}")
+    rich.print(f"\n[INFO] Wrote decomposer qualities log to {path}")

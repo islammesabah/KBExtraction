@@ -5,10 +5,9 @@ from typing import Sequence, Tuple
 
 from kbdebugger.extraction.types import Qualities
 from kbdebugger.types import GraphRelation
-from kbdebugger.vector.encoder import SentenceTransformerEncoder
-from kbdebugger.vector.similarity_filter import VectorSimilarityFilter
-from kbdebugger.vector.types import KeptQuality, DroppedQuality
-
+from .encoder import SentenceTransformerEncoder
+from .similarity_filter import VectorSimilarityFilter
+from .types import KeptQuality, DroppedQuality
 
 
 @dataclass(frozen=True, slots=True)

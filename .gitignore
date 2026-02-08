@@ -26,3 +26,5 @@ fine-tuned-mistral
 # Logs
 Log/user_updates.csv
 Log/data.csv
+
+credentials/

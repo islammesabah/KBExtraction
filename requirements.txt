@@ -58,7 +58,9 @@ sentence-transformers
 debugpy
 
 # HNSW (Hierarchical Navigable Small World graphs) for vector search
-hnswlib
+# hnswlib
+
+faiss-cpu
 
 # Topic modeling
 bertopic

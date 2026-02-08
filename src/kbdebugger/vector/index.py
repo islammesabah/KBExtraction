@@ -1,42 +1,107 @@
-# vector index abstraction + HNSW (Hierarchical Navigable Small World) backend.
-# (HNSW-based in-memory vector index — documented MVP)
+# kbdebugger/vector/index_faiss.py
+# -----------------------------------------------------------------------------
+# Vector index implementation using Facebook AI Similarity Search (FAISS).
+# -----------------------------------------------------------------------------
 from __future__ import annotations
 
 """
-Vector index abstraction for approximate nearest-neighbor (ANN) search.
+Facebook AI Similarity Search (FAISS) vector index backend.
 
-This module provides a thin, well-documented wrapper around `hnswlib`,
-which implements the HNSW (Hierarchical Navigable Small World) graph
-algorithm for fast cosine-similarity search in high-dimensional spaces.
+What this module is
+-------------------
+This file provides an in-process, in-memory vector index for nearest-neighbor search
+over embedding vectors using **Facebook AI Similarity Search (FAISS)**.
 
-Why HNSW?
----------
-- Very fast approximate nearest-neighbor search
-- Excellent recall/latency tradeoff
-- No server required (in-process)
-- Ideal for *ephemeral* indexes such as:
-    - KG subgraph context
-    - per-query similarity filtering
-    - MVP experimentation
+FAISS is a widely used library (C++ with Python bindings) for efficient similarity
+search and clustering of dense vectors. It supports multiple index types, ranging from
+exact search to approximate nearest neighbor (ANN) search. In this project we start
+with an **exact** index because our indexed set is typically small (a retrieved
+Neo4j subgraph), and we want maximum stability and determinism.
 
-This index is **NOT** a database.
-It is rebuilt from scratch per retrieval run (by design).
+Why we are replacing HNSWLIB
+----------------------------
+We previously used `hnswlib` (Hierarchical Navigable Small World library), which can
+be compiled with CPU instruction set extensions such as AVX-512. On cluster nodes that
+do not support these instructions, calling into the extension may crash the process
+with "Illegal instruction (core dumped)".
+
+FAISS CPU wheels are generally more stable across heterogeneous compute environments.
+(If you later run into similar issues with FAISS on our cluster, you can still fall
+back to a pure NumPy brute-force backend, but FAISS is a strong default.)
+
+Similarity metric: cosine similarity (not distance)
+---------------------------------------------------
+Downstream parts of KBDebugger expect **cosine similarity scores** in [approximately -1, 1]
+(usually [0, 1] for many embedding models) where **higher means more similar**.
+
+FAISS provides indices that operate on:
+- L2 distance (Euclidean), or
+- inner product (dot product)
+
+We implement cosine similarity by:
+1) **L2-normalizing** all vectors (both indexed vectors and query vectors)
+2) Using an **inner product index**
+   because for unit-normalized vectors:
+
+        cosine_similarity(u, v) == dot(u, v)
+
+Index type used here
+--------------------
+We use `faiss.IndexFlatIP`, which is:
+- "Flat" = brute-force exact search (no approximation)
+- "IP"   = Inner Product similarity
+
+This is simple, deterministic, and extremely reliable.
+
+If you later want approximate search (for huge indexes), FAISS also supports IVF,
+HNSW, PQ, etc., but this MVP intentionally keeps things straightforward.
+
+Public API compatibility
+------------------------
+This module is designed to mirror the old `VectorIndex` API:
+
+- `create(dim=..., max_elements=...)`
+- `add(vectors, items)`
+- `search(query_vec, k)`
+- `search_batch(query_vecs, k)`
+
+The most important is `search_batch`, since our pipeline uses batched search to
+avoid Python loops.
+
+Dependencies
+------------
+- numpy
+- faiss (Python package name is typically: `faiss-cpu`)
+
+Important note: payload mapping
+-------------------------------
+FAISS stores only vectors. We maintain a parallel Python list called `payloads`
+where:
+
+    payloads[i] == domain object associated with vector ID i
+
+FAISS returns neighbor IDs; we map IDs back to payload objects for callers.
+
 """
 
 from dataclasses import dataclass
-from typing import Generic, TypeVar, Sequence, List, Tuple
+from typing import Generic, List, Sequence, Tuple, TypeVar
 
 import numpy as np
-import hnswlib
+from .faiss_utils import (
+    _as_float32_matrix,
+    _as_float32_vector,
+    _l2_normalize_rows,
+)
 
-# Generic payload type:
-# each vector is associated with an arbitrary Python object
+# Generic payload type: each vector is associated with an arbitrary Python object.
 T = TypeVar("T")
+
 
 @dataclass
 class VectorIndex(Generic[T]):
     """
-    In-memory vector index using cosine similarity.
+    In-memory vector index using Facebook AI Similarity Search (FAISS).
 
     Attributes
     ----------
@@ -44,15 +109,15 @@ class VectorIndex(Generic[T]):
         Dimensionality of the embedding vectors.
 
     index:
-        The underlying hnswlib.Index instance.
+        The underlying FAISS index instance (IndexFlatIP).
 
     payloads:
-        A list mapping internal vector IDs -> domain objects
-        (e.g., GraphRelation instances).
+        List mapping internal vector IDs -> domain objects.
+        The internal vector ID used by FAISS equals the position in this list.
     """
 
     dim: int
-    index: hnswlib.Index
+    index: "faiss.Index"  # quoted annotation to avoid importing faiss at module import time
     payloads: List[T]
 
     # ------------------------------------------------------------------
@@ -64,75 +129,41 @@ class VectorIndex(Generic[T]):
         *,
         dim: int,
         max_elements: int,
-        ef_construction: int = 200,
-        M: int = 16,
-        ef_search: int = 50,
-    ) -> VectorIndex[T]:
+    ) -> "VectorIndex[T]":
         """
-        Create and initialize a new HNSW vector index.
+        Create and initialize a new FAISS-based vector index.
 
         Parameters
         ----------
-        - dim:
-            Dimensionality of the embedding vectors
-            (must match the output size of our encoder).
+        dim:
+            Dimensionality of embedding vectors (must match encoder output).
 
-        - max_elements:
-            Maximum number of vectors that will be added to this index.
-            For our use case, this is typically:
-                len(subgraph_relations)
-
-        - ef_construction:
-            Controls index *construction quality* vs build time.
-
-            - Higher values → 😀⬆️ better recall, ☹️⏳️ slower index build
-            - Lower values  → 😀⏳️ faster build,  ☹️⬇️ lower recall
-
-            Rule of thumb:
-                100-400 is reasonable for most NLP embeddings.
-
-            We default to 200 because:
-                - subgraph size is moderate
-                - build happens infrequently
-                - we prefer recall over micro-optimizations
-
-        - M:
-            Maximum number of connections per node in the HNSW graph.
-
-            - Higher values → 😀⬆️ better accuracy, ☹️🧠 more memory
-            - Lower values → 😀🧠 smaller index, ☹️⬇️ slightly worse recall
-
-            Typical values:
-                8-32
-
-            We default to 16 (balanced, widely used).
-
-        - ef_search:
-            Controls *search-time* accuracy vs latency.
-
-            - Higher → 😀⬆️ more accurate but ☹️⏳️ slower queries
-            - Must be >= k (number of neighbors we request)
-
-            We default to 50, which is plenty for k≈5-10.
+        max_elements:
+            Maximum number of vectors expected to be added.
+            This parameter is kept for API compatibility with the previous HNSWLIB index.
+            It is not required by IndexFlatIP, because IndexFlatIP grows dynamically.
 
         Returns
         -------
         VectorIndex[T]
-            An empty, initialized vector index ready to accept vectors.
+            An empty vector index ready to accept vectors.
+
+        Notes
+        -----
+        We intentionally use an exact index (IndexFlatIP) for stability and simplicity.
+
+        - "Flat" means brute-force exact search. i.e. no approximation, no clustering, no quantization of vectors.
+        - "IP" stands for Inner Product.
+        - We convert inner product to cosine similarity by L2-normalizing vectors.
+
+        Even though `max_elements` is not required by FAISS here, we keep it so the
+        call sites do not change and future backends can use it if needed.
         """
-        # Create index for cosine similarity
-        # Note: hnswlib uses cosine *distance* internally
-        idx = hnswlib.Index(space="cosine", dim=dim)
+        # Lazy import: faiss is only required when you actually instantiate an index.
+        import faiss  # type: ignore
 
-        # Initialize index memory and graph structure
-        idx.init_index(
-            max_elements=max_elements,
-            ef_construction=ef_construction,
-            M=M,
-        )
-
-        # Set search-time parameter (can be adjusted later)
-        idx.set_ef(ef_search)
+        # Exact inner-product index. With L2-normalized vectors, this returns cosine similarity.
+        idx = faiss.IndexFlatIP(dim)
 
         return cls(dim=dim, index=idx, payloads=[])
 
@@ -150,48 +181,54 @@ class VectorIndex(Generic[T]):
 
         items:
             Sequence of domain objects (length N) associated with vectors.
-            Example:
-                - GraphRelation objects
-                - IDs
-                - Any metadata you want to retrieve later
+            Example payload types:
+              - GraphRelation objects
+              - string identifiers
+              - any Python object we want to retrieve for nearest neighbors
 
-        Notes
-        -----
-        Internally, hnswlib assigns each vector an integer ID.
-        We map these IDs to `payloads` so search results can be
-        returned as domain objects instead of raw indices.
+        Raises
+        ------
+        ValueError
+            If shapes mismatch or the number of vectors differs from number of items.
+
+        Implementation details
+        ----------------------
+        - FAISS expects float32 contiguous arrays.
+        - We L2-normalize vectors before adding them so that inner product == cosine similarity.
+        - The FAISS internal IDs are assigned in insertion order: 0..N-1 for the first add(),
+          then continuing  N.. for subsequent add() calls.
+        - We mirror that by extending `payloads` in the same order.
         """
-        vectors = np.asarray(vectors, dtype=np.float32)
+        matrix = _as_float32_matrix(vectors, name="vectors")
 
-        if vectors.ndim != 2 or vectors.shape[1] != self.dim:
+        if matrix.shape[1] != self.dim:
             raise ValueError(
-                f"❌ Shape Missmatch: Expected vectors of shape (N, {self.dim}), "
-                f"got {vectors.shape}"
+                f"❌ Shape mismatch: expected vectors of shape (N, {self.dim}), got {matrix.shape}"
             )
 
-        if len(vectors) != len(items):
-            raise ValueError(
-                "❌ Number of vectors must match number of payload items"
-            )
+        if len(matrix) != len(items):
+            raise ValueError("❌ Number of vectors must match number of payload items.")
 
-        start_id = len(self.payloads) # Next available internal ID
-        # Create sequential IDs for new vectors to be added to the index
-        ids = np.arange(start_id, start_id + len(items))
+        # Normalize vectors so dot product equals cosine similarity.
+        matrix_normalized = _l2_normalize_rows(matrix) # keeps shape (N, dim)
 
-        self.index.add_items(vectors, ids)
-        self.payloads.extend(items)
+        # Add to FAISS index.
+        self.index.add(matrix_normalized)
+
+        # Preserve payload mapping (ID -> object).
+        self.payloads.extend(list(items))
 
     # ------------------------------------------------------------------
-    # Search
+    # Search (single query)
     # ------------------------------------------------------------------
     def search(self, query_vec: np.ndarray, k: int) -> List[Tuple[T, float]]:
         """
-        Perform a cosine-similarity search over the index.
+        Search for the k nearest neighbors of a single query vector.
 
         Parameters
         ----------
         query_vec:
-            Embedding vector of shape (dim,).
+            Query vector of shape (dim,).
 
         k:
             Number of nearest neighbors to retrieve.
@@ -199,60 +236,46 @@ class VectorIndex(Generic[T]):
         Returns
         -------
         List[Tuple[T, float]]
-            A list of (payload, similarity_score) pairs, where:
-
-            - payload is the associated domain object
-            - similarity_score ∈ [0, 1], higher is more similar
+            List of (payload, similarity_score) pairs, where:
+              - payload is the domain object mapped to the neighbor vector
+              - similarity_score is cosine similarity (higher = more similar)
 
         Notes
         -----
-        hnswlib returns *cosine distance*:
-            distance = 1 - cosine_similarity
-
-        We convert it back to cosine similarity here so downstream
-        code never has to think about distance metrics.
+        This is a convenience wrapper around `search_batch` for a single query.
+        For performance, prefer `search_batch` when you have many queries.
         """
         if k <= 0:
             return []
 
-        # Force 1D shape (1, dim) & float32 because hnswlib requires it
-        q = np.asarray(query_vec, dtype=np.float32).reshape(1, -1) 
+        q = _as_float32_vector(query_vec, dim=self.dim, name="query_vec").reshape(1, -1)
+        neighbors, scores = self.search_batch(q, k=k)
 
-        labels, distances = self.index.knn_query(q, k=k)
-        # - labels: 
-        # type: NDArray[uint64] 
-        # shape: (1, k) of internal vector IDs. 
-        #        i.e., raw indices of the nearest neighbors.
-        #        We map these to payloads below.
-        # 
-        # - distances: 
-        # type: NDArray[float32] 
-        # shape: (1, k) of cosine distances
+        # neighbors is length 1 list; scores is shape (1, k)
+        out: List[Tuple[T, float]] = []
+        row_neighbors = neighbors[0]
+        row_scores = scores[0]
 
-        results: List[Tuple[T, float]] = []
+        # Align by min length because neighbor list may be shorter if index is small.
+        # e.g., k = 5 but index only has 3 vectors, so FAISS returns 3 neighbors + 2 invalid (-1) IDs.
+        n = min(len(row_neighbors), int(row_scores.shape[0]))
+        for i in range(n):
+            out.append((row_neighbors[i], float(row_scores[i])))
 
-        for idx, dist in zip(labels[0], distances[0]):
-            # idx is the internal vector ID
-            # idx can be -1 if not enough neighbors found
-            if idx < 0:
-                continue
+        return out
 
-            similarity = 1.0 - float(dist)
-            # Map internal ID to payload object
-            payload = self.payloads[int(idx)]
-            results.append((payload, similarity))
-
-        return results
-
-
-    def search_batch(self, query_vecs: np.ndarray, k: int) -> Tuple[List[List[T]], np.ndarray]:
+    # ------------------------------------------------------------------
+    # Search (batched queries)
+    # ------------------------------------------------------------------
+    def search_batch(self, query_vecs: np.ndarray, k: int) -> Tuple[
+        List[List[T]], 
+        np.ndarray
+    ]:
         """
-        Perform a batch cosine-similarity search over the index.
+        Perform a **batched** cosine-similarity search over the index.
 
-        This is the vectorized / "matrix mindset" equivalent of calling `search()`
-        in a Python loop, and is typically *much* faster when you have many queries
-        (e.g., 1000+ qualities), because it reduces Python-to-hnswlib overhead to
-        a single call.
+        This is the equivalent of calling `search()` in a loop, but it avoids
+        Python overhead by doing one FAISS call for all queries.
 
         Parameters
         ----------
@@ -260,65 +283,80 @@ class VectorIndex(Generic[T]):
             NumPy array of shape (Q, dim) containing Q query embedding vectors.
 
         k:
-            Number of nearest neighbors to retrieve per query.
+            Number of nearest neighbors to retrieve **per query**.
 
         Returns
         -------
         (neighbors, scores):
             neighbors:
-                A Python list of length Q; each entry is a list of payload objects
-                (length up to k) corresponding to the nearest neighbors.
+                Python list of length Q.
+                Each entry is a list of payload objects (length up to k),
+                representing the nearest neighbors for that query.
 
             scores:
-                A float32 NumPy array of shape (Q, k) with cosine similarity scores
-                in [0, 1], aligned with `neighbors`.
+                NumPy float32 array of shape (Q, k) containing cosine similarity
+                scores aligned with the neighbor IDs returned by FAISS.
 
         Notes
         -----
-        - hnswlib returns cosine *distance*: dist = 1 - cosine_similarity
-          We convert to cosine similarity via: sim = 1 - dist.
-        - hnswlib may return label -1 when it cannot return k neighbors.
-          In that case, we keep a score of 0.0 and do not add a payload.
-        - For performance, we always convert inputs to contiguous float32.
+        - We return cosine similarity scores because we:
+            1) L2-normalize indexed vectors during `add()`
+            2) L2-normalize query vectors here
+            3) use FAISS IndexFlatIP (inner product)
+
+        - FAISS returns:
+            - `scores`: inner products (cosine similarity due to normalization), shape (Q, k)
+            - `ids`: neighbor indices, shape (Q, k), where ids[i, j] is the vector ID
+
+        - If the index has fewer than k vectors, FAISS still returns arrays of shape (Q, k),
+          but some IDs may be -1. We:
+            - omit payloads for -1 IDs
+            - set the corresponding scores to 0.0 to keep thresholding deterministic
         """
-        if k <= 0:
-            # Return an empty neighbor list per query, and an empty score matrix.
-            q = np.asarray(query_vecs)
-            num_q = int(q.shape[0]) if q.ndim == 2 else 0
-            return ([[] for _ in range(num_q)], np.zeros((num_q, 0), dtype=np.float32))
+        q = _as_float32_matrix(query_vecs, name="query_vecs") # shape (Q, dim)
 
-        # Ensure contiguous float32 array
-        q = np.ascontiguousarray(np.asarray(query_vecs, dtype=np.float32))
-
-        if q.ndim != 2 or q.shape[1] != self.dim:
+        if q.shape[1] != self.dim:
             raise ValueError(
-                f"❌ Shape Missmatch: Expected query_vecs of shape (Q, {self.dim}), got {q.shape}"
+                f"❌ Shape mismatch: expected query_vecs of shape (Q, {self.dim}), got {q.shape}"
             )
 
-        labels, distances = self.index.knn_query(q, k=k)
-        # labels:    (Q, k) int64/uint64 (internal IDs, -1 if missing)
-        # distances: (Q, k) float32 cosine distances
+        num_q = int(q.shape[0]) # number of query vectors
 
-        # Convert distance -> similarity (vectorized).
-        # If label == -1, distance can be garbage; we'll mask below.
-        scores = (1.0 - distances).astype(np.float32, copy=False)
+        if k <= 0:
+            return ([[] for _ in range(num_q)], np.zeros((num_q, 0), dtype=np.float32))
+
+        # Normalize query vectors so dot product equals cosine similarity.
+        q_norm = _l2_normalize_rows(q)
+
+        # FAISS expects contiguous float32 arrays.
+        q_norm = np.ascontiguousarray(q_norm, dtype=np.float32)
+
+        # Perform batched search.
+        # scores: (Q, k) float32
+        # ids:    (Q, k) int64; id == -1 indicates invalid neighbor (not enough vectors)
+        scores, ids = self.index.search(q_norm, k)
+
+        scores = np.asarray(scores, dtype=np.float32)
+        ids = np.asarray(ids, dtype=np.int64)
 
         neighbors: List[List[T]] = []
-        for row_labels in labels:
+        for row_ids in ids:
+            # row_ids is shape (k,) containing the IDs of the top-k neighbors for this query vector.
             row_payloads: List[T] = []
-            for idx in row_labels:
+            for idx in row_ids:
                 if idx < 0:
-                    # Not enough neighbors; skip adding payload.
                     continue
+                # Map FAISS vector ID -> payload
                 row_payloads.append(self.payloads[int(idx)])
+
+            # Now for this specific query vector, we have a list of payloads corresponding to the top-k neighbors. 
+            # Append to the overall neighbors list.                
             neighbors.append(row_payloads)
 
-        # Ensure that scores for invalid (-1) labels are 0.0 for safety.
-        # (This makes thresholding deterministic.)
-        invalid_mask = labels < 0
+        # Ensure scores for invalid IDs are exactly 0.0 (deterministic thresholding).
+        invalid_mask = ids < 0
         if np.any(invalid_mask):
             scores = scores.copy()
             scores[invalid_mask] = 0.0
 
         return neighbors, scores
-

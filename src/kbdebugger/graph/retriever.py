@@ -5,6 +5,7 @@ import json
 import os
 from typing import Any, Literal, Mapping, Optional, Sequence, TypedDict
 
+import rich
 from rich.console import Console
 from rich.panel import Panel
 from rich.text import Text
@@ -197,7 +198,7 @@ class KnowledgeGraphRetriever:
         path = f"logs/02_kg_retrieval_{keyword}_{created_at}.json"
         write_json(path, payload)
 
-        print(f"\n[INFO] Wrote KG retrieval log to {path}")
+        rich.print(f"\n[INFO] Wrote KG retrieval log to {path}")
 
 
     def pretty_print(
@@ -214,7 +215,7 @@ class KnowledgeGraphRetriever:
         - show_props_keys: if set, prints only these keys from edge.properties (in addition to sentence/source/page)
         """
         if not hits:
-            self.console.print("[bold yellow]No matching relations found.[/bold yellow]")
+            self.console.rich.print("[bold yellow]No matching relations found.[/bold yellow]")
             return
 
         if not show_props_keys:
@@ -263,7 +264,7 @@ class KnowledgeGraphRetriever:
                     if k in props and props[k] is not None: # type: ignore
                         body.append(f"[bold]{k}:[/bold] {props[k]}") # type: ignore
 
-            self.console.print(
+            self.console.rich.print(
                 Panel(
                     "\n".join(body),
                     title=header,

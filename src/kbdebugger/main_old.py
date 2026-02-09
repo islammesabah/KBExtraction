@@ -16,7 +16,7 @@ from .extraction.triplet_extraction import extract_triplets
 
 # from .graph.triplet_extraction import extract_triplets
 from .graph import get_graph
-from .graph.utils import map_extracted_triplets_to_graph_relations
+from .graph.utils import map_doc_extracted_triplets_to_graph_relations
 from tqdm import tqdm
 from kbdebugger.compat.langchain import Document
 import rich
@@ -46,7 +46,7 @@ def bulk_upload(documents):
         try:
             for sentence in doc_decomposed:
                 triplets = extract_triplets(sentence)
-                for relation in map_extracted_triplets_to_graph_relations(triplets, doc):
+                for relation in map_doc_extracted_triplets_to_graph_relations(triplets, doc):
                     print(relation)
                     graph.upsert_relation(relation)
                     relation_update += 1
@@ -178,7 +178,7 @@ def get_similar(
                     }
                     """
                     print(f"Extraction Result: {extracted_triplets}")
-                    graph_relations = map_extracted_triplets_to_graph_relations(extracted_triplets, doc)
+                    graph_relations = map_doc_extracted_triplets_to_graph_relations(extracted_triplets, doc)
                     for i, relation in enumerate(graph_relations):
                         # relation_sentence = relation['edge']['properties']['sentence']
                         rich.print(f"👉️ Proposed triplet: [bold yellow]{extracted_triplets['triplets'][i]}[/bold yellow]")

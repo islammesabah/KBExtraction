@@ -1,5 +1,5 @@
 from typing import List, TypedDict, Literal
-from kbdebugger.types import TripletSOP, GraphRelation
+from kbdebugger.types import TripletSubjectObjectPredicate, GraphRelation
 
 # In our codebase, Qualities is typically something like: list[str]
 # We keep it explicit here for clarity and strictness.

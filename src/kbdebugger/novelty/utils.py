@@ -1,15 +1,10 @@
 from __future__ import annotations
 
 import rich
-from rich.console import Console
-from rich.panel import Panel
-from rich.rule import Rule
-from rich.text import Text
 
 from typing import Any, Dict, Mapping, Mapping, Sequence, cast, List
 from dataclasses import asdict
 
-from kbdebugger.utils.json import write_json, now_utc_compact
 from kbdebugger.vector.types import KeptQuality, NeighborHit
 
 from .types import (
@@ -19,7 +14,6 @@ from .types import (
     QualityNoveltyResultRaw,
     QualityNoveltyInput,
 )
-
 
 
 def neighbor_hit_to_view(hit: NeighborHit) -> NeighborView | None:
@@ -148,263 +142,162 @@ def coerce_quality_novelty_result(
     )
 
 
-# def save_novelty_results_json(
-#     *,
-#     kept: Sequence[KeptQuality],
-#     results: Sequence[QualityNoveltyResult]
-# ) -> str:
-#     """
-#     Write novelty comparator results to a readable JSON file.
-
-#     JSON structure:
-#     ```
-#     {
-#         "total": ...,
-#         "counts": {"EXISTING": ..., "PARTIALLY_NEW": ..., "NEW": ...},
-#         "created_at": "...",
-#         "items": [
-#             {
-#                 "quality": "...",
-#                 "max_score": 0.72,
-#                 "decision": "PARTIALLY_NEW",
-#                 "confidence": 0.78,
-#                 "matched_neighbor_sentence": "...",
-#                 "novel_spans": [...],
-#                 "rationale": "..."
-#             },
-#             ...
-#         ]
-#     }
-#     ```
-
-#     Args:
-#         kept: KeptQuality items, i.e., the output from vector filter stage.
-#         results: Novelty results aligned with kept order. i.e., the output from novelty comparator LLM.
-
-#     Returns:
-#         The path written to disk.
-#     """
-#     created_at = now_utc_compact()
-
-#     # Zip keeps things aligned and readable.
-#     items: List[Mapping[str, object]] = []
-#     counts = {"EXISTING": 0, "PARTIALLY_NEW": 0, "NEW": 0}
-
-#     for k, r in zip(kept, results):
-#         r_dict = asdict(r) # typed dataclass -> plain dict
-#         decision = str(r_dict.get("decision", "")).upper()
-#         if decision in counts:
-#             counts[decision] += 1
-
-#         items.append(
-#             {
-#                 "quality": k["quality"],
-#                 "max_score": float(k["max_score"]),
-#                 # Flatten the novelty result into the same object
-#                 **r_dict,
-#                 # "decision": r_dict.get("decision"),
-#                 # "confidence": float(r_dict.get("confidence", 0.5)),
-#                 # "matched_neighbor_sentence": r_dict.get("matched_neighbor_sentence"),
-#                 # "novel_spans": r_dict.get("novel_spans", []),
-#                 # "rationale": r_dict.get("rationale", ""),
-#             }
-#         )
-
-#     total = len(items)
-#     path = f"logs/04_novelty_comparator_results_{created_at}.json"
-
-#     data: Mapping[str, object] = {
-#         "total": total,
-#         "counts": counts,
-#         "created_at": created_at,
-#         "items": items,
-#     }
-
-#     write_json(path, data)
-#     print(f"\n[INFO] 🧠🧾 Wrote novelty comparator results to {path}")
-#     return path
-
-
-def save_novelty_results_json(results: Sequence[QualityNoveltyResult]) -> str:
+# ============================
+# Batching utilities
+# ============================
+def kept_batch_to_prompt_items(
+        batch: Sequence[KeptQuality], 
+        *, 
+        id_offset: int
+    ) -> List[Dict[str, Any]]:
     """
-    Write novelty comparator results to a readable JSON file.
-
-    JSON structure:
-    {
-      "total": ...,
-      "counts": {"EXISTING": ..., "PARTIALLY_NEW": ..., "NEW": ...},
-      "created_at": "...",
-      "items": [
-        {
-          "quality": "...",
-          "max_score": 0.72,
-          "decision": "PARTIALLY_NEW",
-          "confidence": 0.78,
-          "matched_neighbor_sentence": "...",
-          "novel_spans": [...],
-          "rationale": "..."
-        }
-      ]
-    }
-
-    Args:
-        results: Novelty results (each already carries its quality context).
-
-    Returns:
-        The path written to disk.
-    """
-    created_at = now_utc_compact()
-
-    counts = {"EXISTING": 0, "PARTIALLY_NEW": 0, "NEW": 0}
-    items: List[Mapping[str, object]] = []
-
-    for r in results:
-        decision_str = str(r.decision)  # relies on NoveltyDecision.__str__ -> value
-        decision_key = decision_str.upper()
-        if decision_key in counts:
-            counts[decision_key] += 1
-
-        d = asdict(r)
-
-        # Make JSON serialization 100% deterministic/robust:
-        d["decision"] = decision_str # so that enum becomes string
-        d["novel_spans"] = list(r.novel_spans) # ensure list, not other Sequence
-
-        items.append(d)
-
-    path = f"logs/04_novelty_comparator_results_{created_at}.json"
-
-    data: Mapping[str, object] = {
-        "total": len(results),
-        "counts": counts,
-        "created_at": created_at,
-        "results": items,
-    }
-
-    write_json(path, data)
-    print(f"\n[INFO] 🧠🧾 Wrote novelty comparator results to {path}")
-    return path
-
-
-def pretty_print_novelty_results(
-    *,
-    kept: Sequence[KeptQuality],
-    results: Sequence[QualityNoveltyResult],
-    title: str = "Novelty Comparator Results",
-    max_items_to_show: int | None = None,
-    console: Console | None = None,
-) -> None:
-    """
-    Pretty-print novelty comparator results using rich.
+    Convert a batch of KeptQuality objects into the prompt JSON schema for the batched comparator.
 
     Parameters
     ----------
-    kept:
-        Kept qualities produced by the Vector Similarity Filter.
-        (We use these for quality text + max_score only; we do not show neighbors here.)
+    batch:
+        Batch of kept qualities.
 
-    results:
-        Novelty comparator results aligned with `kept` order.
+    id_offset:
+        Integer offset added to each item's index to create stable ids across batches.
 
-    title:
-        Title shown at the top of the output.
+    Returns
+    -------
+    list[dict[str, Any]]
+        Items compatible with the batched prompt contract.
 
-    max_items_to_show:
-        Optional cap on how many items to display (useful for large runs).
-        If None, prints all.
+    Notes
+    -----
+    We use explicit integer ids to enforce alignment between:
+    - input items (kept qualities)
+    - output results produced by the LLM
 
-    console:
-        Optional rich Console. If None, a new Console is created.
+    This is crucial: batched calls must be order-robust.
     """
-    c = console or Console()
+    items: List[Dict[str, Any]] = []
+    for i, kept in enumerate(batch):
+        novelty_input = kept_quality_to_novelty_input(kept)
+        d = asdict(novelty_input)
+        d["id"] = id_offset + i
+        items.append(d)
+    return items
 
-    n = min(len(kept), len(results))
-    if max_items_to_show is not None:
-        n = min(n, max(0, int(max_items_to_show)))
 
-    c.rule(f"[bold cyan]{title}[/bold cyan]")
+def _extract_batched_results_by_id(parsed: Mapping[str, Any]) -> Dict[int, Mapping[str, Any]]:
+    """
+    Extract the batched novelty results into an id -> payload mapping.
 
-    if n == 0:
-        c.print("[yellow]No novelty results to display.[/yellow]")
-        return
+    Expected input format
+    ---------------------
+    parsed = {
+      "results": [
+        {"id": 1, "decision": "...", "rationale": "...", ...},
+        {"id": 2, "decision": "...", "rationale": "...", ...},
+        ...
+      ]
+    }
 
-    # ----------------------------
-    # Summary counts
-    # ----------------------------
-    counts: Dict[str, int] = {"EXISTING": 0, "PARTIALLY_NEW": 0, "NEW": 0}
-    for r in results[:n]:
-        # With __str__ overridden on NoveltyDecision, this is safe and clean.
-        key = str(r.decision).upper()
-        if key in counts:
-            counts[key] += 1
+    Expected output format
+    ----------------------
+    {
+        1: {"decision": "...", "rationale": "...", ...},  # payload for item with id 1
+        2: {"decision": "...", "rationale": "...", ...},  # payload for item with id 2
+        ...
+    }
 
-    summary = (
-        f"[bold]Total shown:[/bold] {n}\n"
-        f"[bold green]NEW:[/bold green] {counts['NEW']}    "
-        f"[bold yellow]PARTIALLY_NEW:[/bold yellow] {counts['PARTIALLY_NEW']}    "
-        f"[bold red]EXISTING:[/bold red] {counts['EXISTING']}"
-    )
-    c.print(Panel(summary, border_style="cyan", padding=(1, 2)))
+    Returns
+    -------
+    dict[int, Mapping[str, Any]]
+        Mapping from item id -> novelty payload dict.
 
-    # ----------------------------
-    # Group by decision (optional sections)
-    # ----------------------------
-    # We print in original order by default (more helpful for tracing),
-    # but we add a per-item colored border and header.
-    c.print(Rule("[bold]📌 Per-quality novelty decisions[/bold]"))
+    Raises
+    ------
+    ValueError
+        If the response structure is invalid (missing results array, wrong types).
+    """
+    results_raw = parsed.get("results")
+    if not isinstance(results_raw, list):
+        raise ValueError("Batched novelty response missing 'results' array.")
 
-    for i in range(n):
-        k = kept[i]
-        r = results[i]
+    id_to_response: Dict[int, Mapping[str, Any]] = {}
 
-        quality = str(k["quality"])
-        max_score = float(k["max_score"])
-        decision = str(r.decision)  # thanks to __str__ override
-        conf = float(r.confidence)
+    for entry in results_raw:
+        if not isinstance(entry, dict):
+            continue
 
-        # Color coding
-        if r.decision == NoveltyDecision.NEW:
-            border = "green"
-            badge = "🆕 NEW"
-            badge_style = "bold green"
-        elif r.decision == NoveltyDecision.PARTIALLY_NEW:
-            border = "yellow"
-            badge = "🧩 PARTIALLY_NEW"
-            badge_style = "bold yellow"
-        else:
-            border = "red"
-            badge = "♻️ EXISTING"
-            badge_style = "bold red"
+        rid = entry.get("id")
 
-        header = Text()
-        header.append(f"[{i+1}] ", style="bold cyan")
-        header.append(badge, style=badge_style)
-        header.append("  ")
-        header.append(f"(max_score={max_score:.3f}, confidence={conf:.2f})", style="dim")
+        if not isinstance(rid, int):
+            continue
+        
+        # payload is the entry itself minus "id"
+        payload = dict(entry)
+        payload.pop("id", None)
 
-        body_lines: List[str] = []
-        body_lines.append(f"[bold]Quality:[/bold] {quality}")
-        body_lines.append(f"[bold]Decision:[/bold] {decision}")
-        body_lines.append(f"[bold]Rationale:[/bold] {r.rationale}")
+        id_to_response[rid] = payload
 
-        if r.novel_spans:
-            spans = ", ".join(f"[magenta]{s}[/magenta]" for s in r.novel_spans)
-            body_lines.append(f"[bold]Novel spans:[/bold] {spans}")
-        else:
-            body_lines.append("[bold]Novel spans:[/bold] [dim](none)[/dim]")
+    return id_to_response
 
-        if r.matched_neighbor_sentence:
-            body_lines.append(
-                f"[bold]Matched neighbor sentence:[/bold] {r.matched_neighbor_sentence}"
-            )
-        else:
-            body_lines.append("[bold]Matched neighbor sentence:[/bold] [dim](none)[/dim]")
 
-        c.print(
-            Panel(
-                "\n".join(body_lines),
-                title=header,
-                border_style=border,
-                padding=(1, 2),
-            )
+def coerce_batched_novelty_response(
+    parsed: Mapping[str, Any],
+    *,
+    id_to_input: Mapping[int, QualityNoveltyInput],
+) -> List[QualityNoveltyResult]:
+    """
+    Parse + validate batched LLM response and coerce into typed results.
+
+    This function enforces alignment between:
+    - the ids we sent in the prompt
+    - the ids the model returned
+
+    Then it reuses the single-item coercion routine for each payload.
+
+    Parameters
+    ----------
+    parsed:
+        JSON object produced by ensure_json_object(...).
+
+    id_to_input:
+        Mapping from item id -> original typed novelty input.
+        
+        1. We need this to enrich the result with the original `quality` text and `max_score`,
+        since the LLM response doesn't have to include those (and often shouldn't, to save tokens and reduce error surface).
+
+        2. Also we use to validate that the LLM returned results for all expected ids and no unexpected ids.
+
+    Returns
+    -------
+    list[QualityNoveltyResult]
+        Results aligned by ascending id order (stable and deterministic).
+
+    Raises
+    ------
+    ValueError
+        If the model output is missing ids or contains unexpected ids.
+    """
+    id_to_response = _extract_batched_results_by_id(parsed)
+
+    expected_ids = set(id_to_input.keys()) # ids that we sent to the LLM prompt
+    received_ids = set(id_to_response.keys()) # ids that the LLM returned in its response
+
+    missing = sorted(expected_ids - received_ids)
+    extra = sorted(received_ids - expected_ids)
+
+    if missing or extra:
+        raise ValueError(
+            "Batched novelty response id mismatch.\n"
+            f"Missing ids: {missing}\n"
+            f"Extra ids: {extra}"
         )
+
+    # Single source of truth for decision parsing / defaults / guards:
+    out: List[QualityNoveltyResult] = []
+    for rid in sorted(expected_ids):
+        novelty_input = id_to_input[rid]
+        payload = id_to_response[rid]
+        out.append(
+            coerce_quality_novelty_result(payload, novelty_input=novelty_input)
+        )
+
+    return out

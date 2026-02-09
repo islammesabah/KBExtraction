@@ -34,6 +34,7 @@ class QualityNoveltyInput:
     Attributes:
         quality: the extracted sentence
         neighbors: up to 3 neighbor edges (score + sentence)
+        max_score: maximum similarity score between the quality and its neighbors.
     """
     quality: str
     neighbors: Sequence[NeighborView]

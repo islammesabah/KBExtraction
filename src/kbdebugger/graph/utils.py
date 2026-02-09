@@ -1,6 +1,6 @@
 from kbdebugger.types import EdgeProperties, ExtractionResult, GraphRelation
 from kbdebugger.compat.langchain import Document
-from typing import List, Iterable, Mapping, Any
+from typing import List, Iterable, Mapping, Any, Optional
 
 
 def normalize_text(text: str) -> str:
@@ -14,7 +14,7 @@ def normalize_text(text: str) -> str:
     return clean
 
 
-def map_extracted_triplets_to_graph_relations(
+def map_doc_extracted_triplets_to_graph_relations(
     extraction: ExtractionResult,
     source_doc: Document,
     # *,
@@ -52,8 +52,9 @@ def map_extracted_triplets_to_graph_relations(
     return rels
 
 
-def map_extracted_triplets_to_graph_relations_(
+def map_extracted_triplets_to_graph_relations(
     extraction: ExtractionResult,
+    source: Optional[str] = None,
 ) -> List[GraphRelation]:
     """
     Map an ExtractionResult to graph-ready relation dicts.
@@ -70,13 +71,10 @@ def map_extracted_triplets_to_graph_relations_(
         props: EdgeProperties = {
             # for provenance
             'sentence': sentence_text,
+            **({'source': source} if source else {})  # only include if source is provided
             # 'original_sentence': getattr(source_doc, "page_content", ""),
             # **getattr(source_doc, "metadata", {})  # type: ignore[arg-type]
         }
-
-        # if include_sentence:
-        #     # human-readable extracted sentence (from the extractor)
-        #     props["sentence"] = sentence_text
 
         rels.append({
             "source": { "label": normalize_text(subj) },
@@ -85,6 +83,7 @@ def map_extracted_triplets_to_graph_relations_(
         })
 
     return rels
+
 
 def rows_to_graph_relations(
     rows: Iterable[Mapping[str, Any]],

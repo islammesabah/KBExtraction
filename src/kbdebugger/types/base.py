@@ -8,11 +8,11 @@ Subject = str
 Predicate = str
 Object = str
 
-TripletSOP = tuple[Subject, Object, Predicate]  # (Subject, Object, Predicate)
+TripletSubjectObjectPredicate = tuple[Subject, Object, Predicate]  # (Subject, Object, Predicate)
 
 class ExtractionResult(TypedDict):
     sentence: str
-    triplets: list[TripletSOP]  # [["Subject", "Object", "Relation"], ...]
+    triplets: list[TripletSubjectObjectPredicate]  # [["Subject", "Object", "Relation"], ...]
 
 class GraphEnd(TypedDict):
     label: str

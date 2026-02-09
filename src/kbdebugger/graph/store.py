@@ -5,8 +5,8 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any, List, Optional, Sequence, cast
 from typing_extensions import LiteralString
-
 from dotenv import load_dotenv
+from rich.progress import track
 
 from neo4j import GraphDatabase, Driver, Query
 from neo4j.exceptions import Neo4jError
@@ -302,7 +302,10 @@ class GraphStore:
         succeeded = 0
         errors: List[str] = []
 
-        for i, rel in enumerate(relations, start=1):
+        for i, rel in track(
+            enumerate(relations, start=1), 
+            description="➕🛸 Upserting triplets (relations) into Knowledge Graph",
+            total=len(relations)):
             try:
                 self.upsert_relation(rel)
                 succeeded += 1

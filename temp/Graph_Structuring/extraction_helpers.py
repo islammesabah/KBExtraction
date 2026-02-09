@@ -1,4 +1,4 @@
-from core.types import ExtractionResult, TripletSOP
+from core.types import ExtractionResult, TripletSubjectObjectPredicate
 from typing import Any
 import re
 
@@ -42,8 +42,8 @@ def _coerce_to_result(obj: Any, sentence: str) -> ExtractionResult:
     out_sentence = obj.get("sentence", sentence)
     triplets = obj.get("triplets", [])
 
-    # normalize triplets to list[TripletSOP]
-    norm_triplets: list[TripletSOP] = []
+    # normalize triplets to list[TripletSubjectObjectPredicate]
+    norm_triplets: list[TripletSubjectObjectPredicate] = []
     if isinstance(triplets, list):
         for item in triplets:
             # accept list/tuple of len 3

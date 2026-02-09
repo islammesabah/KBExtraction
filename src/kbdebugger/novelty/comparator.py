@@ -1,13 +1,18 @@
 """
 Novelty comparator for extracted "quality" sentences.
 
-This module defines:
-- Typed input structures for a candidate quality and its top-k KG neighbors
-- A strict JSON output schema for the comparator LLM
+Novelty comparator for extracted "quality" sentences.
 
-This module integrates with the project's existing infrastructure:
-- kbdebugger.llm.llm_protocol.LLMResponder
-- kbdebugger.prompts.render_prompt + examples loaded from kbdebugger.prompts.examples
+This module supports two execution modes:
+
+1) Single-item classification
+   - easiest to debug
+   - one LLM call per kept quality
+
+2) Batched classification (recommended for throughput)
+   - reduces LLM call overhead by grouping items into batches
+   - still keeps strict alignment using stable integer ids
+   - validates that the model returns exactly one result per input item
 
 The comparator decides whether a candidate quality is:
 - EXISTING: no meaningful new semantic value compared to its neighbors
@@ -19,12 +24,14 @@ from __future__ import annotations
 
 from dataclasses import asdict
 
-import json
-from typing import List, Sequence
+import math
+from typing import Any, Dict, List, Sequence
 
 from kbdebugger.llm.model_access import respond
-from kbdebugger.prompts import load_json_resource, render_prompt
+from kbdebugger.prompts import build_prompt, build_prompt_batch
 from kbdebugger.vector.types import KeptQuality
+from kbdebugger.utils import batched
+from rich.progress import track
 from .types import (
     QualityNoveltyResult,
     QualityNoveltyInput,
@@ -32,35 +39,13 @@ from .types import (
 from kbdebugger.utils.json import ensure_json_object
 from .utils import (
     coerce_quality_novelty_result, 
-    kept_quality_to_novelty_input, 
+    kept_quality_to_novelty_input,
+    coerce_batched_novelty_response, 
+)
+from .logging import (
     save_novelty_results_json,
     pretty_print_novelty_results
 )
-
-
-def build_quality_novelty_prompt(item: QualityNoveltyInput) -> str:
-    """
-    Build the comparator prompt by injecting:
-    - examples_json: few-shot examples loaded from prompts/examples
-    - input_json: the current item serialized as JSON
-
-    Args:
-        item: quality + neighbors
-
-    Returns:
-        Rendered prompt string.
-    """
-    examples = load_json_resource("quality_novelty_comparator")
-    examples_json = json.dumps(examples, ensure_ascii=False)
-    
-    # Convert dataclass -> JSON (typed object, no ad-hoc dicts)
-    input_json = json.dumps(asdict(item), ensure_ascii=False)
-
-    return render_prompt(
-        "quality_novelty_comparator",
-        examples_json=examples_json,
-        input_json=input_json,
-    )
 
 # -------------------------
 # Public API
@@ -72,22 +57,35 @@ def classify_quality_novelty(
     temperature: float = 0.0,
 ) -> QualityNoveltyResult:
     """
-    End-to-end novelty classification:
-      - builds the prompt
-      - calls the LLM via respond()
-      - parses with ensure_json_object()
-      - coerces to NoveltyResult
+    Classify novelty for a single kept quality (one LLM call).
 
-    Args:
-        item: KeptQuality produced by VectorSimilarityFilter.
-        max_tokens: LLM generation budget.
-        temperature: decoding temperature.
+    Kept as a debugging-friendly baseline.
+
+    Parameters
+    ----------
+    kept:
+        A single kept quality with its nearest neighbors.
+
+    max_tokens:
+        Maximum generation tokens for the LLM output for this one response.
+
+    temperature:
+        Decoding temperature.
 
     Returns:
-        QualityNoveltyResult instance.
+    -----------
+    QualityNoveltyResult
+        Typed novelty decision including decision label, rationale, novel spans, etc.
+
     """
+    # Map KeptQuality to the minimal input schema expected by the prompt.
     novelty_input = kept_quality_to_novelty_input(kept)
-    prompt = build_quality_novelty_prompt(novelty_input)
+
+    prompt = build_prompt(
+        prompt_name="quality_novelty_comparator",
+        examples_name="quality_novelty_comparator",
+        input_obj=novelty_input,
+    )
     response = respond(
         prompt,
         max_tokens=max_tokens,
@@ -102,26 +100,123 @@ def classify_quality_novelty(
 def classify_qualities_novelty(
     kept_qualities: Sequence[KeptQuality],
     *,
-    max_tokens: int = 700,
+    max_tokens: int = 2048,
     temperature: float = 0.0,
+    use_batch: bool = True,
+    batch_size: int = 5,
 ) -> List[QualityNoveltyResult]:
     """
-    Convenience helper: classify an entire list of kept qualities.
+    Classify novelty for a list of kept qualities.
 
-    This is intentionally sequential (one LLM call per kept item) because the
-    decision depends on each item's unique neighbors.
+    This function supports:
+    - sequential mode (use_batch=False): easiest to debug
+    - ⚡️ batched mode (use_batch=True): fewer LLM calls, much faster
 
-    Returns:
-        List of NoveltyResult aligned with `kept` order.
+    Parameters
+    ----------
+    kept_qualities:
+        List of kept qualities (each includes neighbor relations and similarity scores).
+
+    max_tokens:
+        Token budget for the LLM output.
+
+        IMPORTANT:
+        - In sequential mode, this is "per item".
+        - In batched mode, this is "per batch".
+          ⚡️ Increase it when you increase `batch_size` or when rationales get long.
+
+    temperature:
+        Decoding temperature.
+
+    use_batch:
+        If True, run batched LLM calls. If False, run sequential.
+
+    batch_size:
+        Number of kept items per LLM call (batched mode only).
+
+    Returns
+    -------
+    list[QualityNoveltyResult]
+        Typed novelty results aligned with the input order.
+
+    Raises
+    ------
+    ValueError
+        If the batched LLM response does not return exactly one result per input id.
     """
-    results: List[QualityNoveltyResult] = []
-    
-    for kept_quality in kept_qualities:
-        result = classify_quality_novelty(kept_quality, max_tokens=max_tokens, temperature=temperature)
-        results.append(result)
+    if not kept_qualities:
+        return []
 
-    pretty_print_novelty_results(kept=kept_qualities, results=results)
-    
-    save_novelty_results_json(results)
-    
-    return results
+    # -------------------------
+    # Sequential mode
+    # -------------------------
+    if not use_batch:
+        results: List[QualityNoveltyResult] = []
+        for kept in kept_qualities:
+            results.append(
+                classify_quality_novelty(
+                    kept,
+                    max_tokens=max_tokens,
+                    temperature=temperature,
+                )
+            )
+        pretty_print_novelty_results(kept=kept_qualities, results=results)
+        save_novelty_results_json(results)
+        return results
+
+    # -------------------------
+    # Batched mode
+    # -------------------------
+    all_results: List[QualityNoveltyResult] = []
+    global_id = 0
+
+    num_batches = math.ceil(len(kept_qualities) / batch_size) 
+
+    for group in track(
+        batched(list(kept_qualities), batch_size=batch_size), 
+        description=f"🪧 LLM Novelty Comparator: classifying novelty for kept qualities. batch size={batch_size}",
+        total=num_batches,
+    ):
+        # 1) Map each kept quality to the minimal input schema expected by the prompt 
+        novelty_inputs: List[QualityNoveltyInput] = [
+            kept_quality_to_novelty_input(k) for k in group
+        ]
+
+        # 2) 🏗️ Build prompt items with stable integer ids.
+        #    We send dicts to the prompt (JSON contract), but we keep the typed
+        #    objects (of type: QualityNoveltyInput) separately for coercion and enrichment.
+        items_for_prompt: List[Dict[str, Any]] = []
+        id_to_input: Dict[int, QualityNoveltyInput] = {}
+
+        for i, ni in enumerate(novelty_inputs):
+            rid = global_id + i
+            id_to_input[rid] = ni
+
+            # The novelty input dict for the prompt includes all fields of ni + the stable "id" field.
+            d = asdict(ni)
+            d["id"] = rid
+            items_for_prompt.append(d)
+
+        # 3) Build the batched prompt using the shared prompt-builder.
+        prompt = build_prompt_batch(
+            prompt_name="quality_novelty_comparator_batch",
+            examples_name="quality_novelty_comparator",
+            items=items_for_prompt,
+            # items_var="items_json",
+            # wrapper_key="items",
+        )
+
+        # 4) Call the LLM once for the entire batch.
+        response = respond(prompt, max_tokens=max_tokens, temperature=temperature, json_mode=True)
+        parsed = ensure_json_object(response)
+
+        # 5) Parse + validate + coerce using shared coercion logic.
+        batch_results = coerce_batched_novelty_response(parsed, id_to_input=id_to_input)
+        all_results.extend(batch_results)
+
+        global_id += len(group)
+
+    # all_results is in ascending id order, which matches original kept order.
+    pretty_print_novelty_results(kept=kept_qualities, results=all_results)
+    save_novelty_results_json(all_results)
+    return all_results

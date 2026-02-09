@@ -1,9 +1,11 @@
+import os
 from random import random
 import re
 from time import time
-from typing import Any, Callable, Iterator, List, Optional, Sequence, TypeVar
+from typing import Any, Callable, List, Optional, TypeVar
 
-from kbdebugger.types import ExtractionResult, TripletSOP
+from kbdebugger.novelty.types import NoveltyDecision
+from kbdebugger.types import ExtractionResult, TripletSubjectObjectPredicate
 from kbdebugger.utils.json import now_utc_compact, write_json
 from .types import Qualities
 from typing import Any, Dict
@@ -12,11 +14,11 @@ from typing import Any, Dict
 def coerce_triplets(item: Dict[str, Any], fallback_sentence: str) -> ExtractionResult:
     """
     Coerce a single item dict to ExtractionResult:
-    { "sentence": str, "triplets": list[TripletSOP] }
+    { "sentence": str, "triplets": list[TripletSubjectObjectPredicate] }
     """
     sentence = item.get("sentence", fallback_sentence)
     raw_triplets = item.get("triplets", [])
-    triplets: list[TripletSOP] = []
+    triplets: list[TripletSubjectObjectPredicate] = []
 
     if isinstance(raw_triplets, list):
         for t in raw_triplets:
@@ -180,37 +182,42 @@ def coerce_batch_qualities(
 
     return out
 
-
-T = TypeVar("T")
-
-
-def batched(items: Sequence[T], batch_size: int) -> Iterator[List[T]]:
+def load_triplet_qualifying_decisions() -> set[NoveltyDecision]:
     """
-    Yield consecutive batches from a sequence.
+    Load which novelty decisions qualify a quality for triplet extraction.
 
-    Parameters
-    ----------
-    items:
-        A finite, indexable sequence.
-    batch_size:
-        Number of items per batch. Must be >= 1.
+    Environment variable:
+        KB_TRIPLET_QUALIFY_DECISIONS=PARTIALLY_NEW,NEW
 
-    Yields
-    ------
-    list[T]
-        Lists of size `batch_size`, except possibly the final batch.
-
-    Notes
-    -----
-    We keep this in pure-Python (no itertools recipes) for readability and to
-    avoid surprising behavior with iterators/generators in debugging sessions.
+    Defaults to:
+        {"PARTIALLY_NEW", "NEW"}
     """
-    if batch_size < 1:
-        raise ValueError(f"batch_size must be >= 1, got {batch_size}")
+    raw = os.getenv("KB_TRIPLET_QUALIFY_DECISIONS", "").strip()
 
-    for i in range(0, len(items), batch_size):
-        yield list(items[i : i + batch_size])
+    fallback = {
+        NoveltyDecision.PARTIALLY_NEW,
+        NoveltyDecision.NEW,
+    }
 
+    if not raw:
+        return fallback
+    
+    decisions: set[NoveltyDecision] = set()
+    for token in raw.split(","):
+        token = token.strip().upper()
+        if not token:
+            continue
+        try:
+            decisions.add(NoveltyDecision(token))
+        except ValueError:
+            # Ignore unknown tokens silently
+            continue
+
+    # Safety fallback
+    if not decisions:
+        decisions = fallback
+
+    return decisions
 
 # ---------------------------------------------------------------------------
 # Parallelism helpers

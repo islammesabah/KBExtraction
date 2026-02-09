@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import List, Dict, Any, Optional, Tuple
 
 import rich
+from rich.progress import track
 
 from keybert import KeyBERT
 from sentence_transformers import SentenceTransformer, util as sbert_util
@@ -60,7 +61,11 @@ def run_keybert_matching(
     matched: List[ParagraphMatch] = []
     unmatched: List[ParagraphMatch] = []
 
-    for i, paragraph in enumerate(paragraphs):
+    for i, paragraph in track(
+        enumerate(paragraphs),
+        description="🔎 KeyBERT: scanning paragraphs",
+        total=len(paragraphs),
+    ):
         # Step 1: Extract top-n keywords from paragraph
         extracted_keywords = kw_model.extract_keywords(
             paragraph,
@@ -179,4 +184,4 @@ def save_keybert_matched_paragrahs(
 
     out_path = f"{output_dir}/01.1.6_keybert_paragraph_matched_paragraphs_{keyword}_{timestamp}.json"
     write_json(out_path, payload)
-    rich.print(f"[INFO] Saved KeyBERT paragraph match matched_paragrahs to {out_path}")
+    rich.print(f"[INFO] Saved KeyBERT matched paragraphs to {out_path}")

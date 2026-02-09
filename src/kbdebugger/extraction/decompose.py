@@ -1,11 +1,13 @@
 from __future__ import annotations
 
+import math
 import os
 from typing import List, Optional, Sequence, Any, Tuple
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from rich.progress import track
 
 from kbdebugger.compat.langchain import Document
-from kbdebugger.extraction.utils import batched
+from kbdebugger.utils import batched
 from .sentence_to_qualities import build_sentence_decomposer
 from .chunk_to_qualities import build_chunk_decomposer, build_chunk_batch_decomposer
 from .types import Qualities, TextDecomposer, BatchTextDecomposer, DecomposeMode
@@ -157,7 +159,7 @@ def decompose_documents(
     if mode == DecomposeMode.CHUNKS and use_batch_decomposer:
         # groups is a list of lists of chunk texts.
         # e.g. Each list has length == batch_size, except possibly the last one.
-        groups = list(batched(texts, batch_size=batch_size))
+        num_batches = math.ceil(len(texts) / batch_size)
 
         # Parallelism is optional; keep it controlled.
         if parallel:
@@ -203,7 +205,11 @@ def decompose_documents(
                     all_qualities.extend(qualities)
 
         else:
-            for group in groups:
+            for group in track(
+                batched(texts, batch_size=batch_size), 
+                description=f"🧷 LLM Decomposer: paragraphs → qualities (batch size={batch_size})",
+                total=num_batches,
+            ):
                 group_results: List[Qualities] = _chunk_batch_to_qualities_decomposer(group)
                 # Flatten group results into the global list.
                 for qualities in group_results:

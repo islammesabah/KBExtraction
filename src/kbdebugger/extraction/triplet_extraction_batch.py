@@ -1,15 +1,23 @@
+import math
 import os
 from typing import Iterable, List, Sequence
 from kbdebugger.llm.hf_backend import use_hf_local, get_hf_causal_model
 from kbdebugger.llm.model_access import respond
-from kbdebugger.novelty.types import NoveltyDecision, QualityNoveltyResult
+from kbdebugger.novelty.types import QualityNoveltyResult
 from kbdebugger.prompts import load_json_resource, render_prompt
 from kbdebugger.utils.json import ensure_json_object
-from kbdebugger.extraction.utils import coerce_triplets_batch, save_results_json
 from kbdebugger.types import ExtractionResult
+from kbdebugger.utils import batched
+from kbdebugger.extraction.utils import (
+    coerce_triplets_batch, 
+    save_results_json,
+    load_triplet_qualifying_decisions,
+)
 import json
+from kbdebugger.vector.types import KeptQuality
 import torch # type: ignore
 import rich
+from rich.progress import track
 
 def build_triplet_extraction_prompt_batch(sentences: list[str]) -> str:
     """
@@ -89,11 +97,6 @@ def _extract_batch_via_hf(sentences: list[str]) -> list[ExtractionResult]:
     return coerce_triplets_batch(parsed, sentences)
 
 
-
-def _batched(seq: Sequence[str], batch_size: int) -> Iterable[List[str]]:
-    for i in range(0, len(seq), batch_size):
-        yield list(seq[i : i + batch_size])
-
 def extract_triplets_batch(
     sentences: Iterable[str],
     *,
@@ -105,7 +108,13 @@ def extract_triplets_batch(
 
     all_results: List[ExtractionResult] = []
 
-    for batch in _batched(sent_list, batch_size):
+    num_batches = math.ceil(len(sent_list) / batch_size) # No iterator materialization
+
+    for batch in track(
+        batched(sent_list, batch_size),
+        description=f"🧬 Triplet extraction: sentences → S-P-O. (batch size={batch_size})",
+        total=num_batches,
+    ):
         if use_hf_local():
             batch_results = _extract_batch_via_hf(batch)
         else:
@@ -115,45 +124,6 @@ def extract_triplets_batch(
     save_results_json(all_results)
     
     return all_results
-
-
-
-def _load_triplet_qualifying_decisions() -> set[NoveltyDecision]:
-    """
-    Load which novelty decisions qualify a quality for triplet extraction.
-
-    Environment variable:
-        KB_TRIPLET_QUALIFY_DECISIONS=PARTIALLY_NEW,NEW
-
-    Defaults to:
-        {"PARTIALLY_NEW", "NEW"}
-    """
-    raw = os.getenv("KB_TRIPLET_QUALIFY_DECISIONS", "").strip()
-
-    fallback = {
-        NoveltyDecision.PARTIALLY_NEW,
-        NoveltyDecision.NEW,
-    }
-
-    if not raw:
-        return fallback
-    
-    decisions: set[NoveltyDecision] = set()
-    for token in raw.split(","):
-        token = token.strip().upper()
-        if not token:
-            continue
-        try:
-            decisions.add(NoveltyDecision(token))
-        except ValueError:
-            # Ignore unknown tokens silently
-            continue
-
-    # Safety fallback
-    if not decisions:
-        decisions = fallback
-
-    return decisions
 
 
 def extract_triplets_from_novelty_results(
@@ -179,7 +149,7 @@ def extract_triplets_from_novelty_results(
     Returns:
         List of ExtractionResult.
     """
-    qualifying_decisions = _load_triplet_qualifying_decisions()
+    qualifying_decisions = load_triplet_qualifying_decisions()
 
     sentences: List[str] = [
         r.quality
@@ -190,6 +160,26 @@ def extract_triplets_from_novelty_results(
     if not sentences:
         return []
 
+    return extract_triplets_batch(
+        sentences,
+        batch_size=batch_size,
+    )
+
+
+def extract_triplets_from_kept_qualities(
+    kept_qualities: Sequence[KeptQuality],
+    *,
+    batch_size: int = 5,
+) -> List[ExtractionResult]:
+
+    sentences: List[str] = [
+        q["quality"]
+        for q in kept_qualities
+    ]
+
+    if not sentences:
+        return []
+    
     return extract_triplets_batch(
         sentences,
         batch_size=batch_size,

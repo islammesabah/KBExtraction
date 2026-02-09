@@ -41,28 +41,28 @@ fi
 echo "🐍 $(python --version) @ $(which python)"
 
 
-# ------------------ Portable hnswlib install (wheelhouse) ------------------
-# Goal: avoid SIGILL when SLURM places you on a different CPU node.
-# One-time: build a portable wheel into ./.wheelhouse (see scripts/build_portable_wheels.sh).
-# Every run: reinstall from wheelhouse quickly and deterministically.
+# # ------------------ Portable hnswlib install (wheelhouse) ------------------
+# # Goal: avoid SIGILL when SLURM places you on a different CPU node.
+# # One-time: build a portable wheel into ./.wheelhouse (see scripts/build_portable_wheels.sh).
+# # Every run: reinstall from wheelhouse quickly and deterministically.
 
-WHEELHOUSE="${WHEELHOUSE:-/netscratch/abuali/wheelhouse}"
-NUMPY_PIN="${NUMPY_PIN:-1.26.4}"
+# WHEELHOUSE="${WHEELHOUSE:-/netscratch/abuali/wheelhouse}"
+# NUMPY_PIN="${NUMPY_PIN:-1.26.4}"
 
-install_hnswlib_from_wheelhouse() {
-  if [ -d "$WHEELHOUSE" ] && ls -1 "$WHEELHOUSE"/hnswlib-*.whl >/dev/null 2>&1; then
-    echo "📦 Installing hnswlib from wheelhouse: $WHEELHOUSE (no deps)"
-    python -m pip install --no-index --no-deps --find-links="$WHEELHOUSE" --force-reinstall hnswlib >/dev/null
-    python -m pip install --force-reinstall "numpy==${NUMPY_PIN}" >/dev/null || true
-    python -c "import hnswlib, numpy as np; print('✅ hnswlib:', hnswlib.__file__); print('✅ numpy:', np.__version__)"
-  else
-    echo "⚠️ Wheelhouse missing/empty at: $WHEELHOUSE"
-    echo "   Build once with: python -m pip wheel --no-build-isolation --no-binary=:all: --no-deps -w $WHEELHOUSE hnswlib"
-  fi
-}
+# install_hnswlib_from_wheelhouse() {
+#   if [ -d "$WHEELHOUSE" ] && ls -1 "$WHEELHOUSE"/hnswlib-*.whl >/dev/null 2>&1; then
+#     echo "📦 Installing hnswlib from wheelhouse: $WHEELHOUSE (no deps)"
+#     python -m pip install --no-index --no-deps --find-links="$WHEELHOUSE" --force-reinstall hnswlib >/dev/null
+#     python -m pip install --force-reinstall "numpy==${NUMPY_PIN}" >/dev/null || true
+#     python -c "import hnswlib, numpy as np; print('✅ hnswlib:', hnswlib.__file__); print('✅ numpy:', np.__version__)"
+#   else
+#     echo "⚠️ Wheelhouse missing/empty at: $WHEELHOUSE"
+#     echo "   Build once with: python -m pip wheel --no-build-isolation --no-binary=:all: --no-deps -w $WHEELHOUSE hnswlib"
+#   fi
+# }
 
-install_hnswlib_from_wheelhouse
-# --------------------------------------------------------------------------
+# install_hnswlib_from_wheelhouse
+# # --------------------------------------------------------------------------
 
 
 # print which venv got activated (great for debugging)

@@ -7,23 +7,9 @@ import rich
 
 from langchain_docling.loader import DoclingLoader
 
-# from langchain_core.documents import Document
 from kbdebugger.compat.langchain import (
     Document,
 )
-
-# from docling import (
-#     InputFormat, 
-#     PdfFormatOption, 
-#     PdfPipelineOptions, 
-#     DoclingParseV2DocumentBackend
-# )
-# from docling.converter import DocumentConverter
-# from docling.document_converter import (
-#     DocumentConverter,
-#     PdfFormatOption,
-#     InputFormat
-# )
 
 from docling.datamodel.base_models import InputFormat
 from docling.datamodel.pipeline_options import PdfPipelineOptions

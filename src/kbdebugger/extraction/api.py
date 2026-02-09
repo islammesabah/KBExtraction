@@ -3,6 +3,7 @@ from encodings.punycode import T
 from typing import List
 
 from kbdebugger.compat.langchain import Document
+from kbdebugger.utils.progress import stage_status
 
 from .chunk import chunk_corpus
 from .decompose import decompose_documents
@@ -34,11 +35,12 @@ def extract_paragraphs_from_pdf(
         Non-empty paragraph Documents, ready to feed into downstream stages
         (keyword extraction, LLM decomposition, etc.).
     """
-    paragraphs = extract_paragraphs_with_docling(
-        pdf_path=pdf_path,
-        do_ocr=do_ocr,
-        do_table_structure=do_table_structure,
-    )
+    with stage_status("🦆 Docling: PDF → paragraphs"):
+        paragraphs = extract_paragraphs_with_docling(
+            pdf_path=pdf_path,
+            do_ocr=do_ocr,
+            do_table_structure=do_table_structure,
+        )
 
     # paragraphs = [
     #     doc.page_content.strip()

@@ -39,8 +39,10 @@ This module should remain stable and boring.
 🧪 All experimental work should happen inside stage APIs, not here.
 """
 
-from kbdebugger.graph.api import retrieve_keyword_subgraph
-from kbdebugger.graph import get_graph
+from kbdebugger.graph.api import (
+    retrieve_keyword_subgraph,
+    upsert_extracted_triplets
+)
 from kbdebugger.extraction.api import (
     extract_paragraphs_from_pdf,
     decompose_paragraphs_to_qualities,
@@ -113,27 +115,60 @@ def run_pipeline(cfg: PipelineConfig) -> None:
         cfg=cfg.vector_similarity,
         pretty_print=True,
     )
+  
+    # ---------------------------------------------------------------------
+    # Stage 4: Novelty decision (LLM comparator)
+    # ---------------------------------------------------------------------
+    novelty_results = classify_qualities_novelty(
+        kept,
+        max_tokens=cfg.novelty_llm_max_tokens,
+        temperature=cfg.novelty_llm_temperature,
+        # use_batch=True
+        # batch_size=5
+    )
 
     # # ---------------------------------------------------------------------
-    # # Stage 4: Novelty decision (LLM comparator)
+    # # Stage 5: Human oversight via UI
     # # ---------------------------------------------------------------------
-    # novelty_results = classify_qualities_novelty(
-    #     kept,
-    #     max_tokens=cfg.novelty_llm_max_tokens,
-    #     temperature=cfg.novelty_llm_temperature,
-    # )
+    # 🖌️ In the UI, here we will show:
+    # - 3 tabs: Existing, Partially New, New
+    # - Each tab shows quality sentences that were classified into that category.
+    # The user can then select which sentences to extract triplets from.
+    # then the selected sentences (i.e., List[QualityNoveltyResult]) are passed to the triplet extraction stage.
 
-    # # ---------------------------------------------------------------------
-    # # Stage 5: Triplet extraction (policy-controlled via env)
-    # # ---------------------------------------------------------------------
-    # extracted_relations = extract_triplets_from_novelty_results(
-    #     novelty_results,
-    #     batch_size=cfg.triplet_extraction_batch_size,
-    # )
+
+    # ---------------------------------------------------------------------
+    # Stage 6: Triplet extraction (policy-controlled via env)
+    # ---------------------------------------------------------------------
+    extracted_triplets = extract_triplets_from_novelty_results(
+        # 🖌️ here the novelty results are what the user has selected for extraction based on their novelty decision 
+        # (e.g., they may only want to extract from "New" sentences, 
+        # or they may want to extract from both "Partially New" and "New" sentences, etc.)
+        novelty_results, 
+        batch_size=cfg.triplet_extraction_batch_size,
+    )
+
+    # ---------------------------------------------------------------------
+    # Stage 7: KG Upsert
+    # ---------------------------------------------------------------------
+    # 🖌️ Here we upsert the relations
+    # for extraction in extracted_triplets:
+    #     # extracted_triplets is like a list of list of triplets with provenance.
+    #     # So, each `extraction` corresponds to one quality sentence that we extracted triplets from
+    #     graph_relations = map_extracted_triplets_to_graph_relations(extraction)
+    #     graph = get_graph()
+    #     graph.upsert_relations(graph_relations)
+
+    upsert_extracted_triplets(
+        extractions=extracted_triplets,
+        # provenance: we can store the PDF filename as the source of these extracted relations
+        source=cfg.corpus_path,  
+    )
 
 
     # # ---------------------------------------------------------------------
     # # Stage 6: Human oversight + KG upsert + decision logging
+    # # ❌ DEPRECATED
     # # ---------------------------------------------------------------------
     # oversight_result = run_human_oversight(extracted_relations)
 

@@ -10,6 +10,7 @@ from rich.text import Text
 from rich.rule import Rule
 
 from kbdebugger.types import GraphRelation
+from kbdebugger.utils.progress import stage_status
 from .encoder import TextEncoder
 from .index import VectorIndex
 from .types import DroppedQuality, KeptQuality, Quality
@@ -293,7 +294,7 @@ class VectorSimilarityFilter:
         dropped: List[DroppedQuality] = []
 
 
-        # 3) Batch ANN (Approximate Nearest Neighbor) search: 
+        # 3) ❤️ Batch ANN (Approximate Nearest Neighbor) search: 
         #    returns (neighbors_per_quality, scores_matrix)
         #       - neighbors_per_quality: 
         #           - shape: (Q, k) 
@@ -302,7 +303,8 @@ class VectorSimilarityFilter:
         #               - i.e. List[List[GraphRelation]] length Q
         #       
         #       - scores_matrix: np.ndarray shape (Q, k) of cosine similarities
-        neighbors_per_q, scores = index.search_batch(vectors_np, k=self.top_k)
+        with stage_status("📊 Performing batch vector similarity search:"):
+            neighbors_per_q, scores = index.search_batch(vectors_np, k=self.top_k)
 
 
         # 4) Vectorized max score per quality
@@ -349,44 +351,6 @@ class VectorSimilarityFilter:
 
         self.save_similarity_results_json(kept=kept, dropped=dropped)
         return (kept, dropped)
-
-
-        # kept.sort(key=lambda x: x["max_score"], reverse=True)
-        # dropped.sort(key=lambda x: x["max_score"], reverse=True)
-
-        # self.save_similarity_results_json(kept=kept, dropped=dropped)
-        # return (kept, dropped)
-
-
-        # # 3. Nearest-neighbor search per quality (query) vector
-        # for q, vec in zip(qualities, vectors):
-        #     neighbors = index.search(vec, k=self.top_k)
-        #     max_score = max((score for _, score in neighbors), default=0.0)
-
-        #     if max_score < self.threshold:
-        #         dropped.append({"quality": q, "max_score": max_score})
-        #         continue
-
-        #     kept.append(
-        #         {
-        #             "quality": q,
-        #             "max_score": max_score,
-        #             "neighbors": [
-        #                 {"relation": rel, "score": score}
-        #                 for (rel, score) in neighbors[: self.top_k]
-        #             ],
-        #         }
-        #     )
-
-        # # ------------------------------------------------------------------
-        # # 4. Sort results by similarity score (descending)
-        # # ------------------------------------------------------------------
-        # kept.sort(key=lambda x: x["max_score"], reverse=True)
-        # dropped.sort(key=lambda x: x["max_score"], reverse=True)
-
-        # self.save_similarity_results_json(kept=kept, dropped=dropped)
-
-        # return (kept, dropped)
 
 
     def pretty_print(

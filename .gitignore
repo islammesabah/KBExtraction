@@ -34,7 +34,12 @@ credentials/
 ui/.venv/
 ui/venv/
 ui/__pycache__/
-ui/*.pyc
+ui/**/*.pyc
 ui/.env
+ui/.env.*
 ui/.DS_Store
 ui/__MACOSX/
+ui/*.log
+ui/uploads/
+ui/cache/
+ui/tmp/

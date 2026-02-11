@@ -16,7 +16,7 @@ This application visualizes and verifies knowledge from documents against a Neo4
     Create a `.env` file in the root directory (if not already present) and add your Neo4j credentials:
     ```env
     NEO4J_URI=neo4j://localhost:7687
-    NEO4J_USER=neo4j
+    NEO4J_USERNAME=neo4j
     NEO4J_PASSWORD=your_password
     ```
 

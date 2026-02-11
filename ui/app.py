@@ -1,18 +1,31 @@
+import sys
+from pathlib import Path
+
+REPO_ROOT = Path(__file__).resolve().parent.parent
+env_path = REPO_ROOT / ".env"
+# SRC_DIR = REPO_ROOT / "src"
+# if str(SRC_DIR) not in sys.path:
+#     sys.path.insert(0, str(SRC_DIR))
+
+
 import os
 from flask import Flask, render_template, jsonify, request
 from neo4j import GraphDatabase
 from dotenv import load_dotenv
+from kbdebugger.graph import get_graph
 
-load_dotenv()
+# Load .env from repo root (one level up)
+# That explicitly tells Flask: Go one directory up and load the root .env
+load_dotenv(dotenv_path=env_path)
 
 app = Flask(__name__)
 
 # Neo4j configuration
 NEO4J_URI = os.getenv("NEO4J_URI", "neo4j://localhost:7687")
-NEO4J_USER = os.getenv("NEO4J_USER", "neo4j")
+NEO4J_USERNAME = os.getenv("NEO4J_USERNAME", "neo4j")
 NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD", "xx")
 
-driver = GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD))
+driver = GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USERNAME, NEO4J_PASSWORD))
 
 def get_db():
     if not driver:
@@ -152,7 +165,7 @@ from neo4j import GraphDatabase
 from dotenv import load_dotenv
 from pypdf import PdfReader
 
-load_dotenv()
+load_dotenv(dotenv_path=env_path)
 
 # ... (rest of imports)
 

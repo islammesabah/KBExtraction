@@ -104,6 +104,7 @@ def classify_qualities_novelty(
     temperature: float = 0.0,
     use_batch: bool = True,
     batch_size: int = 5,
+    pretty_print: bool = True,
 ) -> List[QualityNoveltyResult]:
     """
     Classify novelty for a list of kept qualities.
@@ -174,7 +175,7 @@ def classify_qualities_novelty(
 
     for group in track(
         batched(list(kept_qualities), batch_size=batch_size), 
-        description=f"🪧 LLM Novelty Comparator: classifying novelty for kept qualities. batch size={batch_size}",
+        description=f"🪧 LLM Novelty Comparator: classifying novelty for kept qualities. (batch size={batch_size}, num_batches={num_batches})",
         total=num_batches,
     ):
         # 1) Map each kept quality to the minimal input schema expected by the prompt 
@@ -217,6 +218,9 @@ def classify_qualities_novelty(
         global_id += len(group)
 
     # all_results is in ascending id order, which matches original kept order.
-    pretty_print_novelty_results(kept=kept_qualities, results=all_results)
+
+    if pretty_print:
+        pretty_print_novelty_results(kept=kept_qualities, results=all_results)
+    
     save_novelty_results_json(all_results)
     return all_results

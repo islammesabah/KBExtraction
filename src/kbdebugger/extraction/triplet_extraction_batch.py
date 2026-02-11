@@ -112,7 +112,7 @@ def extract_triplets_batch(
 
     for batch in track(
         batched(sent_list, batch_size),
-        description=f"🧬 Triplet extraction: sentences → S-P-O. (batch size={batch_size})",
+        description=f"🧬 Triplet extraction: sentences → S-P-O. (batch size={batch_size}, num_batches={num_batches})",
         total=num_batches,
     ):
         if use_hf_local():
@@ -149,12 +149,12 @@ def extract_triplets_from_novelty_results(
     Returns:
         List of ExtractionResult.
     """
-    qualifying_decisions = load_triplet_qualifying_decisions()
+    # qualifying_decisions = load_triplet_qualifying_decisions()
 
     sentences: List[str] = [
         r.quality
         for r in results
-        if r.decision in qualifying_decisions
+        # if r.decision in qualifying_decisions
     ]
 
     if not sentences:

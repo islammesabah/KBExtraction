@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+export TRANSFORMERS_NO_AUDIO=1 # That usually makes transformers.audio_utils skip the soxr import path entirely.
+
 # Load environment variables from .env file.
 if [ -f .env ]; then
   echo "💡 Loaded .env file."
@@ -40,6 +42,9 @@ fi
 
 echo "🐍 $(python --version) @ $(which python)"
 
+
+NUMPY_PIN="${NUMPY_PIN:-1.26.4}"
+python -m pip install --force-reinstall "numpy==${NUMPY_PIN}" >/dev/null || true
 
 # # ------------------ Portable hnswlib install (wheelhouse) ------------------
 # # Goal: avoid SIGILL when SLURM places you on a different CPU node.

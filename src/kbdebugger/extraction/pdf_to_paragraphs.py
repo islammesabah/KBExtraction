@@ -11,9 +11,9 @@ from kbdebugger.compat.langchain import (
     Document,
 )
 
-from docling.datamodel.base_models import InputFormat
-from docling.datamodel.pipeline_options import PdfPipelineOptions
-from docling.document_converter import DocumentConverter, PdfFormatOption
+# from docling.datamodel.base_models import InputFormat
+# from docling.datamodel.pipeline_options import PdfPipelineOptions
+# from docling.document_converter import DocumentConverter, PdfFormatOption
 
 from .logging import save_chunked_documents_json
 
@@ -61,17 +61,17 @@ def extract_paragraphs_with_docling(
     #     )
     # })
 
-    pdf_options = PdfPipelineOptions(do_ocr=do_ocr, do_table_structure=do_table_structure)
+    # pdf_options = PdfPipelineOptions(do_ocr=do_ocr, do_table_structure=do_table_structure)
 
-    doc_converter = DocumentConverter(
-        format_options={
-            InputFormat.PDF: PdfFormatOption(pipeline_options=pdf_options)
-        }
-    )
+    # doc_converter = DocumentConverter(
+    #     format_options={
+    #         InputFormat.PDF: PdfFormatOption(pipeline_options=pdf_options)
+    #     }
+    # )
 
     loader = DoclingLoader(
         str(pdf_path),
-        converter=doc_converter
+        # converter=doc_converter
     )
 
     docs: List[Document] = loader.load()

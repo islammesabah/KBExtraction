@@ -14,7 +14,8 @@ from kbdebugger.utils.progress import stage_status
 from .encoder import TextEncoder
 from .index import VectorIndex
 from .types import DroppedQuality, KeptQuality, Quality
-from kbdebugger.utils.json import write_json, now_utc_compact
+from kbdebugger.utils.json import write_json
+from kbdebugger.utils.time import now_utc_compact
 
 """
 Vector similarity filter for *candidate qualities* (atomic sentences).

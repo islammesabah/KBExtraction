@@ -6,7 +6,8 @@ from typing import Any, Callable, List, Optional, TypeVar
 
 from kbdebugger.novelty.types import NoveltyDecision
 from kbdebugger.types import ExtractionResult, TripletSubjectObjectPredicate
-from kbdebugger.utils.json import now_utc_compact, write_json
+from kbdebugger.utils.json import write_json
+from kbdebugger.utils.time import now_utc_compact
 from .types import Qualities
 from typing import Any, Dict
 

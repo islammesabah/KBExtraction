@@ -11,7 +11,6 @@ from transformers import BitsAndBytesConfig
 # instead of the regular HuggingFace object.
 import os, json, torch, rich
 from typing import Optional, Dict, Any
-from peft import AutoPeftModelForCausalLM
 from transformers import AutoTokenizer
 from dotenv import load_dotenv
 from core.types import ExtractionResult
@@ -84,6 +83,7 @@ def _is_peft_dir(path: str) -> bool:
     return os.path.isdir(path) and os.path.isfile(os.path.join(path, "adapter_config.json"))
 
 if _is_peft_dir(model_source):
+    from peft import AutoPeftModelForCausalLM
     print("[Triplets] Detected PEFT adapter")
     _model_local = AutoPeftModelForCausalLM.from_pretrained(model_source, **load_kwargs)
 else:

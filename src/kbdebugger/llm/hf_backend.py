@@ -14,7 +14,6 @@ try:
 except Exception:  # BitsAndBytes not available (e.g., CPU-only install)
     BitsAndBytesConfig = None  # type: ignore
 
-from peft import AutoPeftModelForCausalLM
 from transformers import PreTrainedModel, PreTrainedTokenizerBase
 
 @dataclass(frozen=True)
@@ -107,6 +106,7 @@ def get_hf_causal_model(
         return os.path.isdir(path) and os.path.isfile(os.path.join(path, "adapter_config.json"))
 
     if _is_peft_dir(model_source):
+        from peft import AutoPeftModelForCausalLM
         rich.print("[HFBackend] Detected PEFT adapter")
         model: PreTrainedModel = AutoPeftModelForCausalLM.from_pretrained(
             model_source,

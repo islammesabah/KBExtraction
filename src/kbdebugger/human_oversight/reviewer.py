@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Iterable, List, Tuple
 
-from kbdebugger.graph.utils import map_extracted_triplets_to_graph_relations_
+from kbdebugger.graph.utils import map_extracted_triplets_to_graph_relations
 from rich.console import Console
 from rich.panel import Panel
 from rich.prompt import Prompt
@@ -36,7 +36,7 @@ def review_triplets(
 
     relations: List[GraphRelation] = []
     for r in extraction_results:
-        relations.extend(map_extracted_triplets_to_graph_relations_(extraction=r))
+        relations.extend(map_extracted_triplets_to_graph_relations(extraction=r))
 
     accepted: List[GraphRelation] = []
     rejected: List[GraphRelation] = []

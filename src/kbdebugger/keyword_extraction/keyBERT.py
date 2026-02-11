@@ -4,10 +4,10 @@ from typing import List, Dict, Any, Optional, Tuple
 
 import rich
 from rich.progress import track
-
-from keybert import KeyBERT
-from sentence_transformers import SentenceTransformer, util as sbert_util
-from kbdebugger.utils.json import now_utc_compact, write_json
+# from keybert import KeyBERT
+# from sentence_transformers import SentenceTransformer, util as sbert_util
+from kbdebugger.utils.json import write_json
+from kbdebugger.utils.time import now_utc_compact
 from .types import (
     KeyBERTConfig,
     ParagraphMatch,
@@ -49,6 +49,9 @@ def run_keybert_matching(
     -------
     separate lists for matched and unmatched paragraphs.
     """
+    from keybert import KeyBERT
+    from sentence_transformers import SentenceTransformer, util as sbert_util
+
     cfg = config or KeyBERTConfig()
     synonyms = synonyms or []
     synonym_set = set(s.lower() for s in synonyms)

@@ -1,8 +1,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-import json
-import os
 from typing import Any, Literal, Mapping, Optional, Sequence, TypedDict
 
 import rich
@@ -11,9 +9,9 @@ from rich.panel import Panel
 from rich.text import Text
 
 from kbdebugger.graph import get_graph
-from kbdebugger.graph.utils import rows_to_graph_relations
 from kbdebugger.types import GraphRelation, EdgePropertyKey
-from kbdebugger.utils.json import write_json, now_utc_compact
+from kbdebugger.utils.json import write_json
+from kbdebugger.utils.time import now_utc_compact
 from .utils import normalize_text
 
 MatchPattern = Literal["source_label", "target_label", "rel_props"]

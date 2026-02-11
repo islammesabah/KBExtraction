@@ -84,6 +84,28 @@ def _decompose_one_batch(
     return batch_id, _chunk_batch_to_qualities_decomposer(group)
 
 
+def _safe_chunk_batch_to_qualities_decomposer(group: List[str]) -> List[Qualities]:
+    """
+    Safe wrapper around the batched decomposer.
+
+    Why this exists
+    ---------------
+    `ThreadPoolExecutor.map()` will propagate exceptions and stop iteration
+    on the first failure. For a pipeline stage, it's usually better to be
+    *best-effort* and preserve output alignment.
+
+    Contract
+    --------
+    Returns `List[Qualities]` aligned with `group` length:
+      - one Qualities list per input chunk text
+      - on failure: returns `[[], [], ...]` (same length as group)
+    """
+    try:
+        return _chunk_batch_to_qualities_decomposer(group)
+    except Exception as e:  # noqa: BLE001 (intentionally broad in pipeline boundary)
+        print(f"[decompose_documents] Batch failed (size={len(group)}): {e}")
+        return [[] for _ in range(len(group))]
+
 # ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
@@ -157,52 +179,24 @@ def decompose_documents(
     
     # --- Fast path: batched chunk decomposition ---
     if mode == DecomposeMode.CHUNKS and use_batch_decomposer:
-        # groups is a list of lists of chunk texts.
-        # e.g. Each list has length == batch_size, except possibly the last one.
         num_batches = math.ceil(len(texts) / batch_size)
 
-        # Parallelism is optional; keep it controlled.
         if parallel:
-            # Submit all groups but limit concurrency by max_workers.
-            results_by_batch: dict[int, List[Qualities]] = {}
-
-            # with ThreadPoolExecutor(max_workers=max_workers) as pool:
-            #     futures = [
-            #         pool.submit(_decompose_one_batch, i, group)
-            #         for i, group in enumerate(groups)
-            #     ]
-
-            #     for fut in as_completed(futures):
-            #         try:
-            #             batch_id, batch_results = fut.result()
-            #             results_by_batch[batch_id] = batch_results
-            #         except Exception as e:
-            #             print(f"Error in batch decomposition: {e}")
-            #             results_by_batch[batch_id] = []   # but we need batch_id: so store it in closure
-                    
             with ThreadPoolExecutor(max_workers=max_workers) as pool:
-                future_to_batch_id: dict[Any, int] = {}
+                # `pool.map` preserves input order and streams from the generator.
+                results_iter = pool.map(
+                    _safe_chunk_batch_to_qualities_decomposer,
+                    batched(texts, batch_size=batch_size),
+                )
 
-                for i, group in enumerate(groups):
-                    fut = pool.submit(_decompose_one_batch, i, group)
-                    future_to_batch_id[fut] = i
-
-                for fut in as_completed(future_to_batch_id):
-                    batch_id = future_to_batch_id[fut]
-                    try:
-                        _, batch_results = fut.result()
-                        results_by_batch[batch_id] = batch_results
-                    except Exception as e:
-                        print(f"[decompose_documents] Batch {batch_id} failed: {e}")
-                        # Preserve alignment: return empty per-chunk outputs for that batch
-                        results_by_batch[batch_id] = [[] for _ in groups[batch_id]]
-
-
-
-            # Flatten in deterministic order (0..N-1) regardless of completion order
-            for i in range(len(groups)):
-                for qualities in results_by_batch.get(i, []):
-                    all_qualities.extend(qualities)
+                for group_results in track(
+                    results_iter,
+                    total=num_batches,
+                    description=f"🧷 LLM Decomposer (parallel): paragraphs → qualities (batch size={batch_size})",
+                ):
+                    # group_results is List[Qualities] aligned with that batch’s group
+                    for qualities in group_results:
+                        all_qualities.extend(qualities)
 
         else:
             for group in track(

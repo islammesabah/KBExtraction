@@ -5,7 +5,6 @@ from __future__ import annotations
 # instead of the regular HuggingFace object.
 import os, json, torch, rich
 from typing import Optional, Dict, Any
-from peft import AutoPeftModelForCausalLM
 from transformers import AutoTokenizer
 from dotenv import load_dotenv
 from core.types import ExtractionResult
@@ -133,6 +132,7 @@ else:
 
 # --- robust loader: use PEFT only if adapter_config.json exists ---
 if is_peft_dir(model_source):
+    from peft import AutoPeftModelForCausalLM
     print("[TrustifAI] Detected PEFT adapter; loading with AutoPeftModelForCausalLM")
     model = AutoPeftModelForCausalLM.from_pretrained(model_source, **load_kwargs)
 else:

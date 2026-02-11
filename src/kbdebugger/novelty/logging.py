@@ -7,7 +7,8 @@ from rich.text import Text
 
 from dataclasses import asdict
 from typing import Dict, Mapping, Mapping, Sequence, List
-from kbdebugger.utils.json import write_json, now_utc_compact
+from kbdebugger.utils.json import write_json
+from kbdebugger.utils.time import now_utc_compact
 
 from .types import (
     NoveltyDecision,

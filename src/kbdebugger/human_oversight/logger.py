@@ -2,7 +2,8 @@ from __future__ import annotations
 
 from typing import Mapping, Sequence
 
-from kbdebugger.utils.json import write_json, now_utc_compact
+from kbdebugger.utils.json import write_json
+from kbdebugger.utils.time import now_utc_compact
 from kbdebugger.types import GraphRelation
 
 

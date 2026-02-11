@@ -39,6 +39,7 @@ This module should remain stable and boring.
 🧪 All experimental work should happen inside stage APIs, not here.
 """
 
+import rich
 from kbdebugger.graph.api import (
     retrieve_keyword_subgraph,
     upsert_extracted_triplets
@@ -53,7 +54,7 @@ from kbdebugger.novelty.comparator import classify_qualities_novelty
 from kbdebugger.extraction.triplet_extraction_batch import extract_triplets_from_novelty_results
 from kbdebugger.human_oversight.api import run_human_oversight
 from .config import PipelineConfig
-
+from kbdebugger.utils.run_timing import RunTimer
 
 def run_pipeline(cfg: PipelineConfig) -> None:
     """
@@ -77,55 +78,64 @@ def run_pipeline(cfg: PipelineConfig) -> None:
         If a stage produces an empty or invalid output that prevents downstream stages
         from meaningfully operating (e.g., no KG relations retrieved, no qualities extracted).
     """
+    timer = RunTimer(run_name="kbdebugger_pipeline")
+
     # ---------------------------------------------------------------------
     # Stage 1: Retrieve KG subgraph relations (reference set for similarity)
     # ---------------------------------------------------------------------
-    kg_relations = retrieve_keyword_subgraph(
-        keyword=cfg.kg_retrieval_keyword,
-        limit_per_pattern=cfg.kg_limit_per_pattern,
-    )
+    with timer.stage("💧 Neo4j: retrieve_keyword_subgraph"):
+        kg_relations = retrieve_keyword_subgraph(
+            keyword=cfg.kg_retrieval_keyword,
+            limit_per_pattern=cfg.kg_limit_per_pattern,
+        )
 
     # ---------------------------------------------------------------------
     # Stage 2: Extract candidate qualities
     # ---------------------------------------------------------------------
     # Stage 2a: PDF -> paragraphs
-    paragraphs = extract_paragraphs_from_pdf(
-        pdf_path=cfg.corpus_path,
-        do_ocr=cfg.docling_enable_OCR,
-        do_table_structure=cfg.docling_enable_table_recognition,
-    )
+    with timer.stage("🦆 Docling: extract_paragraphs_from_pdf"):
+        paragraphs = extract_paragraphs_from_pdf(
+            pdf_path=cfg.corpus_path,
+            do_ocr=cfg.docling_enable_OCR,
+            do_table_structure=cfg.docling_enable_table_recognition,
+        )
 
     # Stage 2b: keyword extraction (KeyBERT gate) to find matching paragraphs to the user-chosen keyword
-    keybert_result = filter_paragraphs_by_keyword(
-        paragraphs=paragraphs,
-        search_keyword=cfg.kg_retrieval_keyword,
-    )
+    with timer.stage("🔎 KeyBERT: filter_paragraphs_by_keyword"):
+        keybert_result = filter_paragraphs_by_keyword(
+            paragraphs=paragraphs,
+            search_keyword=cfg.kg_retrieval_keyword,
+        )
 
-    # Stage 2c: matched paragraphs -> qualities
-    candidate_qualities = decompose_paragraphs_to_qualities(
-        paragraphs=keybert_result.matched_docs,
-    )
+    with timer.stage("🧷 LLM Decomposer: decompose_paragraphs_to_qualities"):
+        # Stage 2c: matched paragraphs -> qualities
+        candidate_qualities = decompose_paragraphs_to_qualities(
+            paragraphs=keybert_result.matched_docs,
+        )
 
     # ---------------------------------------------------------------------
     # Stage 3: Vector similarity filtering (kept qualities + neighbor context)
     # ---------------------------------------------------------------------
-    kept, _dropped = run_vector_similarity_filter(
-        kg_relations=kg_relations,
-        qualities=candidate_qualities,
-        cfg=cfg.vector_similarity,
-        pretty_print=True,
-    )
+    with timer.stage("🧠 Vector similarity filter"):
+        kept, _dropped = run_vector_similarity_filter(
+            kg_relations=kg_relations,
+            qualities=candidate_qualities,
+            cfg=cfg.vector_similarity,
+            pretty_print=False,
+        )
   
     # ---------------------------------------------------------------------
     # Stage 4: Novelty decision (LLM comparator)
     # ---------------------------------------------------------------------
-    novelty_results = classify_qualities_novelty(
-        kept,
-        max_tokens=cfg.novelty_llm_max_tokens,
-        temperature=cfg.novelty_llm_temperature,
-        # use_batch=True
-        # batch_size=5
-    )
+    with timer.stage("🧪 LLM Novelty comparator"):
+        novelty_results = classify_qualities_novelty(
+            kept,
+            max_tokens=cfg.novelty_llm_max_tokens,
+            temperature=cfg.novelty_llm_temperature,
+            pretty_print=False,
+            # use_batch=True
+            # batch_size=5
+        )
 
     # # ---------------------------------------------------------------------
     # # Stage 5: Human oversight via UI
@@ -140,13 +150,14 @@ def run_pipeline(cfg: PipelineConfig) -> None:
     # ---------------------------------------------------------------------
     # Stage 6: Triplet extraction (policy-controlled via env)
     # ---------------------------------------------------------------------
-    extracted_triplets = extract_triplets_from_novelty_results(
-        # 🖌️ here the novelty results are what the user has selected for extraction based on their novelty decision 
-        # (e.g., they may only want to extract from "New" sentences, 
-        # or they may want to extract from both "Partially New" and "New" sentences, etc.)
-        novelty_results, 
-        batch_size=cfg.triplet_extraction_batch_size,
-    )
+    with timer.stage("🧾 Triplet extraction"):
+        extracted_triplets = extract_triplets_from_novelty_results(
+            # 🖌️ here the novelty results are what the user has selected for extraction based on their novelty decision 
+            # (e.g., they may only want to extract from "New" sentences, 
+            # or they may want to extract from both "Partially New" and "New" sentences, etc.)
+            novelty_results, 
+            batch_size=cfg.triplet_extraction_batch_size,
+        )
 
     # ---------------------------------------------------------------------
     # Stage 7: KG Upsert
@@ -159,12 +170,15 @@ def run_pipeline(cfg: PipelineConfig) -> None:
     #     graph = get_graph()
     #     graph.upsert_relations(graph_relations)
 
-    upsert_extracted_triplets(
-        extractions=extracted_triplets,
-        # provenance: we can store the PDF filename as the source of these extracted relations
-        source=cfg.corpus_path,  
-    )
+    # with timer.stage("🧠 Neo4j upsert_extracted_triplets"):
+    #     upsert_extracted_triplets(
+    #         extractions=extracted_triplets,
+    #         # provenance: we can store the PDF filename as the source of these extracted relations
+    #         source=cfg.corpus_path,  
+    #     )
 
+    timing_path = timer.save_json()
+    rich.print(f"[INFO] ⏱️ Wrote pipeline timing log to {timing_path}")
 
     # # ---------------------------------------------------------------------
     # # Stage 6: Human oversight + KG upsert + decision logging

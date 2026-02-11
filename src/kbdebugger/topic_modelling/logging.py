@@ -6,7 +6,8 @@ import pandas as pd
 
 from bertopic._bertopic import BERTopic
 
-from kbdebugger.utils.json import write_json, now_utc_compact
+from kbdebugger.utils.json import write_json
+from kbdebugger.utils.time import now_utc_compact
 from kbdebugger.compat.langchain import Document
 
 

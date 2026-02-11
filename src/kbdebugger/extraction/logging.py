@@ -2,7 +2,8 @@ from typing import Any, Sequence
 import rich
 
 from kbdebugger.compat.langchain import Document
-from kbdebugger.utils.json import write_json, now_utc_compact
+from kbdebugger.utils.json import write_json
+from kbdebugger.utils.time import now_utc_compact
 from .types import Qualities, SourceKind, DecomposeMode
 
 def save_chunked_documents_json(

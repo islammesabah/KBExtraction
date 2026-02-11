@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trustworthy AI knowledge discovery</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.26.0/cytoscape.min.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>Trustworthy AI knowledge discovery</h1>
+            <p>Process documents and visualize knowledge graphs.</p>
+        </header>
+
+        <section class="controls">
+            <div class="input-group">
+                <label for="documents" class="custom-file-upload">
+                    Upload Documents
+                </label>
+                <input type="file" id="documents" name="documents" multiple>
+                <span id="file-chosen">No file chosen</span>
+            </div>
+
+            <div class="search-group">
+                <input type="text" id="node-search" placeholder="Enter node name to filter...">
+                <button id="search-btn">Filter & View Details</button>
+                <button id="toggle-view-btn" title="Toggle Verification View">🕸️</button>
+            </div>
+        </section>
+
+        <main class="visualization-area">
+            <div class="graph-wrapper">
+                <div id="cy" class="graph-container"></div>
+
+                <section id="verification-section" class="verification-section" style="display:none;">
+                    <h2>Knowledge Verification</h2>
+                    <div class="verification-split-container">
+                        <div class="verification-top">
+                            <div class="tabs">
+                                <button class="tab-btn active" data-tab="existing-tab">Existing Knowledge</button>
+                                <button class="tab-btn" data-tab="partial-tab">Partial Match</button>
+                                <button class="tab-btn" data-tab="new-tab">New Knowledge</button>
+                            </div>
+                            <div class="tab-content">
+                                <div id="existing-tab" class="tab-pane active">
+                                    <h3>Source Content</h3>
+                                    <div class="content-list"></div>
+                                </div>
+                                <div id="partial-tab" class="tab-pane">
+                                    <h3>Source Content</h3>
+                                    <div class="content-list"></div>
+                                </div>
+                                <div id="new-tab" class="tab-pane">
+                                    <h3>Source Content</h3>
+                                    <div class="content-list"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="verification-bottom">
+                            <h3>Selected for Verification</h3>
+                            <div id="common-verified-list" class="verified-list"></div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <div id="details-panel" class="details-panel">
+                <h3>Concept Insights</h3>
+                <div id="details-content" class="details-content">
+                    <p class="placeholder-text">Select a node or search to view details.</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+
+</html>

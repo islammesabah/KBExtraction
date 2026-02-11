@@ -28,3 +28,13 @@ Log/user_updates.csv
 Log/data.csv
 
 credentials/
+
+
+# 🖌️ UI python artifacts
+ui/.venv/
+ui/venv/
+ui/__pycache__/
+ui/*.pyc
+ui/.env
+ui/.DS_Store
+ui/__MACOSX/

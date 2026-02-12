@@ -14,7 +14,7 @@ from kbdebugger.extraction.utils import (
     load_triplet_qualifying_decisions,
 )
 import json
-from kbdebugger.vector.types import KeptQuality
+from kbdebugger.subgraph_similarity.types import KeptQuality
 import torch # type: ignore
 import rich
 from rich.progress import track

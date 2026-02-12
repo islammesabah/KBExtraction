@@ -29,7 +29,7 @@ from typing import Any, Dict, List, Sequence
 
 from kbdebugger.llm.model_access import respond
 from kbdebugger.prompts import build_prompt, build_prompt_batch
-from kbdebugger.vector.types import KeptQuality
+from kbdebugger.subgraph_similarity.types import KeptQuality
 from kbdebugger.utils import batched
 from rich.progress import track
 from .types import (

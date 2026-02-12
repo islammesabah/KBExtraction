@@ -5,7 +5,7 @@ import rich
 from typing import Any, Dict, Mapping, Mapping, Sequence, cast, List
 from dataclasses import asdict
 
-from kbdebugger.vector.types import KeptQuality, NeighborHit
+from kbdebugger.subgraph_similarity.types import KeptQuality, NeighborHit
 
 from .types import (
     NoveltyDecision,
@@ -48,7 +48,7 @@ def kept_quality_to_novelty_input(
     top_k: int = 3,
 ) -> QualityNoveltyInput:
     """
-    Convert VectorSimilarityFilter output (KeptQuality) into Novelty stage input
+    Convert SubgraphSimilarityFilter output (KeptQuality) into Novelty stage input
     (QualityNoveltyInput) with slim neighbors.
 
     Args:

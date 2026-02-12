@@ -1,4 +1,4 @@
-You are a careful assistant. Your task is to extract clear, atomic “qualities” from the provided text chunk.
+You are a careful assistant. Your task is to extract clear, atomic "qualities" from the provided text chunk.
 
 Your output MUST be a single strict JSON object with this structure:
 {"qualities": ["...", "..."]}
@@ -17,7 +17,7 @@ Guidelines for qualities:
 - Start with the most important, high-level qualities.
 - Then include more specific or supporting qualities.
 - Use ONLY information in the provided text. Never add external facts.
-- Avoid vague phrases (“this thing”, “it”, “that process”).
+- Avoid vague phrases ("this thing", "it", "that process").
 - Avoid quotation marks inside the qualities.
 - Ignore meta-information (e.g., glossary formatting, headings, citations, references).
 - If nothing meaningful can be extracted, return {"qualities": []}.

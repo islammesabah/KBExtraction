@@ -48,13 +48,6 @@ def retrieve_keyword_subgraph(
     hits = retriever.retrieve(keyword)
     relations = [h["relation"] for h in hits]
 
-    # if not relations:
-    #     raise ValueError(
-    #         "KG retrieval returned no relations. "
-    #         f"keyword={keyword!r}, limit_per_pattern={limit_per_pattern}. "
-    #         "Try a different keyword or verify the KG contains relevant nodes/edges."
-    #     )
-
     return relations
 
 

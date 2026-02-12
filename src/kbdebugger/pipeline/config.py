@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from typing import cast
 
 from kbdebugger.extraction.types import SourceKind
-from kbdebugger.vector.api import VectorSimilarityFilterConfig
+from kbdebugger.subgraph_similarity.api import SubgraphSimilarityFilterConfig
 
 
 @dataclass(frozen=True, slots=True)
@@ -120,7 +120,7 @@ class PipelineConfig:
     # ----------------------------
     # Vector similarity filter
     # ----------------------------
-    vector_similarity: VectorSimilarityFilterConfig
+    vector_similarity: SubgraphSimilarityFilterConfig
 
     # ----------------------------
     # Novelty comparator (LLM)
@@ -150,7 +150,7 @@ class PipelineConfig:
         --------------------------------
         - KB_SOURCE_KIND is validated strictly.
         - kg_limit_per_pattern and triplet_extraction_batch_size are clamped to >= 1.
-        - quality_to_kg_top_k is clamped to >= 1 (inside VectorSimilarityFilterConfig).
+        - quality_to_kg_top_k is clamped to >= 1 (inside SubgraphSimilarityFilterConfig).
         - Empty KB_ENCODER_DEVICE is treated as None (auto device).
 
         Returns
@@ -202,7 +202,7 @@ class PipelineConfig:
 
         min_similarity_threshold = float(os.getenv("KB_MIN_SIMILARITY_THRESHOLD", "0.55").strip())
 
-        vector_similarity = VectorSimilarityFilterConfig(
+        vector_similarity = SubgraphSimilarityFilterConfig(
             encoder_model_name=encoder_model_name,
             encoder_device=encoder_device,
             normalize_embeddings=normalize_embeddings,

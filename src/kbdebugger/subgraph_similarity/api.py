@@ -6,12 +6,12 @@ from typing import Sequence, Tuple
 from kbdebugger.extraction.types import Qualities
 from kbdebugger.types import GraphRelation
 from .encoder import SentenceTransformerEncoder
-from .similarity_filter import VectorSimilarityFilter
+from .similarity_filter import SubgraphSimilarityFilter
 from .types import KeptQuality, DroppedQuality
 
 
 @dataclass(frozen=True, slots=True)
-class VectorSimilarityFilterConfig:
+class SubgraphSimilarityFilterConfig:
     """
     Configuration for the Vector Similarity Filter stage.
 
@@ -49,11 +49,11 @@ class VectorSimilarityFilterConfig:
     min_similarity_threshold: float
 
 
-def run_vector_similarity_filter(
+def filter_qualities_by_subgraph_similarity(
     *,
     kg_relations: Sequence[GraphRelation],
     qualities: Qualities,
-    cfg: VectorSimilarityFilterConfig,
+    cfg: SubgraphSimilarityFilterConfig,
     pretty_print: bool = True,
 ) -> Tuple[list[KeptQuality], list[DroppedQuality]]:
     """
@@ -89,7 +89,7 @@ def run_vector_similarity_filter(
         normalize=cfg.normalize_embeddings,
     )
 
-    filter = VectorSimilarityFilter(
+    filter = SubgraphSimilarityFilter(
         encoder=encoder,
         top_k=cfg.quality_to_kg_top_k,
         threshold=cfg.min_similarity_threshold,

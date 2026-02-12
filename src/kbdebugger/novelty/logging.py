@@ -1,4 +1,4 @@
-from kbdebugger.vector.types import KeptQuality
+from kbdebugger.subgraph_similarity.types import KeptQuality
 import rich
 from rich.console import Console
 from rich.panel import Panel

@@ -30,7 +30,7 @@ So in this pipeline, we do:
 
     1) Decomposer LLM -> Qualities (atomic sentences)
     2) Graph Retriever -> KG subgraph relations (each has r.sentence)
-    3) VectorSimilarityFilter -> compare qualities vs KG sentences
+    3) SubgraphSimilarityFilter -> compare qualities vs KG sentences
     4) Triplet extractor LLM -> run ONLY on the kept qualities
 
 This change reduces LLM load and improves semantic matching quality.
@@ -50,8 +50,8 @@ This module is intentionally:
 Dependencies
 ------------
 This module depends on:
-- kbdebugger.vector.encoder.TextEncoder (pluggable embedding model)
-- kbdebugger.vector.index.VectorIndex (pluggable vector index backend; HNSW in MVP)
+- kbdebugger.subgraph_similarity.encoder.TextEncoder (pluggable embedding model)
+- kbdebugger.subgraph_similarity.index.VectorIndex (pluggable vector index backend; HNSW in MVP)
 """
 
 # ---------------------------------------------------------------------------
@@ -145,7 +145,7 @@ def relation_to_text(r: GraphRelation) -> str:
 # Main component
 # ---------------------------------------------------------------------------
 @dataclass
-class VectorSimilarityFilter:
+class SubgraphSimilarityFilter:
     """
     Filter Decomposer-produced qualities using similarity to a KG subgraph.
 

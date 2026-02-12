@@ -21,7 +21,7 @@ Hard requirements:
 - Use ONLY information explicitly present in the corresponding chunk text. Never add external facts.
 - If nothing meaningful can be extracted from a chunk, return an empty list for that chunk.
 
-What is a “quality”:
+What is a "quality":
 - A quality is a short statement expressing exactly ONE fact (one atomic idea).
 - Qualities will later be converted into Subject–Predicate–Object triplets.
   Therefore, each quality MUST be phrased so that a triplet can be extracted unambiguously.
@@ -37,7 +37,7 @@ Guidelines for qualities:
 - Start with the most important, high-level qualities for each chunk.
 - Then include more specific or supporting qualities.
 - Ignore meta-information (e.g., headings, boilerplate, citations, references, formatting artifacts).
-- Avoid vague phrases (“this thing”, “it”, “that process”).
+- Avoid vague phrases ("this thing", "it", "that process").
 - Avoid quotation marks inside qualities.
 - Keep each quality concise and complete.
 

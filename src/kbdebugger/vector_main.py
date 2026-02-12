@@ -25,7 +25,7 @@ Configuration
 Driven by environment variables (see VectorMainConfig.from_env).
 
 Typical usage:
-    KB_KEYWORD=requirement KB_SOURCE_KIND=TEXT python -m kbdebugger.vector_main
+    KB_KEYWORD=requirement KB_SOURCE_KIND=TEXT python -m kbdebugger.subgraph_similarity_main
 """
 
 import os
@@ -41,8 +41,8 @@ from kbdebugger.extraction.types import Qualities
 
 from kbdebugger.graph.retriever import KnowledgeGraphRetriever
 
-from kbdebugger.vector.encoder import SentenceTransformerEncoder
-from kbdebugger.vector.similarity_filter import VectorSimilarityFilter
+from kbdebugger.subgraph_similarity.encoder import SentenceTransformerEncoder
+from kbdebugger.subgraph_similarity.similarity_filter import SubgraphSimilarityFilter
 
 console = Console()
 
@@ -198,7 +198,7 @@ def main() -> None:
         normalize=True,       # recommended for cosine similarity
     )
 
-    filt = VectorSimilarityFilter(
+    filt = SubgraphSimilarityFilter(
         encoder=encoder,
         top_k=cfg.top_k,
         threshold=cfg.threshold,

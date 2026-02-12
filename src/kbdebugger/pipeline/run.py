@@ -49,7 +49,7 @@ from kbdebugger.extraction.api import (
     decompose_paragraphs_to_qualities,
 )
 from kbdebugger.keyword_extraction.api import filter_paragraphs_by_keyword
-from kbdebugger.vector.api import run_vector_similarity_filter
+from kbdebugger.subgraph_similarity.api import filter_qualities_by_subgraph_similarity
 from kbdebugger.novelty.comparator import classify_qualities_novelty
 from kbdebugger.extraction.triplet_extraction_batch import extract_triplets_from_novelty_results
 from kbdebugger.human_oversight.api import run_human_oversight
@@ -117,13 +117,13 @@ def run_pipeline(cfg: PipelineConfig) -> None:
     # Stage 3: Vector similarity filtering (kept qualities + neighbor context)
     # ---------------------------------------------------------------------
     with timer.stage("🧠 Vector similarity filter"):
-        kept, _dropped = run_vector_similarity_filter(
+        kept, _dropped = filter_qualities_by_subgraph_similarity(
             kg_relations=kg_relations,
             qualities=candidate_qualities,
             cfg=cfg.vector_similarity,
             pretty_print=False,
         )
-  
+
     # ---------------------------------------------------------------------
     # Stage 4: Novelty decision (LLM comparator)
     # ---------------------------------------------------------------------

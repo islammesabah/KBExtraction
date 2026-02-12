@@ -34,9 +34,9 @@ Important guidelines:
    - extra relation type (e.g., fairness as "ethical consideration")
 3. Prefer EXISTING when QUALITY is effectively a rephrase of the closest neighbor and adds no new constraints or concepts.
 4. Use similarity scores as a weak signal:
-   - if max_score >= 0.90 and the closest neighbor already captures the same meaning, EXISTING is likely
-   - if max_score is medium/high but QUALITY adds a new detail, PARTIALLY_NEW
-   - if max_score is low/medium and content is not covered by neighbors, NEW
+   - if max_score >= 0.90 and the closest neighbor already captures the same meaning, EXISTING is likely.
+   - if max_score is medium/high but QUALITY adds a new detail, PARTIALLY_NEW.
+   - if max_score is low/medium and content is not covered by neighbors, NEW.
    Scores are not decisive; content is decisive.
 
 Output MUST be valid JSON matching this schema:

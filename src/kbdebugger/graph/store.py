@@ -298,6 +298,15 @@ class GraphStore:
           Deduplication is handled inside `upsert_relation()` via the APOC merge policy.
         - If you later want "fail-fast" semantics, add a flag like `stop_on_error`.
         """
+        if not relations:
+            # Nothing to upsert is not an error here; extraction may legitimately produce nothing.
+            return BatchUpsertSummary(
+                attempted=0,
+                succeeded=0,
+                failed=0,
+                errors=[],
+            )
+
         attempted = len(relations)
         succeeded = 0
         errors: List[str] = []

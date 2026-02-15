@@ -7,7 +7,9 @@ from .retriever import KnowledgeGraphRetriever
 from .utils import map_extracted_triplets_to_graph_relations
 from .types import BatchUpsertSummary
 from . import get_graph
+import rich
 
+from .cytoscape import graph_relations_to_cytoscape, CytoscapeGraphPayload
 
 def retrieve_keyword_subgraph(
     *,
@@ -49,6 +51,46 @@ def retrieve_keyword_subgraph(
     relations = [h["relation"] for h in hits]
 
     return relations
+
+
+def retrieve_keyword_subgraph_cytoscape(
+    *,
+    keyword: str,
+    limit_per_pattern: int,
+) -> CytoscapeGraphPayload:
+    """
+    Retrieve a keyword-guided KG subgraph and return Cytoscape-ready elements.
+
+    Why this exists
+    ---------------
+    - `retrieve_keyword_subgraph()` is a pipeline stage API and returns `List[GraphRelation]`
+      for downstream algorithmic stages (similarity, novelty, etc.).
+    - The UI needs Cytoscape.js elements: {"elements": {"nodes": [...], "edges": [...]}}
+
+    This function is a pure adapter:
+    - no new graph logic
+    - no DB access beyond the underlying retrieval call
+    - strictly typed UI contract
+
+    Parameters
+    ----------
+    keyword:
+        Keyword used to drive the subgraph retrieval patterns.
+
+    limit_per_pattern:
+        Maximum number of relations returned per retrieval pattern.
+
+    Returns
+    -------
+    CytoscapeGraphPayload
+        Cytoscape.js compatible graph payload.
+    """
+    relations = retrieve_keyword_subgraph(
+        keyword=keyword,
+        limit_per_pattern=limit_per_pattern,
+    )
+    rich.print(relations)
+    return graph_relations_to_cytoscape(relations)
 
 
 def upsert_extracted_triplets(
@@ -110,15 +152,6 @@ def upsert_extracted_triplets(
         # and map its triplets to graph relations. And we accumulate all triplets in one flat list to do a single upsert at the end.
         rels = map_extracted_triplets_to_graph_relations(extraction, source=source)
         all_relations.extend(rels)
-
-    if not all_relations:
-        # Nothing to upsert is not an error here; extraction may legitimately produce nothing.
-        return BatchUpsertSummary(
-            attempted=0,
-            succeeded=0,
-            failed=0,
-            errors=[],
-        )
 
     # Here we do a single batch upsert for all relations extracted from all sentences.
     # This is more efficient than upserting per `extraction`, and allows us to get a comprehensive summary of the batch operation.

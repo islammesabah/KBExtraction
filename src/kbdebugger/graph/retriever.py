@@ -64,6 +64,7 @@ class KnowledgeGraphRetriever:
         )
         results.extend({"relation": rel, "match_pattern": "source_label"} for rel in rels)
 
+
         # --- Pattern 2: keyword in target node label ---
         rels = graph.query_relations(
             """

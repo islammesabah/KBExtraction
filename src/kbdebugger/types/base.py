@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import TypedDict, Any
+from typing import Optional, TypedDict, Any
 from typing_extensions import Literal, Required, NotRequired
 
 Subject = str
@@ -16,6 +16,9 @@ class ExtractionResult(TypedDict):
 
 class GraphEnd(TypedDict):
     label: str
+    id: Optional[str]
+    created_at: Optional[str]
+    last_updated_at: Optional[str]
 
 class GraphEdge(TypedDict):
     label: str

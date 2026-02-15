@@ -5,7 +5,7 @@ import rich
 from pathlib import Path
 from datetime import datetime, timezone, date, time
 import dataclasses
-# import ast
+from uuid import UUID
 
 # -------------------------
 # Robust JSON post-processing helpers
@@ -33,7 +33,6 @@ def _extract_json_object(text: str) -> str | None:
             if depth == 0:
                 return text[start:i+1]
     return None
-
 
 def _extract_json_array(text: str) -> str | None:
     """
@@ -138,45 +137,102 @@ def ensure_json_array(raw: str) -> Any:
 
     return []
 
-
-# -------------------------
-# JSON I/O helpers
-# -------------------------
-def _json_default(obj: Any) -> Any:
+def to_jsonable(obj: Any) -> Any:
     """
-    Fallback encoder for objects that the stdlib json module can't serialize.
+    Convert `obj` into a JSON-serializable structure.
 
-    Handles:
-      - datetime/date/time -> ISO 8601 strings
-      - pathlib.Path -> string
-      - dataclasses -> dict
-      - objects with .isoformat() (e.g., neo4j.time.DateTime) -> ISO string
-      - objects with .dict() / model_dump() (pydantic) -> dict
-      - otherwise -> string repr as a last resort
+    Supported conversions
+    ---------------------
+    - primitives -> as-is
+    - datetime/date and objects with .isoformat() -> ISO 8601 string
+    - Path, UUID -> string
+    - dataclasses -> dict
+    - pydantic models -> dict
+    - dict/list/tuple/set -> recursively converted
+    - otherwise -> TypeError (fail fast)
+
+    Notes
+    -----
+    We intentionally DO NOT use a blanket `str(obj)` fallback for all unknown
+    objects because it can silently hide bugs and create confusing payloads.
     """
-    if isinstance(obj, (datetime, date, time)):
+    # Primitives
+    if obj is None or isinstance(obj, (str, int, float, bool)):
+        return obj
+
+    # Datetime/date
+    if isinstance(obj, (datetime, date)):
         return obj.isoformat()
 
-    if isinstance(obj, Path):
+    # Common non-JSON primitives
+    if isinstance(obj, (Path, UUID)):
         return str(obj)
 
-    if dataclasses.is_dataclass(obj):
-        return dataclasses.asdict(obj) # type: ignore
-
-    # Neo4j temporal types (neo4j.time.DateTime, Date, etc.) typically support isoformat()
+    # Neo4j temporal types and similar objects
     iso = getattr(obj, "isoformat", None)
     if callable(iso):
         return iso()
 
-    # Pydantic v1 / v2
-    if hasattr(obj, "model_dump") and callable(getattr(obj, "model_dump")):
-        return obj.model_dump()
-    if hasattr(obj, "dict") and callable(getattr(obj, "dict")):
-        return obj.dict()
+    # Dataclasses
+    if dataclasses.is_dataclass(obj):
+        return {k: to_jsonable(v) for k, v in dataclasses.asdict(obj).items()}  # type: ignore[arg-type]
 
-    # Last resort: stringify
-    return str(obj)
+    # Pydantic v2 / v1
+    model_dump = getattr(obj, "model_dump", None)
+    if callable(model_dump):
+        return to_jsonable(model_dump())
+    model_dict = getattr(obj, "dict", None)
+    if callable(model_dict):
+        return to_jsonable(model_dict())
 
+    # Containers
+    if isinstance(obj, dict):
+        return {str(k): to_jsonable(v) for k, v in obj.items()}
+
+    if isinstance(obj, (list, tuple, set)):
+        return [to_jsonable(x) for x in obj]
+
+    # Fail fast: unknown type
+    raise TypeError(
+        f"Object of type {type(obj).__name__} is not JSON-serializable: {obj!r}"
+    )
+
+
+
+# def _json_default(obj: Any) -> Any:
+#     """
+#     Fallback encoder for objects that the stdlib json module can't serialize.
+
+#     Handles:
+#       - datetime/date/time -> ISO 8601 strings
+#       - pathlib.Path -> string
+#       - dataclasses -> dict
+#       - objects with .isoformat() (e.g., neo4j.time.DateTime) -> ISO string
+#       - objects with .dict() / model_dump() (pydantic) -> dict
+#       - otherwise -> string repr as a last resort
+#     """
+#     if isinstance(obj, (datetime, date, time)):
+#         return obj.isoformat()
+
+#     if isinstance(obj, Path):
+#         return str(obj)
+
+#     if dataclasses.is_dataclass(obj):
+#         return dataclasses.asdict(obj) # type: ignore
+
+#     # Neo4j temporal types (neo4j.time.DateTime, Date, etc.) typically support isoformat()
+#     iso = getattr(obj, "isoformat", None)
+#     if callable(iso):
+#         return iso()
+
+#     # Pydantic v1 / v2
+#     if hasattr(obj, "model_dump") and callable(getattr(obj, "model_dump")):
+#         return obj.model_dump()
+#     if hasattr(obj, "dict") and callable(getattr(obj, "dict")):
+#         return obj.dict()
+
+#     # Last resort: stringify
+#     return str(obj)
 
 def write_json(
     path: str | Path, 
@@ -209,5 +265,8 @@ def write_json(
             f,
             ensure_ascii=False,
             indent=indent,
-            default=_json_default,
+            # default=_json_default,
+            default=to_jsonable,
         )
+
+

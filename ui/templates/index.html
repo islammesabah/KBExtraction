@@ -27,10 +27,17 @@
             </div>
 
             <div class="search-group">
+                <!-- NEW: keyword dropdown -->
+                <label for="keyword-select" class="control-label">🔍️ Keyword</label>
+                <select id="keyword-select" class="select-control" disabled>
+                    <option value="">Loading keywords...</option>
+                </select>
+
                 <input type="text" id="node-search" placeholder="Enter node name to filter...">
                 <button id="search-btn">Filter & View Details</button>
                 <button id="toggle-view-btn" title="Toggle Verification View">🕸️</button>
             </div>
+
         </section>
 
         <main class="visualization-area">
@@ -79,7 +86,7 @@
         </main>
     </div>
 
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script type="module" src="{{ url_for('static', filename='js/main.js') }}"></script>
 </body>
 
 </html>

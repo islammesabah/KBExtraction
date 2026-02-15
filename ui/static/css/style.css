@@ -391,3 +391,27 @@ input[type="file"] {
     border: 1px solid #ccc;
     border-radius: 4px;
 }
+
+
+/* Controls: label + select */
+.control-label {
+    font-size: 0.9rem;
+    color: #666;
+    font-weight: 500;
+    margin-right: 4px;
+}
+
+.select-control {
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background-color: #fff;
+    font-size: 14px;
+    min-width: 220px;
+}
+
+.select-control:disabled {
+    background-color: #f3f3f3;
+    color: #999;
+    cursor: not-allowed;
+}

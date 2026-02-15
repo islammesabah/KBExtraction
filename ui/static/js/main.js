@@ -1,72 +1,23 @@
-document.addEventListener('DOMContentLoaded', function () {
-    // 1. Initialize Cytoscape
-    var cy = cytoscape({
-        container: document.getElementById('cy'),
-        style: [
-            {
-                selector: 'node',
-                style: {
-                    'background-color': '#3f51b5',
-                    'label': 'data(label)',
-                    'text-valign': 'center',
-                    'text-halign': 'center',
-                    'color': '#fff',
-                    'text-outline-width': 2,
-                    'text-outline-color': '#3f51b5',
-                    'font-size': '12px',
-                    'width': '50px',
-                    'height': '50px'
-                }
-            },
-            {
-                selector: 'edge',
-                style: {
-                    'width': 2,
-                    'line-color': '#ccc',
-                    'target-arrow-color': '#ccc',
-                    'target-arrow-shape': 'triangle',
-                    'curve-style': 'bezier',
-                    'label': 'data(label)',
-                    'font-size': '10px',
-                    'text-rotation': 'autorotate',
-                    'text-background-opacity': 1,
-                    'text-background-color': '#ffffff'
-                }
-            },
-            {
-                selector: '.highlighted',
-                style: {
-                    'background-color': '#f50057',
-                    'line-color': '#f50057',
-                    'target-arrow-color': '#f50057',
-                    'transition-property': 'background-color, line-color, target-arrow-color',
-                    'transition-duration': '0.5s'
-                }
-            },
-            {
-                selector: '.faded',
-                style: {
-                    'opacity': 0.1,
-                    'text-opacity': 0
-                }
-            }
-        ],
-        layout: {
-            name: 'cose',
-            animate: false
-        }
-    });
+/**
+ * Main entrypoint:
+ * - initialize graph controller (Cytoscape)
+ * - initialize keyword dropdown and connect it to graph updates
+ *
+ * Keep this file tiny.
+ */
 
-    // 2. Fetch Graph Data
-    fetch('/api/graph')
-        .then(response => response.json())
-        .then(data => {
-            if (data.elements) {
-                cy.add(data.elements);
-                cy.layout({ name: 'cose' }).run();
-            }
-        })
-        .catch(error => console.error('Error fetching graph:', error));
+import { createGraphController } from "./graph_controller.js";
+import { initKeywordDropdown } from "./keyword_dropdown.js";
+
+document.addEventListener('DOMContentLoaded', async () => {
+    // 1. Initialize Cytoscape
+    const graph = createGraphController("cy");
+
+    await initKeywordDropdown({
+        selectId: "keyword-select",
+        onGraphPayload: (payload) => graph.setGraph(payload.elements),
+        defaultKeyword: null // optionally set e.g. "Transparency"
+    });
 
     // File Upload UX
     const fileInput = document.getElementById('documents');

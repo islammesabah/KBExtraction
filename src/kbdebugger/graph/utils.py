@@ -1,6 +1,7 @@
 from kbdebugger.types import EdgeProperties, ExtractionResult, GraphRelation
 from kbdebugger.compat.langchain import Document
 from typing import List, Iterable, Mapping, Any, Optional
+from datetime import datetime
 
 
 def normalize_text(text: str) -> str:
@@ -47,7 +48,7 @@ def map_doc_extracted_triplets_to_graph_relations(
             "source": { "label": normalize_text(subj) },
             "target": { "label": normalize_text(obj) },
             "edge":   { "label": normalize_text(rel), "properties": props },
-        })
+        }) # type: ignore
 
     return rels
 
@@ -80,7 +81,7 @@ def map_extracted_triplets_to_graph_relations(
             "source": { "label": normalize_text(subj) },
             "target": { "label": normalize_text(obj) },
             "edge":   { "label": normalize_text(rel), "properties": props },
-        })
+        }) # type: ignore
 
     return rels
 
@@ -102,6 +103,9 @@ def rows_to_graph_relations(
         predicate = row[predicate_key]
         props_raw = row.get(props_key, {}) or {}
 
+        source_id = str(row.get("source_id", ""))
+        target_id = str(row.get("target_id", ""))
+
         if not isinstance(props_raw, dict):
             raise TypeError(f"Expected '{props_key}' to be a dict, got {type(props_raw)}: {props_raw!r}")
 
@@ -111,12 +115,23 @@ def rows_to_graph_relations(
         # (only if you want this invariant)
         props.setdefault("label", predicate)
 
+
+        now = datetime.now().isoformat()
         rels.append(
             {
-                "source": {"label": str(source)},
-                "target": {"label": str(target)},
-                "edge": {"label": str(predicate), "properties": props},
-            }
+                "source": {
+                    "label": str(source), 
+                    "id": source_id,
+                },
+                "target": {
+                    "label": str(target), 
+                    "id": target_id,
+                },
+                "edge": {
+                    "label": str(predicate), 
+                    "properties": props
+                }   
+            } # type: ignore
         )
 
     return rels

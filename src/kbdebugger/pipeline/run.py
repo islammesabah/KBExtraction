@@ -142,9 +142,9 @@ def run_pipeline(cfg: PipelineConfig) -> None:
     # # ---------------------------------------------------------------------
     # 🖌️ In the UI, here we will show:
     # - 3 tabs: Existing, Partially New, New
-    # - Each tab shows quality sentences that were classified into that category.
-    # The user can then select which sentences to extract triplets from.
-    # then the selected sentences (i.e., List[QualityNoveltyResult]) are passed to the triplet extraction stage.
+    # - Each tab shows quality sentences that were classified by the LLM into that category.
+    # The user can then select which sentences to accept and which to reject.
+    # then the selected sentences (i.e., List[QualityNoveltyResult]) will be passed to the triplet extraction stage.
 
 
     # ---------------------------------------------------------------------
@@ -165,11 +165,7 @@ def run_pipeline(cfg: PipelineConfig) -> None:
     # 🖌️ Here we upsert the relations
     # for extraction in extracted_triplets:
     #     # extracted_triplets is like a list of list of triplets with provenance.
-    #     # So, each `extraction` corresponds to one quality sentence that we extracted triplets from
-    #     graph_relations = map_extracted_triplets_to_graph_relations(extraction)
-    #     graph = get_graph()
-    #     graph.upsert_relations(graph_relations)
-
+    #     # So, each `extraction` corresponds to one quality sentence from which we extract triplets 
     # with timer.stage("🧠 Neo4j upsert_extracted_triplets"):
     #     upsert_extracted_triplets(
     #         extractions=extracted_triplets,

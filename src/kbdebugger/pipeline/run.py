@@ -105,12 +105,14 @@ def run_pipeline(cfg: PipelineConfig) -> None:
         keybert_result = filter_paragraphs_by_keyword(
             paragraphs=paragraphs,
             search_keyword=cfg.kg_retrieval_keyword,
+            # progress=
         )
 
     with timer.stage("🧷 LLM Decomposer: decompose_paragraphs_to_qualities"):
         # Stage 2c: matched paragraphs -> qualities
         candidate_qualities = decompose_paragraphs_to_qualities(
             paragraphs=keybert_result.matched_docs,
+            # progress=
         )
 
     # ---------------------------------------------------------------------

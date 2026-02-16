@@ -4,6 +4,7 @@ import math
 import os
 from typing import List, Optional, Sequence, Any, Tuple
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from kbdebugger.types.ui import ProgressCallback
 from rich.progress import track
 
 from kbdebugger.compat.langchain import Document
@@ -117,6 +118,7 @@ def decompose_documents(
     use_batch_decomposer: bool = True,
     parallel: bool = False,
     max_workers: Optional[int] = 2,
+    progress: Optional[ProgressCallback] = None
 ) -> Qualities:
     """
     Decompose a list of LangChain Documents into a flat list of qualities.
@@ -189,21 +191,35 @@ def decompose_documents(
                     batched(texts, batch_size=batch_size),
                 )
 
-                for group_results in track(
-                    results_iter,
+                for batch_idx, group_results in track(
+                    enumerate(results_iter),
                     total=num_batches,
-                    description=f"🧷 LLM Decomposer (parallel): paragraphs → qualities (batch size={batch_size})",
+                    description=f"🧷 LLM Decomposer (parallel): paragraphs → qualities (num_batches={num_batches}, batch size={batch_size})",
                 ):
+                    if progress:
+                        progress(
+                            batch_idx, 
+                            num_batches, 
+                            f"🧷 LLM Decomposer (parallel): paragraphs → qualities. Processing batch ({batch_idx+1}/{num_batches}) ..."
+                        )
+
                     # group_results is List[Qualities] aligned with that batch’s group
                     for qualities in group_results:
                         all_qualities.extend(qualities)
 
         else:
-            for group in track(
-                batched(texts, batch_size=batch_size), 
-                description=f"🧷 LLM Decomposer: paragraphs → qualities (batch size={batch_size})",
+            for batch_idx, group in track(
+                enumerate(batched(texts, batch_size=batch_size)), 
+                description=f"🧷 LLM Decomposer (parallel): paragraphs → qualities (num_batches={num_batches}, batch size={batch_size})",
                 total=num_batches,
             ):
+                if progress:
+                    progress(
+                        batch_idx, 
+                        num_batches, 
+                        f"🧷 LLM Decomposer: paragraphs → qualities. Processing batch ({batch_idx+1}/{num_batches}) ..."
+                    )
+
                 group_results: List[Qualities] = _chunk_batch_to_qualities_decomposer(group)
                 # Flatten group results into the global list.
                 for qualities in group_results:

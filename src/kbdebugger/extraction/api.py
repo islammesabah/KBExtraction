@@ -1,8 +1,9 @@
 from __future__ import annotations
 from encodings.punycode import T
-from typing import List
+from typing import List, Optional
 
 from kbdebugger.compat.langchain import Document
+from kbdebugger.types.ui import ProgressCallback
 
 # from .chunk import chunk_corpus
 from .decompose import decompose_documents
@@ -63,6 +64,7 @@ def extract_paragraphs_from_pdf(
 def decompose_paragraphs_to_qualities(
     *,
     paragraphs: List[Document],
+    progress: Optional[ProgressCallback] = None,
     # mode: str = "paragraph",
 ) -> Qualities:
     """
@@ -81,7 +83,11 @@ def decompose_paragraphs_to_qualities(
     # Reuse existing decomposer by wrapping paragraphs into the expected "docs" shape.
     # If `decompose_documents` expects LangChain Documents, create them here.
     # Otherwise, pass the list[str] directly if supported.
-    qualities = decompose_documents(docs=paragraphs, mode=DecomposeMode.CHUNKS)
+    qualities = decompose_documents(
+        docs=paragraphs, 
+        mode=DecomposeMode.CHUNKS,
+        progress=progress
+    )
 
     if not qualities:
         raise ValueError("Decomposition produced no qualities.")

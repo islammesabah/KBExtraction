@@ -2,10 +2,9 @@ from __future__ import annotations
 
 from typing import List, Dict, Any, Optional, Tuple
 
+from kbdebugger.types.ui import ProgressCallback
 import rich
 from rich.progress import track
-# from keybert import KeyBERT
-# from sentence_transformers import SentenceTransformer, util as sbert_util
 from kbdebugger.utils.json import write_json
 from kbdebugger.utils.time import now_utc_compact
 from .types import (
@@ -19,7 +18,8 @@ def run_keybert_matching(
     paragraphs: List[str],
     search_keyword: str,
     synonyms: Optional[List[str]] = None,
-    config: Optional[KeyBERTConfig] = None
+    config: Optional[KeyBERTConfig] = None,
+    progress: Optional[ProgressCallback] = None
 ) -> Tuple[
         List[ParagraphMatch],
         List[ParagraphMatch]
@@ -63,12 +63,20 @@ def run_keybert_matching(
 
     matched: List[ParagraphMatch] = []
     unmatched: List[ParagraphMatch] = []
+    total = len(paragraphs)
 
     for i, paragraph in track(
         enumerate(paragraphs),
         description="🔎 KeyBERT: scanning paragraphs",
-        total=len(paragraphs),
+        total=total,
     ):
+        if progress:
+            progress(
+                i, 
+                total, 
+                f"🔎 KeyBERT: Scanning paragraph ({i}/{total}) for keyword {search_keyword}..."
+            )
+
         # Step 1: Extract top-n keywords from paragraph
         extracted_keywords = kw_model.extract_keywords(
             paragraph,

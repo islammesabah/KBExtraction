@@ -7,7 +7,6 @@ from .retriever import KnowledgeGraphRetriever
 from .utils import map_extracted_triplets_to_graph_relations
 from .types import BatchUpsertSummary
 from . import get_graph
-import rich
 
 from .cytoscape import graph_relations_to_cytoscape, CytoscapeGraphPayload
 
@@ -89,7 +88,6 @@ def retrieve_keyword_subgraph_cytoscape(
         keyword=keyword,
         limit_per_pattern=limit_per_pattern,
     )
-    rich.print(relations)
     return graph_relations_to_cytoscape(relations)
 
 

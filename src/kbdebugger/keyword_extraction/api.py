@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from typing import List, Sequence
+from typing import List, Optional, Sequence
 
 from kbdebugger.compat.langchain import Document
+from kbdebugger.types.ui import ProgressCallback
 
 from .keyword_synonyms import generate_synonyms_for_keyword
 from .keyBERT import run_keybert_matching
@@ -14,6 +15,7 @@ def filter_paragraphs_by_keyword(
     paragraphs: Sequence[Document],
     search_keyword: str,
     max_synonyms: int = 10,
+    progress: Optional[ProgressCallback] = None,
 ) -> KeywordDocMatchResult:
     """
     Public API: Generate synonyms then run KeyBERT keyword extraction + matching to filter paragraphs
@@ -28,6 +30,8 @@ def filter_paragraphs_by_keyword(
         The keyword used to find relevant paragraphs.
     max_synonyms:
         Safety cap for synonym list size (if your generator supports it).
+    progress:
+        Callback function to update progress
 
 
     Notes:
@@ -52,6 +56,7 @@ def filter_paragraphs_by_keyword(
         paragraphs=texts,
         search_keyword=search_keyword,
         synonyms=synonyms,
+        progress=progress
     )
     # ⚠️ Notice that we ignore the matched/unmatched ParagraphMatch objects here since they contain 
     # text and keyword info that would be redundant with the Document objects.

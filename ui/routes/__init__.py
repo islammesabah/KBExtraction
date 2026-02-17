@@ -10,6 +10,7 @@ from __future__ import annotations
 from flask import Flask, render_template
 
 from .graph_routes import graph_bp
+from .pipeline_routes import pipeline_bp
 # from .verify_routes import verify_bp
 
 def register_blueprints(app: Flask) -> None:
@@ -26,4 +27,5 @@ def register_blueprints(app: Flask) -> None:
         return render_template('index.html')
     
     app.register_blueprint(graph_bp, url_prefix="/api/graph")
+    app.register_blueprint(pipeline_bp, url_prefix="/api/pipeline")
     # app.register_blueprint(verify_bp)

@@ -5,7 +5,7 @@
  * - on change: calls /api/subgraph and updates the graph
  */
 
-import { getSearchKeywords, getSubgraph } from "./api_client.js";
+import { getSearchKeywords, getSubgraph } from "./graph_client.js";
 
 export async function initKeywordDropdown({
   selectId = "keyword-select",

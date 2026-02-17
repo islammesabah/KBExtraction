@@ -45,6 +45,7 @@ echo "🐍 $(python --version) @ $(which python)"
 
 NUMPY_PIN="${NUMPY_PIN:-1.26.4}"
 python -m pip install --force-reinstall "numpy==${NUMPY_PIN}" >/dev/null || true
+# python -m pip install --force-reinstall numpy==${1.26.4}
 
 # # ------------------ Portable hnswlib install (wheelhouse) ------------------
 # # Goal: avoid SIGILL when SLURM places you on a different CPU node.

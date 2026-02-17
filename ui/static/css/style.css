@@ -415,3 +415,54 @@ input[type="file"] {
     color: #999;
     cursor: not-allowed;
 }
+
+.pipeline-progress {
+  margin-top: 12px;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 12px 14px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.pipeline-progress.hidden {
+  display: none;
+}
+
+.pipeline-progress-header {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.pipeline-stage {
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+.pipeline-message {
+  color: #555;
+  font-size: 0.95rem;
+}
+
+.pipeline-bar-wrap {
+  width: 100%;
+  height: 10px;
+  background: #eee;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.pipeline-bar {
+  height: 100%;
+  width: 0%;
+  background: var(--primary-color);
+  transition: width 0.2s ease;
+}
+
+.pipeline-meta {
+  margin-top: 8px;
+  font-size: 0.85rem;
+  color: #777;
+}

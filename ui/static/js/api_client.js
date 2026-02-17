@@ -14,12 +14,3 @@ export async function fetchJson(url, options = {}) {
   }
   return data;
 }
-
-export async function getSearchKeywords() {
-  return fetchJson("/api/graph/search-keywords");
-}
-
-export async function getSubgraph(keyword) {
-  const url = `/api/graph/subgraph?keyword=${encodeURIComponent(keyword)}`;
-  return fetchJson(url);
-}

@@ -6,17 +6,28 @@
  * Keep this file tiny.
  */
 
-import { createGraphController } from "./graph_controller.js";
+import { createCytoscapeGraph } from "./cytoscape.js";
 import { initKeywordDropdown } from "./keyword_dropdown.js";
+import { wirePipelineUpload } from "./pipeline_controller.js";
 
 document.addEventListener('DOMContentLoaded', async () => {
     // 1. Initialize Cytoscape
-    const graph = createGraphController("cy");
+    const graph = createCytoscapeGraph("cy");
 
     await initKeywordDropdown({
         selectId: "keyword-select",
         onGraphPayload: (payload) => graph.setGraph(payload.elements),
         defaultKeyword: null // optionally set e.g. "Transparency"
+    });
+
+
+    wirePipelineUpload({
+        fileInputId: "documents",
+        keywordSelectId: "keyword-select", // whatever your dropdown id is
+        onDone: (result) => {
+            console.log("Pipeline result:", result);
+            // Later: feed Stage 4 novelty results into your 3 tabs directly.
+        },
     });
 
     // File Upload UX

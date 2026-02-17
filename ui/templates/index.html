@@ -37,8 +37,20 @@
                 <button id="search-btn">Filter & View Details</button>
                 <button id="toggle-view-btn" title="Toggle Verification View">🕸️</button>
             </div>
-
         </section>
+
+        <div id="pipeline-progress" class="pipeline-progress hidden">
+            <div class="pipeline-progress-header">
+                <div class="pipeline-stage" id="pipeline-stage">Stage</div>
+                <div class="pipeline-message" id="pipeline-message">Message…</div>
+            </div>
+
+            <div class="pipeline-bar-wrap">
+                <div class="pipeline-bar" id="pipeline-bar"></div>
+            </div>
+
+            <div class="pipeline-meta" id="pipeline-meta"></div>
+        </div>
 
         <main class="visualization-area">
             <div class="graph-wrapper">

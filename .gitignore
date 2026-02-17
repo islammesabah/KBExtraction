@@ -43,3 +43,8 @@ ui/*.log
 ui/uploads/
 ui/cache/
 ui/tmp/
+
+
+# .env File
+.env
+.env.*

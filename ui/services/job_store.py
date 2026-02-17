@@ -35,6 +35,13 @@ JobProgressStage = Literal[
     "DecomposerLLM"
 ]
 
+JobState = Literal[
+    "queued",
+    "running",
+    "done",
+    "error"
+]
+
 @dataclass
 class JobProgress:
     """
@@ -72,7 +79,7 @@ class JobRecord:
     """
     job_id: str
     created_at_unix: float = field(default_factory=time)
-    state: str = "queued"
+    state: JobState = "queued"
     progress: JobProgress = field(default_factory=JobProgress)
     result: Optional[Dict[str, Any]] = None
     error: Optional[str] = None

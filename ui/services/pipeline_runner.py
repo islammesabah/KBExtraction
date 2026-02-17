@@ -61,8 +61,8 @@ def run_pipeline(
     # ---------------------------
     # Stage 2a: Docling
     # ---------------------------
-    JOB_STORE.update_progress(
-        job_id,
+    init_stage(
+        job_id=job_id,
         stage="Docling",
         message="🦆 Parsing document into paragraphs (Docling)...",
         current=None,

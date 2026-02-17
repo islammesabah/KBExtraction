@@ -4,7 +4,7 @@
  * - updates graph elements when new payload arrives
  */
 
-export function createGraphController(containerId = "cy") {
+export function createCytoscapeGraph(containerId = "cy") {
   const cy = cytoscape({
     container: document.getElementById(containerId),
     style: [

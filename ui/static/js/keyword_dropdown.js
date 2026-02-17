@@ -43,7 +43,8 @@ export async function initKeywordDropdown({
     // Placeholder: selected + disabled => user must pick something else
     const placeholder = document.createElement("option");
     placeholder.value = "";
-    placeholder.textContent = "— Select a keyword —";
+    // placeholder.textContent = "— Select a keyword —";
+    placeholder.textContent = "🔐 Select a keyword";
     placeholder.disabled = true;
     placeholder.selected = true;
     select.appendChild(placeholder);

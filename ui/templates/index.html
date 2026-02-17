@@ -1,138 +1,106 @@
 <!DOCTYPE html>
 <html lang="en">
 
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Trustworthy AI knowledge discovery</title>
-        
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-        <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trustworthy AI knowledge discovery</title>
 
-        <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.26.0/cytoscape.min.js"></script>
-    </head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 
-    <body>
-        <div class="container-xxl py-3">
-            <header class="text-center my-3">
-                <h1 class="display-6 fw-bold text-primary mb-1">Trustworthy AI knowledge discovery</h1>
-                <p class="text-muted mb-0">Process documents and visualize knowledge graphs.</p>
-            </header>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.26.0/cytoscape.min.js"></script>
+</head>
 
-            <section class="controls card p-3 shadow-sm">
-                <div class="d-flex justify-content-between align-items-end gap-3 flex-wrap">
-                    <!-- LEFT: keyword + buttons -->
-                    <div class="d-flex gap-2 flex-wrap align-items-end">
-                        <div class="form-floating">
-                            <select 
-                                id="keyword-select" 
-                                class="form-select" 
-                                style="min-width: 220px;" 
-                                disabled
-                            >
-                                <option value="">Loading keywords...</option>
-                            </select>
-                            <label for="keyword-select" mb-1 fw-semibold text-muted>Keyword</label>
-                        </div>
+<body>
+    <div class="container-xxl py-3">
+        <header class="text-center my-3">
+            <h1 class="display-6 fw-bold text-primary mb-1">Trustworthy AI knowledge discovery</h1>
+            <p class="text-muted mb-0">Process documents and visualize knowledge graphs.</p>
+        </header>
 
-                        <button id="search-btn" class="btn btn-primary" type="button">
-                            Filter &amp; View Details
-                        </button>
+        <section class="card p-3">
+            <div class="d-flex justify-content-between align-items-end gap-3 flex-wrap">
 
-                        <!-- <div class="form-check form-switch mb-0 ms-2">
-                            <input
-                                class="form-check-input"
-                                type="checkbox"
-                                role="switch"
-                                id="toggle-verification-switch"
-                            >
-                            <label class="form-check-label text-muted" for="toggle-verification-switch">
-                                Verification
-                            </label>
-                        </div> -->
-
+                <!-- LEFT: keyword -->
+                <div class="d-flex gap-2 flex-wrap align-items-end">
+                    <div class="form-floating">
+                        <select id="keyword-select" class="form-select" style="min-width: 220px;" disabled>
+                            <option value="">Loading keywords...</option>
+                        </select>
+                        <label for="keyword-select" class="text-muted">Search Keyword</label>
                     </div>
 
-                    <!-- RIGHT: upload -->
-                    <div class="d-flex align-items-end gap-2 flex-wrap">
-                    <div>
-                        <div class="form-label mb-1 text-uppercase small fw-semibold text-muted" style="visibility:hidden;">
-                        spacer
-                        </div>
-
-                        <label
-                        for="documents"
-                        id="upload-label"
-                        class="btn btn-outline-secondary disabled"
-                        aria-disabled="true"
-                        title="Select a keyword first"
-                        >
-                        📄 Upload Documents
-                        </label>
-
-                        <input type="file" id="documents" name="documents" multiple style="display:none;" disabled>
-                    </div>
-
-                    <div class="mb-1 text-muted" id="file-chosen">No file chosen</div>
-                    </div>
-
+                    <!-- keep for later -->
+                    <!--
+                    <button id="search-btn" class="btn btn-primary" type="button">
+                        Filter &amp; View Details
+                    </button>
+                    -->
                 </div>
-            </section>
+
+                <!-- RIGHT: upload -->
+                <div style="min-width: 260px;">
+                    <label for="documents" class="form-label text-muted mb-1">
+                        Upload Documents
+                    </label>
+
+                    <input class="form-control" type="file" id="documents" name="documents" multiple disabled>
+                </div>
 
 
-            <div id="pipeline-progress" class="pipeline-progress hidden">
-                <div class="pipeline-progress-header">
-                    <div class="pipeline-stage" id="pipeline-stage">Stage</div>
-                    <div class="pipeline-message" id="pipeline-message">Message…</div>
+            </div>
+        </section>
 
-                    <!-- NEW: global elapsed time -->
-                    <div 
-                        class="pipeline-elapsed text-primary-emphas" 
-                        id="pipeline-elapsed"
-                    >
+
+        <div id="pipeline-progress" class="card mb-3">
+            <!-- TODO: Add `d-none` class to the card -->
+            <div class="card-body py-2">
+
+                <div class="d-flex align-items-center gap-2">
+                    <div class="fw-bold text-primary" id="pipeline-stage">Stage</div>
+
+                    <div class="text-muted flex-grow-1" id="pipeline-message"
+                        style="min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                        Message…
+                    </div>
+
+                    <div id="pipeline-elapsed" class="text-primary-emphasis"
+                        style="font-variant-numeric: tabular-nums; white-space: nowrap;">
                         ⏱️ 00:00
                     </div>
                 </div>
 
-                <div class="pipeline-bar-wrap">
-                    <div class="pipeline-bar" id="pipeline-bar"></div>
+                <div class="progress mt-2" style="height: 10px;">
+                    <div class="progress-bar" id="pipeline-bar" role="progressbar" style="width: 0%;" aria-valuenow="0"
+                        aria-valuemin="0" aria-valuemax="100"></div>
                 </div>
 
-                <div class="pipeline-meta" id="pipeline-meta"></div>
-            </div>
+                <div class="small text-muted mt-2" id="pipeline-meta"></div>
 
-            <main class="visualization-area">
+            </div>
+        </div>
+
+
+        <main class="visualization-area">
             <!-- LEFT: Graph / Verification tabs -->
             <div class="graph-wrapper p-3">
 
                 <!-- Top-level view tabs -->
                 <ul class="nav nav-tabs mb-3" id="view-tabs" role="tablist">
                     <li class="nav-item" role="presentation">
-                        <button
-                            class="nav-link active"
-                            id="graph-view-tab"
-                            data-bs-toggle="tab"
-                            data-bs-target="#graph-view"
-                            type="button"
-                            role="tab"
-                            aria-controls="graph-view"
-                            aria-selected="true"
-                        >
+                        <button class="nav-link active" id="graph-view-tab" data-bs-toggle="tab"
+                            data-bs-target="#graph-view" type="button" role="tab" aria-controls="graph-view"
+                            aria-selected="true">
                             Graph
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <button
-                            class="nav-link"
-                            id="verification-view-tab"
-                            data-bs-toggle="tab"
-                            data-bs-target="#verification-view"
-                            type="button"
-                            role="tab"
-                            aria-controls="verification-view"
-                            aria-selected="false"
-                        >
+                        <button class="nav-link" id="verification-view-tab" data-bs-toggle="tab"
+                            data-bs-target="#verification-view" type="button" role="tab"
+                            aria-controls="verification-view" aria-selected="false">
                             Oversight
                         </button>
                     </li>
@@ -142,28 +110,15 @@
                 <div class="tab-content h-100" id="view-tabs-content" style="min-height:0;">
 
                     <!-- Graph view -->
-                    <div
-                        class="tab-pane fade show active h-100 position-relative"
-                        id="graph-view"
-                        role="tabpanel"
-                        aria-labelledby="graph-view-tab"
-                        style="min-height:0;"
-                    >
+                    <div class="tab-pane fade show active h-100 position-relative" id="graph-view" role="tabpanel"
+                        aria-labelledby="graph-view-tab" style="min-height:0;">
                         <div id="cy" class="graph-container"></div>
                     </div>
 
                     <!-- Human Oversight view -->
-                    <div
-                        class="tab-pane fade h-100"
-                        id="verification-view"
-                        role="tabpanel"
-                        aria-labelledby="verification-view-tab"
-                        style="min-height:0; overflow:auto;"
-                    >
-                        <section 
-                            id="verification-section"
-                            class="p-2 p-md-3 bg-white rounded-3 border"
-                        >
+                    <div class="tab-pane fade h-100" id="verification-view" role="tabpanel"
+                        aria-labelledby="verification-view-tab" style="min-height:0; overflow:auto;">
+                        <section id="verification-section" class="p-2 p-md-3 bg-white rounded-3 border">
                             <h2>🧑🏻‍⚖️ Human Oversight</h2>
 
                             <div class="verification-split-container">
@@ -171,82 +126,47 @@
                                     <!-- Inner tabs -->
                                     <ul class="nav nav-tabs mb-3" id="oversight-inner-tabs" role="tablist">
                                         <li class="nav-item" role="presentation">
-                                        <button
-                                            class="nav-link active"
-                                            id="existing-inner-tab"
-                                            data-bs-toggle="tab"
-                                            data-bs-target="#existing-inner"
-                                            type="button"
-                                            role="tab"
-                                            aria-controls="existing-inner"
-                                            aria-selected="true"
-                                        >
-                                            Existing Knowledge
-                                        </button>
+                                            <button class="nav-link active" id="existing-inner-tab" data-bs-toggle="tab"
+                                                data-bs-target="#existing-inner" type="button" role="tab"
+                                                aria-controls="existing-inner" aria-selected="true">
+                                                Existing Knowledge
+                                            </button>
                                         </li>
 
                                         <li class="nav-item" role="presentation">
-                                        <button
-                                            class="nav-link"
-                                            id="partial-inner-tab"
-                                            data-bs-toggle="tab"
-                                            data-bs-target="#partial-inner"
-                                            type="button"
-                                            role="tab"
-                                            aria-controls="partial-inner"
-                                            aria-selected="false"
-                                        >
-                                            Partial Match
-                                        </button>
+                                            <button class="nav-link" id="partial-inner-tab" data-bs-toggle="tab"
+                                                data-bs-target="#partial-inner" type="button" role="tab"
+                                                aria-controls="partial-inner" aria-selected="false">
+                                                Partial Match
+                                            </button>
                                         </li>
 
                                         <li class="nav-item" role="presentation">
-                                        <button
-                                            class="nav-link"
-                                            id="new-inner-tab"
-                                            data-bs-toggle="tab"
-                                            data-bs-target="#new-inner"
-                                            type="button"
-                                            role="tab"
-                                            aria-controls="new-inner"
-                                            aria-selected="false"
-                                        >
-                                            New Knowledge
-                                        </button>
+                                            <button class="nav-link" id="new-inner-tab" data-bs-toggle="tab"
+                                                data-bs-target="#new-inner" type="button" role="tab"
+                                                aria-controls="new-inner" aria-selected="false">
+                                                New Knowledge
+                                            </button>
                                         </li>
                                     </ul>
 
                                     <!-- Inner tab content -->
-                                    <div class="tab-content flex-grow-1" id="oversight-inner-tabs-content" style="min-height:0;">
-                                        <div
-                                            class="tab-pane fade show active h-100"
-                                            id="existing-inner"
-                                            role="tabpanel"
-                                            aria-labelledby="existing-inner-tab"
-                                            style="min-height:0;"
-                                        >
+                                    <div class="tab-content flex-grow-1" id="oversight-inner-tabs-content"
+                                        style="min-height:0;">
+                                        <div class="tab-pane fade show active h-100" id="existing-inner" role="tabpanel"
+                                            aria-labelledby="existing-inner-tab" style="min-height:0;">
                                             <h3 class="h5">Source Content</h3>
                                             <div class="content-list"></div>
                                         </div>
 
-                                        <div
-                                            class="tab-pane fade h-100"
-                                            id="partial-inner"
-                                            role="tabpanel"
-                                            aria-labelledby="partial-inner-tab"
-                                            style="min-height:0;"
-                                        >
+                                        <div class="tab-pane fade h-100" id="partial-inner" role="tabpanel"
+                                            aria-labelledby="partial-inner-tab" style="min-height:0;">
                                             <h3 class="h5">Source Content</h3>
                                             <div class="content-list"></div>
                                         </div>
 
-                                        <div
-                                            class="tab-pane fade h-100"
-                                            id="new-inner"
-                                            role="tabpanel"
-                                            aria-labelledby="new-inner-tab"
-                                            style="min-height:0;"
-                                        >
+                                        <div class="tab-pane fade h-100" id="new-inner" role="tabpanel"
+                                            aria-labelledby="new-inner-tab" style="min-height:0;">
                                             <h3 class="h5">Source Content</h3>
                                             <div class="content-list"></div>
                                         </div>
@@ -269,17 +189,16 @@
             <div id="details-panel" class="details-panel">
                 <h3>Concept Insights</h3>
                 <div id="details-content" class="details-content">
-                <p class="placeholder-text">Select a node or search to view details.</p>
+                    <p class="placeholder-text">Select a node or search to view details.</p>
                 </div>
             </div>
-            </main>
+        </main>
+    </div>
 
-        </div>
+    <script type="module" src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-..."
+        crossorigin="anonymous"></script>
 
-        <script type="module" src="{{ url_for('static', filename='js/main.js') }}"></script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
-                integrity="sha384-..." crossorigin="anonymous"></script>
-
-    </body>
+</body>
 
 </html>

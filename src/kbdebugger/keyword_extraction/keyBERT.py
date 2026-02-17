@@ -74,7 +74,7 @@ def run_keybert_matching(
             progress(
                 i, 
                 total, 
-                f"🔎 ({i}/{total}) Scanning paragraphs for keyword: \"{search_keyword}\"..."
+                f"🔎 Scanning paragraphs for keyword: \"{search_keyword}\"..."
             )
 
         # Step 1: Extract top-n keywords from paragraph

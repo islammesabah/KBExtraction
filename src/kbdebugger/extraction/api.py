@@ -89,6 +89,7 @@ def decompose_paragraphs_to_qualities(
         progress=progress
     )
 
-    if not qualities:
-        raise ValueError("Decomposition produced no qualities.")
+    # if not qualities:
+    #     raise ValueError("Decomposition produced no qualities.")
+    
     return qualities

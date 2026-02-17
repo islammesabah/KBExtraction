@@ -4,6 +4,7 @@
 
 import { startPipelineJob, getJobStatus } from "./pipeline_client.js";
 import { showProgressPanel, updateProgressPanel } from "./pipeline_progress_ui.js";
+import { resetElapsedTimer, updateElapsedTimer } from "./timer.js";
 
 export function wirePipelineUpload({ fileInputId, keywordSelectId, onDone }) {
   const fileInput = document.getElementById(fileInputId);
@@ -17,12 +18,13 @@ export function wirePipelineUpload({ fileInputId, keywordSelectId, onDone }) {
 
     const keyword = keywordSel.value.trim();
     if (!keyword) {
-      alert("🔍️ Please choose a keyword first.");
+      alert("🔍️ Please choose a keyword firjob.");
       return;
     }
 
     const file = fileInput.files[0];
     showProgressPanel();
+    resetElapsedTimer();
     updateProgressPanel({ stage: "queued", message: "Queued…", current: null, total: null });
 
     let jobId;
@@ -37,21 +39,23 @@ export function wirePipelineUpload({ fileInputId, keywordSelectId, onDone }) {
     // Poll
     const poll = async () => {
       try {
-        const st = await getJobStatus(jobId);
-        updateProgressPanel({
-          stage: st.stage,
-          message: st.message,
-          current: st.progress?.current ?? null,
-          total: st.progress?.total ?? null,
-        });
-
+        const job = await getJobStatus(jobId);
         
-        if (st.state === "done") {
-          onDone?.(st.result);
+        updateProgressPanel({
+          stage: job.stage,
+          message: job.message,
+          current: job.progress?.current ?? null,
+          total: job.progress?.total ?? null,
+        });
+        
+        updateElapsedTimer(job);
+        
+        if (job.state === "done") {
+          onDone?.(job.result);
           return;
         }
-        if (st.state === "error") {
-          alert(`Pipeline failed: ${st.error || "unknown error"}`);
+        if (job.state === "error") {
+          alert(`Pipeline failed: ${job.error || "unknown error"}`);
           return;
         }
 

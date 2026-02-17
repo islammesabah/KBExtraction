@@ -176,6 +176,7 @@ def run_pipeline(cfg: PipelineConfig) -> None:
     #     )
 
     timing_path = timer.save_json()
+
     rich.print(f"[INFO] ⏱️ Wrote pipeline timing log to {timing_path}")
 
     # # ---------------------------------------------------------------------

@@ -123,6 +123,6 @@ def get_job_status(job_id: str):
             "progress": {"current": rec.progress.current, "total": rec.progress.total},
             "result": rec.result,
             "error": rec.error,
-            "created_at": rec.created_at_unix
+            "started_at": rec.started_at
         }
     )

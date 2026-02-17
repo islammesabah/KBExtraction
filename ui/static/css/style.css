@@ -84,6 +84,12 @@ input[type="file"] {
     background-color: #ddd;
 }
 
+.custom-file-upload.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
 #node-search {
     padding: 10px;
     border: 1px solid var(--border-color);
@@ -416,8 +422,21 @@ input[type="file"] {
     cursor: not-allowed;
 }
 
-.pipeline-progress {
+/* .pipeline-progress {
   margin-top: 12px;
+  margin-bottom: 12px;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 12px 14px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+} */
+
+.pipeline-progress {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
   background: var(--card-bg);
   border: 1px solid var(--border-color);
   border-radius: 8px;
@@ -428,22 +447,39 @@ input[type="file"] {
 .pipeline-progress.hidden {
   display: none;
 }
-
+/* 
 .pipeline-progress-header {
   display: flex;
   flex-direction: column;
   gap: 6px;
   margin-bottom: 10px;
+} */
+
+.pipeline-progress-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .pipeline-stage {
   font-weight: 700;
   color: var(--primary-color);
+  white-space: nowrap;
 }
 
 .pipeline-message {
   color: #555;
   font-size: 0.95rem;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pipeline-elapsed {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  opacity: 0.9;
 }
 
 .pipeline-bar-wrap {

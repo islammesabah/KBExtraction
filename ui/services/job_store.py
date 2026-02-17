@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from kbdebugger.utils.time import now_utc_iso
+
 """
 In-memory job store for long-running pipeline tasks.
 
@@ -78,7 +80,7 @@ class JobRecord:
         Error message if state == "error".
     """
     job_id: str
-    created_at_unix: float = field(default_factory=time)
+    started_at: float = field(default_factory=time)
     state: JobState = "queued"
     progress: JobProgress = field(default_factory=JobProgress)
     result: Optional[Dict[str, Any]] = None
@@ -120,6 +122,11 @@ class InMemoryJobStore:
         with self._lock:
             rec = self._jobs[job_id]
             rec.state = "running"
+
+            # only set once per run
+            if not rec.started_at:
+                rec.started_at = now_utc_iso()
+
 
     def set_done(self, job_id: str, result: Dict[str, Any]) -> None:
         with self._lock:

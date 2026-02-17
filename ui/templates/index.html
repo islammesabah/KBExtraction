@@ -18,14 +18,6 @@
         </header>
 
         <section class="controls">
-            <div class="input-group">
-                <label for="documents" class="custom-file-upload">
-                    Upload Documents
-                </label>
-                <input type="file" id="documents" name="documents" multiple>
-                <span id="file-chosen">No file chosen</span>
-            </div>
-
             <div class="search-group">
                 <!-- NEW: keyword dropdown -->
                 <label for="keyword-select" class="control-label">🔍️ Keyword</label>
@@ -33,9 +25,31 @@
                     <option value="">Loading keywords...</option>
                 </select>
 
-                <input type="text" id="node-search" placeholder="Enter node name to filter...">
-                <button id="search-btn">Filter & View Details</button>
+                <!-- Hide this for now -->
+                <input
+                    type="text" 
+                    id="node-search" 
+                    placeholder="Enter node name to filter..."
+                    style="display: none;"
+                >
+
+                <button id="search-btn">Filter &amp; View Details</button>
                 <button id="toggle-view-btn" title="Toggle Verification View">🕸️</button>
+            </div>
+
+
+            <div class="input-group">
+                <label 
+                    for="documents"
+                    id="upload-label"
+                    class="custom-file-upload disabled"
+                    aria-disabled="true"
+                    title="Select a keyword first"
+                >
+                    📄 Upload Documents
+                </label>
+                <input type="file" id="documents" name="documents" multiple>
+                <span id="file-chosen">No file chosen</span>
             </div>
         </section>
 
@@ -43,6 +57,9 @@
             <div class="pipeline-progress-header">
                 <div class="pipeline-stage" id="pipeline-stage">Stage</div>
                 <div class="pipeline-message" id="pipeline-message">Message…</div>
+
+                <!-- NEW: global elapsed time -->
+                <div class="pipeline-elapsed" id="pipeline-elapsed">⏱️ 00:00</div>
             </div>
 
             <div class="pipeline-bar-wrap">

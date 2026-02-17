@@ -67,14 +67,14 @@ def run_keybert_matching(
 
     for i, paragraph in track(
         enumerate(paragraphs),
-        description="🔎 KeyBERT: scanning paragraphs",
+        description="🔎 scanning paragraphs",
         total=total,
     ):
         if progress:
             progress(
                 i, 
                 total, 
-                f"🔎 KeyBERT: ({i}/{total}) Scanning paragraphs for keyword: \"{search_keyword}\"..."
+                f"🔎 ({i}/{total}) Scanning paragraphs for keyword: \"{search_keyword}\"..."
             )
 
         # Step 1: Extract top-n keywords from paragraph

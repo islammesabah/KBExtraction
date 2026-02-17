@@ -20,7 +20,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         defaultKeyword: null // optionally set e.g. "Transparency"
     });
 
-
     wirePipelineUpload({
         fileInputId: "documents",
         keywordSelectId: "keyword-select", // whatever your dropdown id is
@@ -42,7 +41,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     // 4. Verification Logic
-    const verificationSection = document.getElementById('verification-section');
+    // const verificationSection = document.getElementById('verification-section');
+    // const verificationSwitch = document.getElementById("toggle-verification-switch");
+
+    // function setVerificationVisible(visible) {
+    //     verificationSection.style.display = visible ? "block" : "none";
+    //     verificationSwitch.checked = visible;
+    // }
+
+    // // Ensure initial state is OFF (hidden)
+    // setVerificationVisible(false);
+
+    // verificationSwitch.addEventListener("change", () => {
+    //     setVerificationVisible(verificationSwitch.checked);
+    // });
+
     const tabBtns = document.querySelectorAll('.tab-btn');
     const tabPanes = document.querySelectorAll('.tab-pane');
 
@@ -191,12 +204,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const searchBtn = document.getElementById('search-btn');
     const searchInput = document.getElementById('node-search');
     const detailsContent = document.getElementById('details-content');
-    const toggleViewBtn = document.getElementById('toggle-view-btn');
-
-    toggleViewBtn.addEventListener('click', () => {
-        const isHidden = verificationSection.style.display === 'none';
-        verificationSection.style.display = isHidden ? 'block' : 'none';
-    });
 
     searchBtn.addEventListener('click', performSearch);
     searchInput.addEventListener('keypress', function (e) {

@@ -84,4 +84,20 @@ srun -K \
 --time="$HOURS:00:00" \
 --immediate=3600 \
 --pty \
-/bin/bash
+/bin/bash -lc '
+set -euo pipefail
+
+echo "🔧 Fixing Python deps inside container..."
+
+# (Optional but recommended) ensure pip is available/updated
+python -m pip install -U pip setuptools wheel
+
+# 1) Force numpy downgrade (your workaround)
+python -m pip install --force-reinstall --no-cache-dir numpy==1.26.4
+
+# 2) Install required packages
+python -m pip install --no-cache-dir faiss-cpu keybert flask
+
+echo "✅ Done. Dropping into interactive shell."
+exec /bin/bash
+'

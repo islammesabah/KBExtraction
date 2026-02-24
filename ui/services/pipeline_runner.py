@@ -18,9 +18,12 @@ from typing import Any, Dict
 
 from kbdebugger.pipeline.config import PipelineConfig
 from kbdebugger.extraction.api import extract_paragraphs_from_pdf
-from kbdebugger.keyword_extraction.api import filter_paragraphs_by_keyword
-from kbdebugger.extraction.api import decompose_paragraphs_to_qualities
+from kbdebugger.extraction.logging import build_chunked_documents_payload
 
+from kbdebugger.keyword_extraction.api import filter_paragraphs_by_keyword
+from kbdebugger.keyword_extraction.logging import build_keybert_payload
+
+from kbdebugger.extraction.api import decompose_paragraphs_to_qualities
 # Optional next stages (enable when ready):
 # from kbdebugger.subgraph_similarity.api import filter_qualities_by_subgraph_similarity
 # from kbdebugger.novelty.comparator import classify_qualities_novelty
@@ -69,7 +72,7 @@ def run_pipeline(
         total=None,
     )
 
-    paragraphs = extract_paragraphs_from_pdf(
+    paragraphs, docling_log = extract_paragraphs_from_pdf(
         pdf_path=str(file_path),
         do_ocr=cfg.docling_enable_OCR,
         do_table_structure=cfg.docling_enable_table_recognition,
@@ -87,12 +90,12 @@ def run_pipeline(
         total=total_par,
     )
 
-    keybert_result = filter_paragraphs_by_keyword(
+    keybert_result, keybert_log = filter_paragraphs_by_keyword(
         paragraphs=paragraphs,
         search_keyword=keyword,
         progress=make_job_progress_callback(job_id=job_id, stage="KeyBERT"),
     )
-
+        
     matched_docs = keybert_result.matched_docs
 
     # ---------------------------
@@ -110,24 +113,15 @@ def run_pipeline(
         total=num_batches,
     )
 
-    # If you add a decomposer progress callback later, wire it here similarly.
-    qualities = decompose_paragraphs_to_qualities(
+    qualities, decomposer_log = decompose_paragraphs_to_qualities(
         paragraphs=list(matched_docs),
         progress=make_job_progress_callback(job_id=job_id, stage="DecomposerLLM")
     )
 
-    # ---------------------------
-    # Return minimal payload for now
-    # ---------------------------
-    result: Dict[str, Any] = {
-        "stage2": {
-            "keyword": keyword,
-            "num_paragraphs": len(paragraphs),
-            "num_matched_paragraphs": len(matched_docs),
-            "synonyms": list(keybert_result.synonyms),
-            "qualities": list(qualities),
-            "num_qualities": len(qualities),
-        }
+    response = {
+        "Docling": docling_log,
+        "KeyBERT": keybert_log,
+        "DecomposerLLM": decomposer_log,
     }
 
-    return to_jsonable(result)
+    return to_jsonable(response)

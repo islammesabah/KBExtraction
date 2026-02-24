@@ -12,11 +12,11 @@ import { wirePipelineUpload } from "./pipeline_controller.js";
 
 document.addEventListener("DOMContentLoaded", async () => {
   // 1. Initialize Cytoscape
-  const graph = createCytoscapeGraph("cy");
+  const graph = createCytoscapeGraph("cy", "details-content");
 
   await initKeywordDropdown({
     selectId: "keyword-select",
-    onGraphPayload: (payload) => graph.setGraph(payload.elements),
+    onSubgraphFetch: (payload) => graph.setGraph(payload.elements),
     defaultKeyword: null, // optionally set e.g. "Transparency"
   });
 

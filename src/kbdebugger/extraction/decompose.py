@@ -119,73 +119,39 @@ def decompose_documents(
     parallel: bool = False,
     max_workers: Optional[int] = 2,
     progress: Optional[ProgressCallback] = None
-) -> Qualities:
+) -> Tuple[Qualities, dict]:
     """
     Decompose a list of LangChain Documents into a flat list of qualities.
 
-    This is the *second stage* of the Extractor pipeline:
-        INPUT: Document chunks
-        OUTPUT: atomic qualities (decomposer LLM)
-
-    🚀 Performance rationale
-    ---------------------
-    Decomposing one chunk per LLM call scales poorly for realistic PDFs.
-    When `mode == DecomposeMode.CHUNKS`, this function can use a batched decomposer
-    to reduce LLM round-trips by processing multiple chunks per call.
-
-
-    Parameters
-    ----------
-    docs:
-        Chunked LangChain Documents produced by the chunker stage.
-
-    mode:
-        How to interpret each doc.page_content for decomposition (sentences vs chunks).
-
-    batch_size:
-        Number of chunk texts to send per LLM request when batching is enabled.
-        Typical values: 3-8. Start at 5.
-    
-    use_batch_decomposer:
-        If True and `mode == DecomposeMode.CHUNKS`, use the batched decomposer.
-        If False, always fall back to single-text decomposition.
-
     Returns
     -------
-    Qualities:
-        A flat list of atomic qualities produced across the entire corpus.
-
-
-    Notes
-    -----
-    - The batch decomposer returns `List[Qualities]` aligned to the input order.
-      We flatten it here because the rest of the pipeline expects a flat list.
-    - Missing or malformed per-chunk outputs are handled inside the batch decomposer
-      (yielding empty lists), so this function remains robust.
+    (qualities, log_payload)
+        - qualities: flat list of atomic qualities
+        - log_payload: the same payload that was written to disk
     """
     all_qualities: Qualities = []
 
     if not docs:
-        # Save empty output for consistent downstream behavior / debugging.
-        meta: dict[str, Any] = {
-            "mode": mode,
-            "num_docs": 0,
-            "use_batch_decomposer": use_batch_decomposer,
-            "batch_size": batch_size,
-        }
-        save_qualities_json(qualities=all_qualities, meta=meta, mode=mode)
-        return all_qualities
-    
-    # Extract texts once for easier batching and consistent behavior.
+        log_payload = save_qualities_json(
+            qualities=all_qualities,
+            mode=mode,
+            num_input_docs=0,
+            use_batch_decomposer=use_batch_decomposer,
+            batch_size=batch_size if use_batch_decomposer else None,
+            num_batches=0 if use_batch_decomposer else None,
+            parallel=parallel,
+            max_workers=max_workers if parallel else None,
+        )
+        return all_qualities, log_payload
+
     texts: List[str] = [getattr(doc, "page_content", "") for doc in docs]
-    
+
     # --- Fast path: batched chunk decomposition ---
     if mode == DecomposeMode.CHUNKS and use_batch_decomposer:
         num_batches = math.ceil(len(texts) / batch_size)
 
         if parallel:
             with ThreadPoolExecutor(max_workers=max_workers) as pool:
-                # `pool.map` preserves input order and streams from the generator.
                 results_iter = pool.map(
                     _safe_chunk_batch_to_qualities_decomposer,
                     batched(texts, batch_size=batch_size),
@@ -194,61 +160,66 @@ def decompose_documents(
                 for batch_idx, group_results in track(
                     enumerate(results_iter),
                     total=num_batches,
-                    description=f"🧷 LLM Decomposer (parallel): paragraphs → qualities (num_batches={num_batches}, batch size={batch_size})",
+                    description=(
+                        f"🧷 LLM Decomposer (parallel): paragraphs → qualities "
+                        f"(num_batches={num_batches}, batch size={batch_size})"
+                    ),
                 ):
                     if progress:
                         progress(
-                            batch_idx, 
-                            num_batches, 
-                            f"🧷 LLM Decomposer (parallel): paragraphs → qualities. Processing batch ({batch_idx+1}/{num_batches}) ..."
+                            batch_idx + 1,  # nicer: 1-based progress
+                            num_batches,
+                            f"🧷 LLM Decomposer (parallel): Processing batch ({batch_idx+1}/{num_batches}) ..."
                         )
 
-                    # group_results is List[Qualities] aligned with that batch’s group
                     for qualities in group_results:
                         all_qualities.extend(qualities)
 
         else:
             for batch_idx, group in track(
-                enumerate(batched(texts, batch_size=batch_size)), 
-                description=f"🧷 LLM Decomposer (parallel): paragraphs → qualities (num_batches={num_batches}, batch size={batch_size})",
+                enumerate(batched(texts, batch_size=batch_size)),
                 total=num_batches,
+                description=(
+                    f"🧷 LLM Decomposer: paragraphs → qualities "
+                    f"(num_batches={num_batches}, batch size={batch_size})"
+                ),
             ):
                 if progress:
                     progress(
-                        batch_idx, 
-                        num_batches, 
-                        f"🧷 LLM Decomposer: paragraphs → qualities. Processing batch ({batch_idx+1}/{num_batches}) ..."
+                        batch_idx + 1,
+                        num_batches,
+                        f"🧷 LLM Decomposer: Processing batch ({batch_idx+1}/{num_batches}) ..."
                     )
 
                 group_results: List[Qualities] = _chunk_batch_to_qualities_decomposer(group)
-                # Flatten group results into the global list.
                 for qualities in group_results:
                     all_qualities.extend(qualities)
 
-        meta: dict[str, Any] = {
-            "mode": mode,
-            "num_docs": len(docs),
-            "use_batch_decomposer": True,
-            "batch_size": batch_size,
-            "num_batches": (len(docs) + batch_size - 1) // batch_size,
-            "parallel": parallel,
-            "max_workers": max_workers if parallel else None,
-        }
-        save_qualities_json(qualities=all_qualities, meta=meta, mode=mode)
-        return all_qualities
-    
+        log_payload = save_qualities_json(
+            qualities=all_qualities,
+            mode=mode,
+            num_input_docs=len(docs),
+            use_batch_decomposer=True,
+            batch_size=batch_size,
+            num_batches=num_batches,
+            parallel=parallel,
+            max_workers=max_workers if parallel else None,
+        )
+        return all_qualities, log_payload
 
     # --- Default path: one document -> one decompose() call ---
     for text in texts:
         qualities = decompose(text, mode=mode)
         all_qualities.extend(qualities)
 
-    meta: dict[str, Any] = {
-        "mode": mode,
-        "num_docs": len(docs),
-        "use_batch_decomposer": False,
-        "batch_size": None,
-    }
-    save_qualities_json(qualities=all_qualities, meta=meta, mode=mode)
-
-    return all_qualities
+    log_payload = save_qualities_json(
+        qualities=all_qualities,
+        mode=mode,
+        num_input_docs=len(docs),
+        use_batch_decomposer=False,
+        batch_size=None,
+        num_batches=None,
+        parallel=False,
+        max_workers=None,
+    )
+    return all_qualities, log_payload

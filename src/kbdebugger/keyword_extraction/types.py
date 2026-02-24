@@ -19,7 +19,7 @@ class ParagraphMatch:
     keywords: List[str]
     match_type: Optional[MatchType]
     matched_terms: List[str]
-    score: Optional[float] = None
+    cosine_sim_score: Optional[float] = None
 
 
 @dataclass(frozen=True)
@@ -31,7 +31,7 @@ class KeyBERTConfig:
     # To extract keyphrases, simply set keyphrase_ngram_range to (1, 2) or higher 
     # depending on the number of words you would like in the resulting keyphrases.
 
-    top_n: int = 8 # top_n keywords to be extracted by paragraph
+    top_n_keywords_per_paragraph: int = 8 # top_n keywords to be extracted by paragraph
 
     search_kw_to_paragraph_similarity_threshold: float = 0.45  # Fallback semantic similarity (paragraph vs keyword)
     search_kw_to_keywords_similarity_threshold: float = 0.65

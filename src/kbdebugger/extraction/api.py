@@ -17,7 +17,7 @@ def extract_paragraphs_from_pdf(
     pdf_path: str,
     do_ocr: bool = True,
     do_table_structure: bool = True,
-) -> List[Document]:
+) -> tuple[List[Document], dict]:
     """
     Public API: Extract clean paragraphs from a PDF via 🦆 Docling.
 
@@ -31,11 +31,12 @@ def extract_paragraphs_from_pdf(
 
     Returns
     -------
-    list[Document]
-        Non-empty paragraph Documents, ready to feed into downstream stages
-        (keyword extraction, LLM decomposition, etc.).
+    tuple[List[Document], dict]
+        A tuple of (List[Document], log_payload), where:
+        - List[Document] is a list of LangChain Document objects, one per paragraph, with metadata.
+        - log_payload is a dictionary containing metadata for logging.
     """
-    paragraphs = extract_paragraphs_with_docling(
+    paragraphs, log_payload = extract_paragraphs_with_docling(
         pdf_path=pdf_path,
         do_ocr=do_ocr,
         do_table_structure=do_table_structure,
@@ -53,11 +54,10 @@ def extract_paragraphs_from_pdf(
         if doc.page_content and doc.page_content.strip()
     ]
 
-
     if not paragraphs:
         raise ValueError("🦆 Docling extraction produced no valid paragraphs.")
     
-    return paragraphs
+    return paragraphs, log_payload
 
 
 # 2. LLM decomposer: paragraphs → qualities (sentences)
@@ -66,7 +66,7 @@ def decompose_paragraphs_to_qualities(
     paragraphs: List[Document],
     progress: Optional[ProgressCallback] = None,
     # mode: str = "paragraph",
-) -> Qualities:
+) -> tuple[Qualities, dict]:
     """
     Public API: Decompose paragraphs into atomic qualities.
 
@@ -77,13 +77,13 @@ def decompose_paragraphs_to_qualities(
 
     Returns
     -------
-    Qualities
-        The extracted qualities.
+    tuple[Qualities, dict]
+        The extracted qualities and the decomposer log payload.
     """
     # Reuse existing decomposer by wrapping paragraphs into the expected "docs" shape.
     # If `decompose_documents` expects LangChain Documents, create them here.
     # Otherwise, pass the list[str] directly if supported.
-    qualities = decompose_documents(
+    qualities, decomposer_log = decompose_documents(
         docs=paragraphs, 
         mode=DecomposeMode.CHUNKS,
         progress=progress
@@ -92,4 +92,4 @@ def decompose_paragraphs_to_qualities(
     # if not qualities:
     #     raise ValueError("Decomposition produced no qualities.")
     
-    return qualities
+    return qualities, decomposer_log

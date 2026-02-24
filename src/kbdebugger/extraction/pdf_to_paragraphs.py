@@ -22,7 +22,7 @@ def extract_paragraphs_with_docling(
         pdf_path: str | Path,
         do_ocr: bool = False,
         do_table_structure: bool = False
-    ) -> List[Document]:
+    ) -> tuple[List[Document], dict]:
     """
     Extract paragraph-level text chunks from a PDF using Docling via LangChain.
     👁️ Configurable for OCR and table recognition via .env.
@@ -34,8 +34,10 @@ def extract_paragraphs_with_docling(
 
     Returns
     -------
-    List[Document]
-        A list of LangChain Document objects, one per paragraph, with metadata.
+    tuple[List[Document], dict]
+        A tuple of (List[Document], logging_payload), where:
+        - List[Document] is a list of LangChain Document objects, one per paragraph, with metadata.
+        - logging_payload is a dictionary containing metadata for logging.
 
     Notes
     -----
@@ -80,6 +82,6 @@ def extract_paragraphs_with_docling(
     rich.print(f"👁️  [DOCLING] OCR enabled: {do_ocr}")
     rich.print(f"📊  [DOCLING] Table recognition enabled: {do_table_structure}")
 
-    save_chunked_documents_json(docs=docs, source_kind=SourceKind.PDF_PARAGRAPHS)
+    logging_payload = save_chunked_documents_json(docs=docs, source_kind=SourceKind.PDF_PARAGRAPHS)
 
-    return docs
+    return docs, logging_payload

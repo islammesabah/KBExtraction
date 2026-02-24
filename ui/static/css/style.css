@@ -4,14 +4,15 @@
 }
 
 /* Let the app actually fill the viewport */
-html, body {
-    height: 100%;
+html,
+body {
+  height: 100%;
 }
 
 body {
-    margin: 0;
-    font-family: "Roboto", system-ui, -apple-system, Segoe UI, Arial, sans-serif;
-    background: #f4f6f8;
+  margin: 0;
+  font-family: "Roboto", system-ui, -apple-system, Segoe UI, Arial, sans-serif;
+  background: #f4f6f8;
 }
 
 /* Your top-level bootstrap container becomes the app frame */
@@ -30,10 +31,12 @@ body {
 
 /* --- Main visualization layout should consume remaining height --- */
 .visualization-area {
-  flex: 1;                 /* ✅ THIS makes <main> fill the screen */
+  flex: 1;
+  /* ✅ THIS makes <main> fill the screen */
   display: flex;
   gap: 1rem;
-  min-height: 0;           /* ✅ allow children to shrink + scroll */
+  min-height: 0;
+  /* ✅ allow children to shrink + scroll */
 }
 
 
@@ -106,12 +109,43 @@ body {
 .content-list,
 .verified-list {
   overflow-y: auto;
-  max-height: 55vh; /* tweak to allow area to scroll inside the tab */
+  max-height: 55vh;
+  /* tweak to allow area to scroll inside the tab */
 }
 
 /* --- Pipeline progress widget (custom) --- */
-.pipeline-elapsed {
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-  opacity: 0.9;
+#global-loading-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+}
+
+#global-loading-overlay .overlay-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(2px);
+}
+
+#global-loading-overlay .overlay-content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  padding: 20px 24px;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  min-width: 280px;
+}
+
+.relation-card:hover {
+  background: rgba(13, 110, 253, 0.05); /* bootstrap primary-ish tint */
+  border-color: rgba(13, 110, 253, 0.35);
+}
+
+.relation-card:focus {
+  outline: 2px solid rgba(13, 110, 253, 0.35);
+  outline-offset: 2px;
 }

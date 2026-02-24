@@ -11,22 +11,40 @@ import { getSearchKeywords, getSubgraph } from "./graph_client.js";
 
 export async function initKeywordDropdown({
   selectId = "keyword-select",
-  onGraphPayload,
+  onSubgraphFetch,
+  useGlobalOverlay = false,
   // defaultKeyword = null
 }) {
   const select = document.getElementById(selectId);
   if (!select) throw new Error(`Missing select element #${selectId}`);
 
   const fileInput = document.getElementById("documents");
-  const uploadLabel = document.getElementById("upload-label");
+  const keywordSpinner = document.getElementById("keyword-spinner");
+
+  const overlay = document.getElementById("global-loading-overlay");
+  const overlayTitle = document.getElementById("overlay-title");
+  const overlaySubtitle = document.getElementById("overlay-subtitle");
 
   // Helper: enable/disable upload UI
   function setUploadEnabled(enabled) {
     if (fileInput) fileInput.disabled = !enabled;
-    if (uploadLabel) {
-      uploadLabel.classList.toggle("disabled", !enabled);
-      uploadLabel.setAttribute("aria-disabled", String(!enabled));
-      uploadLabel.title = enabled ? "📄 Upload Documents" : "🔐 Select a keyword first";
+  }
+
+  function setLoading(isLoading, { title = "Loading…", subtitle = "Please wait." } = {}) {
+    // 1. Disable dropdown while pending to avoid multi-clicks / duplicate requests
+    select.disabled = isLoading;
+
+    // 2. Show/hide inline spinner near dropdown
+    if (keywordSpinner) keywordSpinner.classList.toggle("d-none", !isLoading);
+
+    // 3. Also disable upload while graph is loading (optional but recommended)
+    if (fileInput) fileInput.disabled = isLoading || fileInput.disabled;
+
+    // 4. Global overlay (optional)
+    if (useGlobalOverlay && overlay) {
+      overlay.classList.toggle("d-none", !isLoading);
+      if (overlayTitle) overlayTitle.textContent = title;
+      if (overlaySubtitle) overlaySubtitle.textContent = subtitle;
     }
   }
 
@@ -34,6 +52,7 @@ export async function initKeywordDropdown({
   setUploadEnabled(false);
   
   try {
+    setLoading(true, { title: "Loading keywords…", subtitle: "Populating the keyword list." });
     const data = await getSearchKeywords();
     const keywords = data.keywords || [];
 
@@ -67,10 +86,10 @@ export async function initKeywordDropdown({
 
     // if (initial) {
     //   select.value = initial;
-    //   await fetchAndRender(initial, onGraphPayload);
+    //   await fetchAndRenderSubgraph(initial, onSubgraphFetch);
     // }
 
-    // On change: enable upload + fetch/render graph
+    // On keyword change: enable upload + fetch/render graph
     select.addEventListener("change", async () => {
       const chosen = select.value.trim();
       
@@ -80,27 +99,51 @@ export async function initKeywordDropdown({
         return;
       }
 
-      // Enable upload once keyword is chosen
+      // Enable upload once keyword is chosen (but we may temporarily disable during loading)
       setUploadEnabled(true);
 
-      // Fetch and render subgraph for the chosen keyword
-      await fetchAndRender(chosen, onGraphPayload);
-    });``
+      // Now the user has selected a keyword from the dropdown, we can show loading state while fetching the subgraph
+      setLoading(true, {
+        title: "Loading graph…",
+        subtitle: "If the database is waking up, this may take a moment.",
+      });
+
+      try {
+        // Fetch and render subgraph for the chosen keyword
+        await fetchAndRenderSubgraph(chosen, onSubgraphFetch);
+      } finally {
+        setLoading(false);
+        // Re-enable upload after load finishes
+        setUploadEnabled(true);
+      }
+    });
   } catch (err) {
     console.error(err);
     select.innerHTML = `<option value="">❌ Failed to load keywords</option>`;
     select.disabled = true;
     setUploadEnabled(false);
+  } finally {
+    // Stop loading overlay/spinner after keyword list attempt
+    setLoading(false);
   }
 }
 
-async function fetchAndRender(keyword, onGraphPayload) {
+let currentSubgraphAbort = null;
+
+async function fetchAndRenderSubgraph(keyword, onSubgraphFetch) {
   try {
-    const payload = await getSubgraph(keyword);
+    if (currentSubgraphAbort) currentSubgraphAbort.abort();
+    currentSubgraphAbort = new AbortController();
+
+    const subgraphPayload = await getSubgraph(keyword, { signal: currentSubgraphAbort.signal });
     // payload is CytoscapeGraphPayload -> { elements: { nodes, edges } }
-    onGraphPayload(payload);
+    onSubgraphFetch(subgraphPayload);
   } catch (err) {
+    if (err.name === "AbortError") return; // ignore
     console.error(err);
     alert(`Subgraph error: ${err.message}`);
+  }
+  finally {
+    currentSubgraphAbort = null;
   }
 }

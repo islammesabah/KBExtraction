@@ -94,7 +94,7 @@ def run_pipeline(cfg: PipelineConfig) -> None:
     # ---------------------------------------------------------------------
     # Stage 2a: PDF -> paragraphs
     with timer.stage("🦆 Docling: extract_paragraphs_from_pdf"):
-        paragraphs = extract_paragraphs_from_pdf(
+        paragraphs, docling_payload = extract_paragraphs_from_pdf(
             pdf_path=cfg.corpus_path,
             do_ocr=cfg.docling_enable_OCR,
             do_table_structure=cfg.docling_enable_table_recognition,
@@ -102,7 +102,7 @@ def run_pipeline(cfg: PipelineConfig) -> None:
 
     # Stage 2b: keyword extraction (KeyBERT gate) to find matching paragraphs to the user-chosen keyword
     with timer.stage("🔎 KeyBERT: filter_paragraphs_by_keyword"):
-        keybert_result = filter_paragraphs_by_keyword(
+        keybert_result, keybert_logging_payload = filter_paragraphs_by_keyword(
             paragraphs=paragraphs,
             search_keyword=cfg.kg_retrieval_keyword,
             # progress=
@@ -110,7 +110,7 @@ def run_pipeline(cfg: PipelineConfig) -> None:
 
     with timer.stage("🧷 LLM Decomposer: decompose_paragraphs_to_qualities"):
         # Stage 2c: matched paragraphs -> qualities
-        candidate_qualities = decompose_paragraphs_to_qualities(
+        candidate_qualities, decomposer_log = decompose_paragraphs_to_qualities(
             paragraphs=keybert_result.matched_docs,
             # progress=
         )

@@ -117,7 +117,8 @@ class VectorIndex(Generic[T]):
     """
 
     dim: int
-    index: "faiss.Index"  # quoted annotation to avoid importing faiss at module import time
+    index: "faiss.Index"  # type: ignore 
+                          # quoted annotation to avoid importing faiss at module import time
     payloads: List[T]
 
     # ------------------------------------------------------------------

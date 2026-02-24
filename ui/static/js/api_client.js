@@ -5,7 +5,18 @@
  */
 
 export async function fetchJson(url, options = {}) {
-  const resp = await fetch(url, options);
+  let resp;
+  try {
+    resp = await fetch(url, options);
+  } catch (err) {
+    // AbortController cancellation should not be treated as an error
+    if (err?.name === "AbortError") {
+      // Return a recognizable "no-op" value; caller can ignore.
+      return { aborted: true };
+    }
+    throw err;
+  }
+
   const data = await resp.json().catch(() => ({}));
 
   if (!resp.ok) {

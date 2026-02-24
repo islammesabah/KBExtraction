@@ -1,17 +1,15 @@
 from __future__ import annotations
 
-from typing import List, Dict, Any, Optional, Tuple
+from typing import List, Optional, Tuple
 
 from kbdebugger.types.ui import ProgressCallback
-import rich
 from rich.progress import track
-from kbdebugger.utils.json import write_json
-from kbdebugger.utils.time import now_utc_compact
 from .types import (
     KeyBERTConfig,
     ParagraphMatch,
     MatchType,
 )
+from .logging import save_keybert_result
 
 
 def run_keybert_matching(
@@ -22,7 +20,8 @@ def run_keybert_matching(
     progress: Optional[ProgressCallback] = None
 ) -> Tuple[
         List[ParagraphMatch],
-        List[ParagraphMatch]
+        List[ParagraphMatch],
+        dict # logging payload
     ]:
     """
     Extract keywords from paragraphs using KeyBERT and match them to a target keyword.
@@ -82,7 +81,7 @@ def run_keybert_matching(
             paragraph,
             keyphrase_ngram_range=cfg.ngram_range,
             stop_words="english",
-            top_n=cfg.top_n,
+            top_n=cfg.top_n_keywords_per_paragraph,
         )
         paragraph_keywords = [kw for kw, _probs in extracted_keywords]
         paragraph_keywords_lower = [kp.lower() for kp in paragraph_keywords]
@@ -146,7 +145,7 @@ def run_keybert_matching(
             keywords=paragraph_keywords,
             match_type=match_type,
             matched_terms=matched_terms,
-            score=score,
+            cosine_sim_score=score,
             # embedding_model_name=cfg.embedding_model,
         )
 
@@ -155,7 +154,7 @@ def run_keybert_matching(
         else:
             unmatched.append(record)
 
-    save_keybert_matched_paragrahs(
+    logging_payload = save_keybert_result(
         matched=matched,
         unmatched=unmatched,
         keyword=search_keyword,
@@ -163,36 +162,4 @@ def run_keybert_matching(
         config=cfg
     )
 
-    return matched, unmatched
-
-
-def save_keybert_matched_paragrahs(
-        *,
-        matched: List[ParagraphMatch],
-        unmatched: List[ParagraphMatch],
-        keyword: str,
-        synonyms: Optional[List[str]] = None,
-        config: KeyBERTConfig,
-        output_dir: str = "logs",
-) -> None:
-    """
-    Save full KeyBERT paragraph match results including matched and unmatched paragraphs.
-    """
-    timestamp = now_utc_compact()
-    num_matched = len(matched)
-    num_unmatched = len(unmatched)
-    payload: Dict[str, Any] = {
-        "created_at": timestamp,
-        "keyword": keyword,
-        "generated_synonyms": synonyms or [],
-        "num_total_paragraphs": num_matched + num_unmatched, 
-        "num_matched": num_matched,
-        "num_unmatched": num_unmatched,
-        "keyBERT_config": config.__dict__,
-        "matched": [m.__dict__ for m in matched],
-        "unmatched": [u.__dict__ for u in unmatched],
-    }
-
-    out_path = f"{output_dir}/01.1.6_keybert_paragraph_matched_paragraphs_{keyword}_{timestamp}.json"
-    write_json(out_path, payload)
-    rich.print(f"[INFO] Saved KeyBERT matched paragraphs to {out_path}")
+    return matched, unmatched, logging_payload

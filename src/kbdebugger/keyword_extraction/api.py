@@ -16,7 +16,10 @@ def filter_paragraphs_by_keyword(
     search_keyword: str,
     max_synonyms: int = 10,
     progress: Optional[ProgressCallback] = None,
-) -> KeywordDocMatchResult:
+) -> tuple[
+        KeywordDocMatchResult,
+        dict # logging payload
+    ]:
     """
     Public API: Generate synonyms then run KeyBERT keyword extraction + matching to filter paragraphs
     by their relevance to the user-chosen keyword.
@@ -52,7 +55,7 @@ def filter_paragraphs_by_keyword(
     # Extract paragraph strings from Document objects.
     texts = [paragraph_doc.page_content for paragraph_doc in paragraphs]  # guaranteed non-empty
 
-    matched, unmatched = run_keybert_matching(
+    matched, unmatched, log_payload = run_keybert_matching(
         paragraphs=texts,
         search_keyword=search_keyword,
         synonyms=synonyms,
@@ -68,10 +71,11 @@ def filter_paragraphs_by_keyword(
     matched_docs = [paragraphs[m.index] for m in matched]
     unmatched_docs = [paragraphs[u.index] for u in unmatched]
 
+    
     return KeywordDocMatchResult(
         matched_docs=matched_docs,
         unmatched_docs=unmatched_docs,
         synonyms=synonyms,
         # matched=matched,
         # unmatched=unmatched,
-    )
+    ), log_payload

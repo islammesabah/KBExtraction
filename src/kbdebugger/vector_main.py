@@ -149,7 +149,7 @@ def run_extractor(cfg: VectorMainConfig) -> Qualities:
     )
 
     # 2. Decompose each document into qualities
-    qualities = decompose_documents(
+    qualities, decomposer_log = decompose_documents(
         docs=docs,
         mode=mode,
     )

@@ -38,8 +38,6 @@ def create_app() -> Flask:
         static_folder="../static",
     )
 
-
-
     # Register modular routes (Blueprints)
     register_blueprints(app)
 

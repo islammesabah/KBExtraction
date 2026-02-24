@@ -16,16 +16,21 @@ function setDetailsTitle(title) {
 function copyBtn(value) {
   if (!value) return "";
   return `
-    <button class="btn btn-sm btn-outline-secondary py-0 px-2 copy-btn"
+    <button class="btn btn-sm py-0 px-2 copy-btn"
             type="button"
             data-copy="${escapeHtml(value)}"
             title="Copy to clipboard">
-      📋
+      <i class="bi bi-copy"></i>
     </button>
   `;
 }
 
 function wireCopyButtons(container) {
+  if (!container || typeof container.querySelectorAll !== "function") {
+    console.warn("[panel] wireCopyButtons called with non-element:", container);
+    return;
+  }
+
   container.querySelectorAll(".copy-btn").forEach((btn) => {
     btn.addEventListener("click", async (ev) => {
       ev.stopPropagation();
@@ -33,9 +38,11 @@ function wireCopyButtons(container) {
       try {
         await navigator.clipboard.writeText(text);
         // tiny feedback
-        const old = btn.textContent;
-        btn.textContent = "✅";
-        setTimeout(() => (btn.textContent = old), 700);
+        const old = btn.innerHTML;
+        // change to bootstrap check icon
+        btn.innerHTML = `<i class="bi bi-clipboard-check-fill"></i>`;
+        // btn.textContent = "✅";
+        setTimeout(() => (btn.innerHTML = old), 700);
       } catch (err) {
         console.error("Clipboard failed:", err);
       }
@@ -112,15 +119,17 @@ function formatAbsolute(isoString) {
   });
 }
 
-function timeRow({ emoji, label, isoString }) {
+function timeRow({ icon = null, emoji = null, label, isoString }) {
   if (!isoString) return "";
 
   const abs = formatAbsolute(isoString) || isoString;
   const rel = timeAgo(isoString);
 
+  const iconPart = icon ? `<i class="bi ${escapeHtml(icon)} me-1"></i>` : (emoji ? `${escapeHtml(emoji)} ` : "");
+
   return `
-    <div class="mb-2">
-      <div class="text-muted small">${emoji} ${escapeHtml(label)}</div>
+    <div class="mb-3">
+      <div class="text-muted small">${iconPart}${escapeHtml(label)}</div>
       <div class="d-flex align-items-start justify-content-between gap-2">
         <div style="min-width:0;">
           <div class="fw-semibold" title="${escapeHtml(isoString)}" style="word-break: break-word;">
@@ -134,20 +143,6 @@ function timeRow({ emoji, label, isoString }) {
   `;
 }
 
-// function infoRow({ emoji, label, value, title = "" }) {
-//   if (value == null || value === "") return "";
-
-//   const emojiPart = emoji ? `${emoji} ` : "";
-  
-//   return `
-//     <div class="mb-2">
-//       <div class="text-muted small">${emojiPart}${escapeHtml(label)}</div>
-//       <div class="fw-semibold" style="word-break: break-word;" title="${escapeHtml(title)}">${escapeHtml(value)}</div>
-//     </div>
-//   `;
-// }
-
-
 function infoRow({ icon = null, emoji = null, label, value, title = "" }) {
   if (value == null || value === "") return "";
 
@@ -156,7 +151,7 @@ function infoRow({ icon = null, emoji = null, label, value, title = "" }) {
     : (emoji ? `${escapeHtml(emoji)} ` : "");
 
   return `
-    <div class="mb-2">
+    <div class="mb-3">
       <div class="text-muted small">${iconPart}${escapeHtml(label)}</div>
       <div class="d-flex align-items-start justify-content-between gap-2">
         <div class="fw-semibold" style="word-break: break-word; min-width:0;" title="${escapeHtml(title)}">
@@ -171,10 +166,15 @@ function infoRow({ icon = null, emoji = null, label, value, title = "" }) {
 
 function sentenceCallout(sentence) {
   if (!sentence) return "";
+  
   return `
     <div class="p-3 rounded-3 bg-light border mb-3">
-      <div class="text-muted small mb-1">
-        <i class="bi bi-card-text me-1"></i>Sentence
+      <div class="text-muted small mb-1 d-flex justify-content-between">
+        <span>
+          <i class="bi bi-quote me-1"></i>
+          Sentence
+        </span>
+        ${copyBtn(sentence)}
       </div>
       <div class="fw-semibold" style="line-height: 1.4;">${escapeHtml(sentence)}</div>
     </div>
@@ -254,12 +254,6 @@ export function renderEdgeDetails(container, edgeData) {
   const createdAt = props.created_at || null;
   const updatedAt = props.last_updated_at || null;
 
-  const createdRel = timeAgo(createdAt);
-  const updatedRel = timeAgo(updatedAt);
-
-  const createdAbs = formatAbsolute(createdAt);
-  const updatedAbs = formatAbsolute(updatedAt);
-
   container.innerHTML = `
     <div class="mb-2">
       <span class="badge text-bg-primary">${escapeHtml(relationLabel)}</span>
@@ -310,7 +304,8 @@ export function renderNodeDetails(container, nodeData, incidentEdges, onEdgePick
            role="button"
            tabindex="0"
            data-edge-id="${escapeHtml(d.id)}"
-           style="cursor:pointer;">
+           style="cursor:pointer;"
+           title="↗️ Go to relation">
         ${badgeTriplet(srcLabel, relLabel, tgtLabel)}
         ${scrollableSentenceLine(sentence)}
       </div>

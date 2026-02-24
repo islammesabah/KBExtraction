@@ -113,12 +113,12 @@ class KnowledgeGraphRetriever:
         # (same source/target/predicate + same sentence/source if you want)
         results = self._dedupe(results)
 
-        
-        self.save_results_json(
-            keyword=keyword,
-            hits=results,
-            limit_per_pattern=limit,
-        )
+        # # TODO: Enable again after we're done with Frontend integration
+        # self.save_results_json(
+        #     keyword=keyword,
+        #     hits=results,
+        #     limit_per_pattern=limit,
+        # )
 
         return results
 

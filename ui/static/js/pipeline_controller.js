@@ -13,6 +13,10 @@ export function wirePipelineUpload({ fileInputId, keywordSelectId, onDone }) {
   if (!fileInput) throw new Error(`Missing file input: #${fileInputId}`);
   if (!keywordSel) throw new Error(`Missing keyword select: #${keywordSelectId}`);
 
+  if (fileInput.disabled) {
+    fileInput.title = "🔐 Select a keyword first";
+  }
+
   fileInput.addEventListener("change", async () => {
     if (!fileInput.files || fileInput.files.length === 0) return;
 

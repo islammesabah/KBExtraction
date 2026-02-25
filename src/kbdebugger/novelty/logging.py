@@ -1,5 +1,4 @@
 from kbdebugger.subgraph_similarity.types import KeptQuality
-import rich
 from rich.console import Console
 from rich.panel import Panel
 from rich.rule import Rule
@@ -8,14 +7,14 @@ from rich.text import Text
 from dataclasses import asdict
 from typing import Dict, Mapping, Mapping, Sequence, List
 from kbdebugger.utils.json import write_json
-from kbdebugger.utils.time import now_utc_compact
+from kbdebugger.utils.time import now_utc_compact, now_utc_human
 
 from .types import (
     NoveltyDecision,
     QualityNoveltyResult,
 )
 
-def save_novelty_results_json(results: Sequence[QualityNoveltyResult]) -> str:
+def save_novelty_results_json(results: Sequence[QualityNoveltyResult]) -> Dict:
     """
     Write novelty comparator results to a readable JSON file.
 
@@ -43,7 +42,7 @@ def save_novelty_results_json(results: Sequence[QualityNoveltyResult]) -> str:
     Returns:
         The path written to disk.
     """
-    created_at = now_utc_compact()
+    created_at = now_utc_human()
 
     counts = {"EXISTING": 0, "PARTIALLY_NEW": 0, "NEW": 0}
     items: List[Mapping[str, object]] = []
@@ -62,7 +61,7 @@ def save_novelty_results_json(results: Sequence[QualityNoveltyResult]) -> str:
 
         items.append(d)
 
-    path = f"logs/04_novelty_comparator_results_{created_at}.json"
+    path = f"logs/04_novelty_comparator_results_{now_utc_compact()}.json"
 
     data: Mapping[str, object] = {
         "total": len(results),
@@ -73,7 +72,7 @@ def save_novelty_results_json(results: Sequence[QualityNoveltyResult]) -> str:
 
     write_json(path, data)
     print(f"\n[INFO] 🧠🧾 Wrote novelty comparator results to {path}")
-    return path
+    return data
 
 
 def pretty_print_novelty_results(

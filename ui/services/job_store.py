@@ -32,9 +32,11 @@ JobProgressStage = Literal[
     "Done",
     "Error",
     
-    "Docling", 
-    "KeyBERT", 
-    "DecomposerLLM"
+    "Docling", # 2a
+    "KeyBERT", # 2b
+    "DecomposerLLM", # 2c
+    "SubgraphSimilarity", # 3
+    "NoveltyLLM", # 4
 ]
 
 JobState = Literal[

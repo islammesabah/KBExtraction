@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from typing import cast
 
 from kbdebugger.extraction.types import SourceKind
-from kbdebugger.subgraph_similarity.api import SubgraphSimilarityFilterConfig
+from kbdebugger.subgraph_similarity.types import SubgraphSimilarityFilterConfig
 
 
 @dataclass(frozen=True, slots=True)

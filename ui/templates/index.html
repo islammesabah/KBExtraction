@@ -60,7 +60,13 @@
                         Upload Documents
                     </label>
 
-                    <input class="form-control" type="file" id="documents" name="documents" multiple disabled>
+                    <input 
+                        class="form-control" 
+                        type="file" 
+                        id="documents" 
+                        name="documents" 
+                        disabled
+                    >
                 </div>
 
 
@@ -68,9 +74,8 @@
         </section>
 
 
-        <div id="pipeline-progress" class="card mb-3">
-            <!-- TODO: Add `d-none` class to the card -->
-            <div class="card-body py-2 d-none">
+        <div id="pipeline-progress" class="card mb-3 d-none">
+            <div class="card-body py-2">
 
                 <div class="d-flex align-items-center gap-2">
                     <div class="fw-bold text-primary" id="pipeline-stage">Stage</div>
@@ -188,19 +193,22 @@
                                         style="min-height:0;">
                                         <div class="tab-pane fade show active h-100" id="existing-inner" role="tabpanel"
                                             aria-labelledby="existing-inner-tab" style="min-height:0;">
-                                            <h3 class="h5">Source Content</h3>
+                                            <h3 class="h5">Qualities</h3>
+                                            <span class="text-muted small">The following quality sentences closely match existing knowledge. Decide whether to accept or reject each quality.</span>
                                             <div class="content-list"></div>
                                         </div>
 
                                         <div class="tab-pane fade h-100" id="partial-inner" role="tabpanel"
                                             aria-labelledby="partial-inner-tab" style="min-height:0;">
-                                            <h3 class="h5">Source Content</h3>
+                                            <h3 class="h5">Qualities</h3>
+                                            <span class="text-muted small">The following quality sentences partially match existing knowledge. Decide whether to accept or reject each quality.</span>
                                             <div class="content-list"></div>
                                         </div>
 
                                         <div class="tab-pane fade h-100" id="new-inner" role="tabpanel"
                                             aria-labelledby="new-inner-tab" style="min-height:0;">
-                                            <h3 class="h5">Source Content</h3>
+                                            <h3 class="h5">Qualities</h3>
+                                            <span class="text-muted small">The following quality sentences are new to the knowledge base. Decide whether to accept or reject each quality.</span>
                                             <div class="content-list"></div>
                                         </div>
                                     </div>
@@ -208,7 +216,8 @@
 
 
                                 <div class="verification-bottom">
-                                    <h3>Accepted qualities</h3>
+                                    <h3>Extracted Triplets</h3>
+                                    <span class="text-muted small">An LLM has extracted the following triplets from your accepted quality sentences. You can modify each triplet here</span>
                                     <div id="common-verified-list" class="verified-list"></div>
                                 </div>
                             </div>

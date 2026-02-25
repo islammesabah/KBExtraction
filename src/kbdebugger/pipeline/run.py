@@ -119,7 +119,7 @@ def run_pipeline(cfg: PipelineConfig) -> None:
     # Stage 3: Vector similarity filtering (kept qualities + neighbor context)
     # ---------------------------------------------------------------------
     with timer.stage("🧠 Vector similarity filter"):
-        kept, _dropped = filter_qualities_by_subgraph_similarity(
+        (kept, _dropped), subgraph_similarity_log = filter_qualities_by_subgraph_similarity(
             kg_relations=kg_relations,
             qualities=candidate_qualities,
             cfg=cfg.vector_similarity,
@@ -130,7 +130,7 @@ def run_pipeline(cfg: PipelineConfig) -> None:
     # Stage 4: Novelty decision (LLM comparator)
     # ---------------------------------------------------------------------
     with timer.stage("🧪 LLM Novelty comparator"):
-        novelty_results = classify_qualities_novelty(
+        novelty_results, novelty_log = classify_qualities_novelty(
             kept,
             max_tokens=cfg.novelty_llm_max_tokens,
             temperature=cfg.novelty_llm_temperature,

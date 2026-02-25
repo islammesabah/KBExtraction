@@ -1,10 +1,49 @@
 from typing import List, TypedDict, Literal
 from kbdebugger.types import TripletSubjectObjectPredicate, GraphRelation
+from dataclasses import dataclass
 
 # In our codebase, Qualities is typically something like: list[str]
 # We keep it explicit here for clarity and strictness.
 Quality = str
 
+
+@dataclass(frozen=True, slots=True)
+class SubgraphSimilarityFilterConfig:
+    """
+    Configuration for the Vector Similarity Filter stage.
+
+    This stage embeds:
+      - each candidate quality sentence
+      - each KG relation sentence in the retrieved subgraph
+    using a SentenceTransformer encoder, then keeps a quality if its maximum
+    similarity to any KG relation sentence exceeds `min_similarity_threshold`.
+
+    Attributes
+    ----------
+    encoder_model_name:
+        HuggingFace model id for the SentenceTransformer encoder used to embed
+        both quality sentences and KG relation sentences.
+
+    encoder_device:
+        Device string passed to the encoder (e.g. "cpu", "cuda", "cuda:0").
+        If None, the backend chooses automatically.
+
+    normalize_embeddings:
+        Whether to L2-normalize embeddings (recommended for cosine similarity).
+
+    quality_to_kg_top_k:
+        Number of nearest KG relation sentences to retrieve per quality
+        (for context + logging, and to compute max_score).
+
+    min_similarity_threshold:
+        Minimum cosine similarity required to keep a quality.
+    """
+    encoder_model_name: str
+    encoder_device: str | None # None will let sentence-transformers choose
+    normalize_embeddings: bool # Normalizing is recommended for cosine similarity
+
+    quality_to_kg_top_k: int
+    min_similarity_threshold: float
 
 class NeighborHit(TypedDict):
     """

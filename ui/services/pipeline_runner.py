@@ -18,18 +18,17 @@ from typing import Any, Dict
 
 from kbdebugger.pipeline.config import PipelineConfig
 from kbdebugger.extraction.api import extract_paragraphs_from_pdf
-from kbdebugger.extraction.logging import build_chunked_documents_payload
 
 from kbdebugger.keyword_extraction.api import filter_paragraphs_by_keyword
-from kbdebugger.keyword_extraction.logging import build_keybert_payload
 
 from kbdebugger.extraction.api import decompose_paragraphs_to_qualities
 # Optional next stages (enable when ready):
-# from kbdebugger.subgraph_similarity.api import filter_qualities_by_subgraph_similarity
-# from kbdebugger.novelty.comparator import classify_qualities_novelty
+from kbdebugger.graph.api import retrieve_keyword_subgraph
+from kbdebugger.subgraph_similarity.api import filter_qualities_by_subgraph_similarity
+from kbdebugger.novelty.comparator import classify_qualities_novelty
 # from kbdebugger.graph.api import retrieve_keyword_subgraph
 
-from ui.services.job_store import JOB_STORE
+from ui.services.job_store import JOB_STORE, JobProgressStage
 from ui.services.json_sanitize import to_jsonable
 from ui.services.progress_callbacks import init_stage, make_job_progress_callback
 
@@ -118,10 +117,65 @@ def run_pipeline(
         progress=make_job_progress_callback(job_id=job_id, stage="DecomposerLLM")
     )
 
-    response = {
+    # ---------------------------------------------------------------------
+    # Stage 3: Quality-to-Subgraph similarity filter (needs KG relations)
+    # ---------------------------------------------------------------------
+    init_stage(
+        job_id=job_id,
+        stage="SubgraphSimilarity",
+        message="🧠 Filtering qualities by similarity to KG subgraph...",
+        current=0,
+        total=3,  # 1. 📚 Building KG vector index, 2. 📊 Running similarity search, 3. ✍️ Finalizing logs
+    )
+
+    kg_relations = retrieve_keyword_subgraph(
+        keyword=keyword,
+        limit_per_pattern=cfg.kg_limit_per_pattern,
+    )
+
+    # If kg_relations is empty, SubgraphSimilarityFilter.build_index() will crash
+    if not kg_relations:
+        raise ValueError(f"No KG relations retrieved for keyword {keyword!r}.")
+
+    (kept, dropped), subgraph_similarity_log = filter_qualities_by_subgraph_similarity(
+        kg_relations=kg_relations,
+        qualities=qualities,
+        cfg=cfg.vector_similarity,  # assumes PipelineConfig has vector_similarity field
+        pretty_print=False,
+        progress=make_job_progress_callback(job_id=job_id, stage="SubgraphSimilarity"),
+    )
+
+    # ---------------------------------------------------------------------
+    # Stage 4: Novelty decision (LLM comparator)
+    # ---------------------------------------------------------------------
+    batch_size = 5  # TODO: move to cfg if you want (cfg.novelty_batch_size)
+    num_batches = math.ceil(len(kept) / batch_size) if kept else 0
+
+    init_stage(
+        job_id=job_id,
+        stage="NoveltyLLM",
+        message=f"🧑🏻‍⚖️ Novelty comparator: classifying {len(kept)} kept qualities...",
+        current=0,
+        total=max(num_batches, 1),  # avoid total=0 in UI
+    )
+
+    novelty_results, novelty_log = classify_qualities_novelty(
+        kept,
+        max_tokens=cfg.novelty_llm_max_tokens,
+        temperature=cfg.novelty_llm_temperature,
+        use_batch=True,
+        batch_size=batch_size,
+        pretty_print=False,
+        progress=make_job_progress_callback(job_id=job_id, stage="NoveltyLLM"),
+    )
+
+
+    response: Dict[JobProgressStage, Dict] = {
         "Docling": docling_log,
         "KeyBERT": keybert_log,
         "DecomposerLLM": decomposer_log,
+        "SubgraphSimilarity": subgraph_similarity_log,
+        "NoveltyLLM": novelty_log,
     }
 
     return to_jsonable(response)

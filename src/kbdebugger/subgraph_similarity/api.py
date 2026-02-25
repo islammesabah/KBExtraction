@@ -1,52 +1,15 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import Sequence, Tuple
+from typing import Optional, Sequence, Tuple
 
 from kbdebugger.extraction.types import Qualities
+from kbdebugger.subgraph_similarity.logging import build_qualities_to_subgraph_similarity_payload
 from kbdebugger.types import GraphRelation
+from kbdebugger.types.ui import ProgressCallback
 from .encoder import SentenceTransformerEncoder
 from .similarity_filter import SubgraphSimilarityFilter
-from .types import KeptQuality, DroppedQuality
+from .types import KeptQuality, DroppedQuality,SubgraphSimilarityFilterConfig
 
-
-@dataclass(frozen=True, slots=True)
-class SubgraphSimilarityFilterConfig:
-    """
-    Configuration for the Vector Similarity Filter stage.
-
-    This stage embeds:
-      - each candidate quality sentence
-      - each KG relation sentence in the retrieved subgraph
-    using a SentenceTransformer encoder, then keeps a quality if its maximum
-    similarity to any KG relation sentence exceeds `min_similarity_threshold`.
-
-    Attributes
-    ----------
-    encoder_model_name:
-        HuggingFace model id for the SentenceTransformer encoder used to embed
-        both quality sentences and KG relation sentences.
-
-    encoder_device:
-        Device string passed to the encoder (e.g. "cpu", "cuda", "cuda:0").
-        If None, the backend chooses automatically.
-
-    normalize_embeddings:
-        Whether to L2-normalize embeddings (recommended for cosine similarity).
-
-    quality_to_kg_top_k:
-        Number of nearest KG relation sentences to retrieve per quality
-        (for context + logging, and to compute max_score).
-
-    min_similarity_threshold:
-        Minimum cosine similarity required to keep a quality.
-    """
-    encoder_model_name: str
-    encoder_device: str | None # None will let sentence-transformers choose
-    normalize_embeddings: bool # Normalizing is recommended for cosine similarity
-
-    quality_to_kg_top_k: int
-    min_similarity_threshold: float
 
 
 def filter_qualities_by_subgraph_similarity(
@@ -55,7 +18,14 @@ def filter_qualities_by_subgraph_similarity(
     qualities: Qualities,
     cfg: SubgraphSimilarityFilterConfig,
     pretty_print: bool = True,
-) -> Tuple[list[KeptQuality], list[DroppedQuality]]:
+    progress: Optional[ProgressCallback] = None
+) -> Tuple[
+        Tuple[
+            list[KeptQuality], 
+            list[DroppedQuality]
+        ], 
+        dict
+    ]:
     """
     Public API: run the full vector similarity filter stage.
 
@@ -80,25 +50,49 @@ def filter_qualities_by_subgraph_similarity(
 
         pretty_print:
             Whether to pretty-print the filtering results to console.
-    Returns:
-        (kept, dropped)
+
+    Returns
+    -------
+    ((kept, dropped), log_payload)
     """
+    total = 2
+    step = 0
+    def tick(msg: str):
+        nonlocal step
+        step += 1
+        if progress:
+            progress(step, total, msg)
+
+    tick("📚 Building KG vector index...")
     encoder = SentenceTransformerEncoder(
         model_name=cfg.encoder_model_name,
         device=cfg.encoder_device,
         normalize=cfg.normalize_embeddings,
     )
 
-    filter = SubgraphSimilarityFilter(
+    filt = SubgraphSimilarityFilter(
         encoder=encoder,
         top_k=cfg.quality_to_kg_top_k,
         threshold=cfg.min_similarity_threshold,
+    ) # the word "filter" in python is overloaded, so I use "filt" for the instance name
+    index = filt.build_index(kg_relations)
+
+    tick("📊 Running similarity search (cos_sim<qualities, kg_relations>)...")
+    kept, dropped = filt.filter_qualities(
+        cfg=cfg,
+        index=index,
+        qualities=qualities,
+        progress=progress
     )
 
-    index = filter.build_index(kg_relations)
-    kept, dropped = filter.filter_qualities(index=index, qualities=qualities)
+    log_payload = build_qualities_to_subgraph_similarity_payload(
+        cfg=cfg,
+        kept=kept,
+        dropped=dropped,
+    )
 
     if pretty_print:
-        filter.pretty_print(kept=kept, dropped=dropped)
+        filt.pretty_print(kept=kept, dropped=dropped)
 
-    return kept, dropped
+    return (kept, dropped), log_payload
+

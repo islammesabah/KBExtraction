@@ -67,17 +67,18 @@ export function buildCytoscapeStyle(theme) {
     {
       selector: ".highlighted-node",
       style: {
-        "shadow-blur": 18,
-        "shadow-color": highlight,
-        "shadow-opacity": 0.9,
-        "shadow-offset-x": 0,
-        "shadow-offset-y": 0,
+        // "shadow-blur": 18,
+        // "shadow-color": highlight,
+        // "shadow-opacity": 0.9,
+        // "shadow-offset-x": 0,
+        // "shadow-offset-y": 0,
 
         "border-width": 6,
         "border-color": highlight,
         "border-opacity": 0.9,
 
-        "transition-property": "shadow-blur, shadow-opacity, border-width, border-opacity",
+        // "transition-property": "shadow-blur, shadow-opacity, border-width, border-opacity",
+        "transition-property": "border-width, border-opacity",
         "transition-duration": "0.2s",
       },
     },
@@ -90,14 +91,15 @@ export function buildCytoscapeStyle(theme) {
         "line-color": highlight,
         "target-arrow-color": highlight,
 
-        // optional aura for edges too
-        "shadow-blur": 12,
-        "shadow-color": highlight,
-        "shadow-opacity": 0.8,
-        "shadow-offset-x": 0,
-        "shadow-offset-y": 0,
+        // // optional aura for edges too
+        // "shadow-blur": 12,
+        // "shadow-color": highlight,
+        // "shadow-opacity": 0.8,
+        // "shadow-offset-x": 0,
+        // "shadow-offset-y": 0,
 
-        "transition-property": "width, line-color, target-arrow-color, shadow-blur, shadow-opacity",
+        // "transition-property": "width, line-color, target-arrow-color, shadow-blur, shadow-opacity",
+        "transition-property": "width, line-color, target-arrow-color",
         "transition-duration": "0.2s",
       },
     },

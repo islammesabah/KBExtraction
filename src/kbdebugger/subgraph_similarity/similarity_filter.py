@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any, List, Mapping, Sequence, Tuple
+from typing import Any, Dict, List, Mapping, Optional, Sequence, Tuple
+from kbdebugger.subgraph_similarity.logging import build_qualities_to_subgraph_similarity_payload
+from kbdebugger.types.ui import ProgressCallback
 import numpy as np
 
 from rich.console import Console
@@ -13,7 +15,7 @@ from kbdebugger.types import GraphRelation
 from kbdebugger.utils.progress import stage_status
 from .encoder import TextEncoder
 from .index import VectorIndex
-from .types import DroppedQuality, KeptQuality, Quality
+from .types import DroppedQuality, KeptQuality, Quality, SubgraphSimilarityFilterConfig
 from kbdebugger.utils.json import write_json
 from kbdebugger.utils.time import now_utc_compact
 
@@ -239,8 +241,10 @@ class SubgraphSimilarityFilter:
     def filter_qualities(
         self,
         *,
+        cfg: SubgraphSimilarityFilterConfig,
         index: VectorIndex[GraphRelation],
         qualities: Sequence[Quality],
+        progress: Optional[ProgressCallback] = None
     ) -> Tuple[List[KeptQuality], List[DroppedQuality]]:
         """
         Filter candidate qualities using vector similarity to the KG index.
@@ -281,6 +285,15 @@ class SubgraphSimilarityFilter:
             - extract triplets
             - write to Neo4j
         """
+        total = 4
+        step = 0
+        def tick(msg: str):
+            nonlocal step
+            step += 1
+            if progress:
+                progress(step, total, msg)
+
+
         if not qualities:
             return ([], [])
 
@@ -288,6 +301,7 @@ class SubgraphSimilarityFilter:
         texts = [quality_to_text(q) for q in qualities]
 
         # 2. Batch-embed qualities
+        tick("🧬 Embedding qualities…")
         vectors = self.encoder.encode(texts) # shape: (num_qualities, dim)
         vectors_np = np.ascontiguousarray(np.asarray(vectors), dtype=np.float32)
 
@@ -305,6 +319,7 @@ class SubgraphSimilarityFilter:
         #       
         #       - scores_matrix: np.ndarray shape (Q, k) of cosine similarities
         with stage_status("📊 Performing batch vector similarity search:"):
+            tick("📊 Searching nearest neighbors (FAISS)…")
             neighbors_per_q, scores = index.search_batch(vectors_np, k=self.top_k)
 
 
@@ -322,6 +337,7 @@ class SubgraphSimilarityFilter:
 
 
         # 6) Assemble outputs (still a loop, but *cheap*; no ANN calls inside)
+        tick("🧮 Thresholding + assembling results…")
         for i, q in enumerate(qualities):
             ms = float(max_scores[i])
 
@@ -350,7 +366,8 @@ class SubgraphSimilarityFilter:
         kept.sort(key=lambda x: x["max_score"], reverse=True)
         dropped.sort(key=lambda x: x["max_score"], reverse=True)
 
-        self.save_similarity_results_json(kept=kept, dropped=dropped)
+        tick("💾 Saving similarity results to JSON log…")
+        self.save_similarity_results_json(cfg=cfg, kept=kept, dropped=dropped)
         return (kept, dropped)
 
 
@@ -465,9 +482,10 @@ class SubgraphSimilarityFilter:
     def save_similarity_results_json(
         self,
         *,
+        cfg: SubgraphSimilarityFilterConfig,
         kept: Sequence[KeptQuality],
         dropped: Sequence[DroppedQuality],
-    ) -> None:
+    ) -> Mapping[str, Any]:
         """
         Write vector similarity filter results to a JSON file.
 
@@ -482,17 +500,24 @@ class SubgraphSimilarityFilter:
             "dropped": [...]
         }
         """
-        created_at = now_utc_compact()
-        data: Mapping[str, Any] = {
-            "number_kept": len(kept),
-            "number_dropped": len(dropped),
-            "kept": kept,
-            "dropped": dropped,
-            "created_at": created_at,
-        }
+        # created_at = now_utc_compact()
+        # data: Mapping[str, Any] = {
+        #     "number_kept": len(kept),
+        #     "number_dropped": len(dropped),
+        #     "kept": kept,
+        #     "dropped": dropped,
+        #     "created_at": created_at,
+        # }
+        log_payload = build_qualities_to_subgraph_similarity_payload(
+            cfg=cfg,
+            kept=kept,
+            dropped=dropped,
+        )
 
-        path = f"logs/03_vector_similarity_filter_results_{created_at}.json"
-        write_json(path, data)
+        path = f"logs/03_vector_similarity_filter_results_{now_utc_compact()}.json"
+        write_json(path, log_payload)
 
         print(f"\n[INFO] 📚️📊 Wrote vector similarity results to {path}")
 
+        return log_payload
+    

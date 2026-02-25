@@ -24,12 +24,14 @@ from __future__ import annotations
 
 from dataclasses import asdict
 
+from encodings.punycode import T
 import math
-from typing import Any, Dict, List, Sequence
+from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 from kbdebugger.llm.model_access import respond
 from kbdebugger.prompts import build_prompt, build_prompt_batch
 from kbdebugger.subgraph_similarity.types import KeptQuality
+from kbdebugger.types.ui import ProgressCallback
 from kbdebugger.utils import batched
 from rich.progress import track
 from .types import (
@@ -105,7 +107,11 @@ def classify_qualities_novelty(
     use_batch: bool = True,
     batch_size: int = 5,
     pretty_print: bool = True,
-) -> List[QualityNoveltyResult]:
+    progress: Optional[ProgressCallback] = None,
+) -> Tuple[
+        Sequence[QualityNoveltyResult], 
+        Dict
+    ]:
     """
     Classify novelty for a list of kept qualities.
 
@@ -146,14 +152,20 @@ def classify_qualities_novelty(
         If the batched LLM response does not return exactly one result per input id.
     """
     if not kept_qualities:
-        return []
+        return [], {}
 
     # -------------------------
     # Sequential mode
     # -------------------------
     if not use_batch:
         results: List[QualityNoveltyResult] = []
-        for kept in kept_qualities:
+        for idx, kept in enumerate(kept_qualities, start=1):
+            if progress:
+                progress(
+                    idx,
+                    len(kept_qualities),
+                    f"🧑🏻‍⚖️ Novelty comparator LLM: determining novelty for quality",
+                )
             results.append(
                 classify_quality_novelty(
                     kept,
@@ -163,21 +175,34 @@ def classify_qualities_novelty(
             )
         pretty_print_novelty_results(kept=kept_qualities, results=results)
         save_novelty_results_json(results)
-        return results
+        return results, {}
 
     # -------------------------
     # Batched mode
     # -------------------------
     all_results: List[QualityNoveltyResult] = []
     global_id = 0
-
     num_batches = math.ceil(len(kept_qualities) / batch_size) 
 
-    for group in track(
-        batched(list(kept_qualities), batch_size=batch_size), 
-        description=f"🪧 LLM Novelty Comparator: classifying novelty for kept qualities. (batch size={batch_size}, num_batches={num_batches})",
-        total=num_batches,
-    ):
+    groups = batched(list(kept_qualities), batch_size=batch_size)
+
+    # Use rich.track only when no UI progress callback is given
+    if progress is None:
+        groups = track(
+            groups,
+            description=f"🧑🏻‍⚖️ LLM Novelty Comparator: batch_size={batch_size}, num_batches={num_batches}",
+            total=num_batches,
+        )
+
+
+    for batch_idx, group in enumerate(groups, start=1):
+        if progress:
+            progress(
+                batch_idx,
+                num_batches,
+                f"🧑🏻‍⚖️ Novelty comparator LLM: determining novelty for a batch of qualities (batch size={len(group)})…",
+            )
+
         # 1) Map each kept quality to the minimal input schema expected by the prompt 
         novelty_inputs: List[QualityNoveltyInput] = [
             kept_quality_to_novelty_input(k) for k in group
@@ -222,5 +247,5 @@ def classify_qualities_novelty(
     if pretty_print:
         pretty_print_novelty_results(kept=kept_qualities, results=all_results)
     
-    save_novelty_results_json(all_results)
-    return all_results
+    log_payload = save_novelty_results_json(all_results)
+    return all_results, log_payload

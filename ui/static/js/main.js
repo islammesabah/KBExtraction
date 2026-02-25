@@ -58,13 +58,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
 
-  // ---------------------------------------------------------------------------
-  // 5) Optional: legacy/supervisor oversight logic (keep disabled for now)
-  // ---------------------------------------------------------------------------
-  wireOversightLegacy({
-    fileInputId: "documents",
-    verificationSectionId: "verification-section",
-    commonVerifiedListId: "common-verified-list",
-    endpoint: "/api/upload_verify",
-  });
+  // // ---------------------------------------------------------------------------
+  // // 5) Optional: legacy/supervisor oversight logic (keep disabled for now)
+  // // ---------------------------------------------------------------------------
+  // wireOversightLegacy({
+  //   fileInputId: "documents",
+  //   verificationSectionId: "verification-section",
+  //   commonVerifiedListId: "common-verified-list",
+  //   endpoint: "/api/upload_verify",
+  // });
 });

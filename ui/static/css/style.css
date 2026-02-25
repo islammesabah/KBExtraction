@@ -1,6 +1,10 @@
 /* Keep the app font + background; let Bootstrap do the rest */
 :root {
-  --sidebar-width: 320px;
+  --sidebar-width: 420px;
+  /* --sidebar-width: 28vw; */
+
+  /* If the sidebar ever feels too dominant, you can later refine: */
+  /* --sidebar-width: clamp(380px, 22vw, 520px); */
 }
 
 /* Let the app actually fill the viewport */
@@ -13,11 +17,15 @@ body {
   margin: 0;
   font-family: "Roboto", system-ui, -apple-system, Segoe UI, Arial, sans-serif;
   background: #f4f6f8;
+
+  /* Optional but recommended: prevent the page itself from scrolling */
+  overflow: hidden;
 }
 
 /* Your top-level bootstrap container becomes the app frame */
-.container-xxl {
-  min-height: 100vh;
+.app-frame {
+  height: 100dvh;          /* or 100vh if you prefer */
+  box-sizing: border-box;  /* IMPORTANT: includes py-3 padding inside height */
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -60,6 +68,7 @@ body {
 
 /* Details panel */
 .details-panel {
+  font-size: 1.10rem; /* slightly larger base */
   width: var(--sidebar-width);
   min-width: var(--sidebar-width);
   display: flex;
@@ -71,13 +80,27 @@ body {
   overflow: hidden;
 }
 
+.details-panel .small {
+  font-size: 1.25rem; /* don't make metadata tiny */
+}
+
+.details-panel .badge {
+  font-size: 1.0rem;
+}
+
 .details-panel h3 {
+  font-size: 1.3rem;
   margin: 0;
   padding: 0.75rem 1rem;
   border-bottom: 1px solid #dee2e6;
 }
 
+.details-panel .text-muted {
+  color: #495057 !important; /* darker than default muted */
+}
+
 .details-content {
+  line-height: 1.6;
   padding: 1rem;
   overflow-y: auto;
   flex: 1;

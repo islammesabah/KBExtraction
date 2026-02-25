@@ -63,6 +63,23 @@ export function createCytoscapeGraph(containerId = "cy", detailsContainerId = "d
     if (detailsEl) renderEmptyDetails(detailsEl);
   });
 
+  // Bonus: also allow double-click background to reset
+  cy.on("dbltap", (evt) => {
+    if (evt.target !== cy) return;
+    resetZoomToInitialView();
+  });
+
+  function resetZoomToInitialView() {
+    cy.fit(undefined, 150);
+  }
+
+  const resetZoomBtn = document.getElementById("reset-zoom-btn");
+  if (resetZoomBtn) {
+    resetZoomBtn.addEventListener("click", () => {
+      resetZoomToInitialView();
+    });
+  }
+
   function setGraph(elements) {
     /**
      * Expected payload format from server:
@@ -104,8 +121,11 @@ export function createCytoscapeGraph(containerId = "cy", detailsContainerId = "d
     }).run();
     
     // Fit the graph to the viewport with padding
-    // undefined means fit all elements, 150 is the padding
-    cy.fit(undefined, 150);
+    // undefined means fit all elements, 150 is the padding.
+    // Sometimes fitting immediately while layout is animating can feel jumpy. You can delay fit slightly:
+    setTimeout(() => {
+      cy.fit(undefined, 150);
+    }, 250);
   }
 
   // Return theme too in case we want it later

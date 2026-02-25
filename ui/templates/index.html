@@ -16,7 +16,7 @@
 </head>
 
 <body>
-    <div class="container-xxl py-3">
+    <div class="container-fluid app-frame py-3">
         <header class="text-center my-3">
             <h1 class="display-6 fw-bold text-primary mb-1">Trustworthy AI knowledge discovery</h1>
             <p class="text-muted mb-0">Process documents and visualize knowledge graphs.</p>
@@ -124,14 +124,20 @@
 
                     <!-- Graph view -->
                     <div class="tab-pane fade show active h-100 position-relative" id="graph-view" role="tabpanel"
-                        aria-labelledby="graph-view-tab" style="min-height:0;">
+                        aria-labelledby="graph-view-tab" style="min-height:0;"
+                    >
+                        
+                        <div class="position-absolute top-0 end-0 p-2" style="z-index: 10;">
+                            <button id="reset-zoom-btn" class="btn btn-sm btn-outline-secondary">
+                                <i class="bi bi-zoom-out me-1"></i> Reset zoom
+                            </button>
+                        </div>
 
                         <div id="cy" class="graph-container"></div>
 
                         <!-- Empty state overlay -->
                         <div id="graph-empty-state"
-                            class="position-absolute top-50 start-50 translate-middle text-center d-none"
-                        >
+                            class="position-absolute top-50 start-50 translate-middle text-center d-none">
                             <div class="text-muted">
                                 <div class="fs-5 fw-semibold mb-2">🫤 No knowledge found</div>
                                 <div class="small">

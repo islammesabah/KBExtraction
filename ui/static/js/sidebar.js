@@ -40,7 +40,8 @@ function wireCopyButtons(container) {
         // tiny feedback
         const old = btn.innerHTML;
         // change to bootstrap check icon
-        btn.innerHTML = `<i class="bi bi-clipboard-check-fill"></i>`;
+        // btn.innerHTML = `<i class="bi bi-clipboard-check-fill"></i>`;
+        btn.innerHTML = `<i class="bi bi-check2"></i>`;
         // btn.textContent = "✅";
         setTimeout(() => (btn.innerHTML = old), 700);
       } catch (err) {

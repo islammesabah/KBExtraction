@@ -4,7 +4,7 @@
  * - updates graph elements when new payload arrives
  */
 
-import { renderEmptyDetails, renderEdgeDetails, renderNodeDetails } from "./concept_insights_panel.js";
+import { renderEmptyDetails, renderEdgeDetails, renderNodeDetails } from "./sidebar.js";
 import { createStyledCytoscape } from "./cytoscape_theme.js";
 
 export function createCytoscapeGraph(containerId = "cy", detailsContainerId = "details-content") {

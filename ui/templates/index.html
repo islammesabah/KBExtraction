@@ -111,8 +111,8 @@
                     </li>
                     <li class="nav-item" role="presentation">
                         <button class="nav-link" id="oversight-view-tab" data-bs-toggle="tab"
-                            data-bs-target="#oversight-view" type="button" role="tab"
-                            aria-controls="oversight-view" aria-selected="false">
+                            data-bs-target="#oversight-view" type="button" role="tab" aria-controls="oversight-view"
+                            aria-selected="false">
                             Oversight
                         </button>
                     </li>
@@ -154,13 +154,21 @@
 
                             <!-- Oversight-only overlay (covers just this section) -->
                             <div id="oversight-overlay" class="d-none position-absolute top-0 start-0 w-100 h-100">
-                                <div class="position-absolute top-0 start-0 w-100 h-100 bg-white"
-                                    style="opacity: 0.75;"></div>
 
-                                <div class="position-absolute top-50 start-50 translate-middle text-center">
+                                <!-- Backdrop -->
+                                <div class="position-absolute top-0 start-0 w-100 h-100 bg-info" style="opacity: 0.15;">
+                                </div>
+
+                                <!-- Content -->
+                                <div
+                                    class="position-absolute top-50 start-50 translate-middle text-center px-4 py-4 bg-white rounded-4 shadow">
                                     <div class="spinner-border text-primary" role="status" aria-hidden="true"></div>
-                                    <div class="mt-3 fw-semibold" id="oversight-overlay-title">Working…</div>
-                                    <div class="text-muted small" id="oversight-overlay-subtitle">Please wait.</div>
+                                    <div class="mt-3 fw-semibold text-dark" id="oversight-overlay-title">
+                                        Working…
+                                    </div>
+                                    <div class="text-muted small" id="oversight-overlay-subtitle">
+                                        Please wait.
+                                    </div>
                                 </div>
                             </div>
 
@@ -240,10 +248,51 @@
 
 
                                 <div id="oversight-bottom" class="oversight-bottom d-none">
-                                    <h3>Extracted Triplets</h3>
-                                    <span class="text-muted small">An LLM has extracted the following triplets from your
-                                        accepted quality sentences. You can modify each triplet here</span>
-                                    <div id="common-verified-list" class="verified-list"></div>
+                                    <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-2">
+                                        <div>
+                                            <h3 class="mb-1">Extracted Triplets</h3>
+                                            <div class="text-muted small">
+                                                Review, edit, or delete triplets before inserting into the Knowledge
+                                                Graph.
+                                            </div>
+                                        </div>
+
+                                        <div class="d-flex gap-2">
+                                            <button id="triplets-back" class="btn btn-outline-secondary btn-sm"
+                                                type="button">
+                                                <i class="bi bi-arrow-left me-1"></i>
+                                                Back to qualities
+                                            </button>
+
+                                            <button id="triplets-submit" class="btn btn-success btn-sm" type="button"
+                                                disabled>
+                                                <i class="bi bi-database-up me-1"></i>
+                                                Submit to KG
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div class="d-flex align-items-center justify-content-between mb-2 flex-wrap gap-2">
+                                        <div class="text-muted small">
+                                            Triplets: <span id="triplets-count" class="fw-semibold">0</span>
+                                            <span class="mx-2">•</span>
+                                            Deleted: <span id="triplets-deleted-count" class="fw-semibold">0</span>
+                                        </div>
+
+                                        <div class="input-group input-group-sm" style="max-width: 340px;">
+                                            <span class="input-group-text"><i class="bi bi-search"></i></span>
+                                            <input id="triplets-filter" class="form-control" type="text"
+                                                placeholder="Filter triplets..." />
+                                            <button id="triplets-clear-filter" class="btn btn-outline-secondary"
+                                                type="button">Clear</button>
+                                        </div>
+                                    </div>
+
+                                    <div id="triplets-table-wrap" class="table-responsive"></div>
+
+                                    <div id="triplets-empty" class="text-muted small d-none">
+                                        No triplets to review.
+                                    </div>
                                 </div>
                             </div>
                         </section>

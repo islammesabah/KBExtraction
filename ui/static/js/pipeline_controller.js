@@ -5,6 +5,7 @@
 import { startPipelineJob, getJobStatus } from "./pipeline_client.js";
 import { showProgressPanel, updateProgressPanel } from "./pipeline_progress_ui.js";
 import { resetElapsedTimer, updateElapsedTimer } from "./timer.js";
+import { setRunContext } from "./oversight_state.js";
 
 export function wirePipelineUpload({ fileInputId, keywordSelectId, onDone }) {
   const fileInput = document.getElementById(fileInputId);
@@ -22,7 +23,7 @@ export function wirePipelineUpload({ fileInputId, keywordSelectId, onDone }) {
 
     const keyword = keywordSel.value.trim();
     if (!keyword) {
-      alert("🔍️ Please choose a keyword firjob.");
+      alert("🔍️ Please choose a keyword first.");
       return;
     }
 
@@ -44,17 +45,27 @@ export function wirePipelineUpload({ fileInputId, keywordSelectId, onDone }) {
     const poll = async () => {
       try {
         const job = await getJobStatus(jobId);
-        
+
         updateProgressPanel({
           stage: job.stage,
           message: job.message,
           current: job.progress?.current ?? null,
           total: job.progress?.total ?? null,
         });
-        
+
         updateElapsedTimer(job);
-        
+
         if (job.state === "done") {
+          // ✅ Save provenance for downstream stages (triplets upsert, etc.)
+          const meta = job.result?._meta;
+          if (meta?.source) {
+            setRunContext({
+              source: meta.source,
+              source_name: meta.source_name || null,
+              keyword: meta.keyword || null,
+            });
+          }
+
           onDone?.(job.result);
           return;
         }

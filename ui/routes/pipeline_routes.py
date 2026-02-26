@@ -26,9 +26,10 @@ from ui.services.job_store import JOB_STORE
 from ui.services.pipeline_runner import run_pipeline
 from ui.services.pipeline_config_service import get_pipeline_config
 
-from kbdebugger.novelty.utils import coerce_from_browser_dict
-from kbdebugger.novelty.types import QualityNoveltyInput, QualityNoveltyResult
-from kbdebugger.extraction.triplet_extraction_batch import extract_triplets_from_novelty_results, extract_triplets_batch
+from kbdebugger.extraction.triplet_extraction_batch import extract_triplets_batch
+from kbdebugger.graph.api import upsert_extracted_triplets
+from kbdebugger.types import ExtractionResult
+
 
 pipeline_bp = Blueprint("pipeline", __name__)
 
@@ -197,4 +198,94 @@ def start_triplet_extraction():
             JOB_STORE.set_error(job.job_id, str(e))
 
     Thread(target=worker, daemon=True).start()
+    return jsonify({"job_id": job.job_id})
+
+
+
+@pipeline_bp.post("/kg-upsert")
+def start_kg_upsert():
+    """
+    Start Stage 7 (KG upsert) as a background job.
+
+    Request (JSON)
+    --------------
+    {
+      "extractions": [
+        {"sentence": "...", "triplets": [["S","O","P"], ...]},
+        ...
+      ],
+      "source": "ui/temp_uploads/foo.pdf"   # optional, but recommended
+    }
+
+    Response
+    --------
+    { "job_id": "<uuid>" }
+    """
+    payload = request.get_json(silent=True) or {}
+    raw_extractions = payload.get("extractions")
+    source = payload.get("source")
+
+    if not isinstance(raw_extractions, list) or not raw_extractions:
+        return jsonify({"error": "Expected non-empty 'extractions' list"}), 400
+
+    # Minimal validation (TypedDict runtime checks)
+    cleaned: List[ExtractionResult] = []
+    for ex in raw_extractions:
+        if not isinstance(ex, dict):
+            continue
+        sentence = str(ex.get("sentence", "")).strip()
+        triplets = ex.get("triplets")
+        if not sentence or not isinstance(triplets, list):
+            continue
+
+        cleaned_triplets = []
+        for t in triplets:
+            if not isinstance(t, list) and not isinstance(t, tuple):
+                continue
+            if len(t) != 3:
+                continue
+            s = str(t[0]).strip()
+            o = str(t[1]).strip()
+            p = str(t[2]).strip()
+            if s and o and p:
+                cleaned_triplets.append((s, o, p))
+
+        cleaned.append({"sentence": sentence, "triplets": cleaned_triplets})
+
+    if not cleaned:
+        return jsonify({"error": "No valid ExtractionResult items provided."}), 400
+
+    job = JOB_STORE.create_job()
+
+    def worker() -> None:
+        try:
+            JOB_STORE.set_running(job.job_id)
+            JOB_STORE.update_progress(
+                job.job_id,
+                stage="KnowledgeGraphUpsert",
+                message=f"🗃️ Upserting relations from {len(cleaned)} triplets to the knowledge graph...",
+                current=None,
+                total=None,
+            )
+
+            upsert_summary = upsert_extracted_triplets(
+                extractions=cleaned,
+                source=str(source).strip() if source else None,
+                pretty_print=False,
+            )
+
+            # dataclass -> dict for JSON
+            JOB_STORE.set_done(job.job_id, {
+                "summary": {
+                    "attempted": upsert_summary.attempted,
+                    "succeeded": upsert_summary.succeeded,
+                    "failed": upsert_summary.failed,
+                    "errors": upsert_summary.errors,
+                }
+            })
+        except Exception as e:
+            JOB_STORE.set_error(job.job_id, str(e))
+
+    Thread(target=worker, daemon=True).start()
+    
     return jsonify({"job_id": job.job_id})

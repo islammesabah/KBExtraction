@@ -9,11 +9,11 @@
 import { createCytoscapeGraph } from "./cytoscape.js";
 import { initKeywordDropdown } from "./keyword_dropdown_controller.js";
 import { wirePipelineUpload } from "./pipeline_controller.js";
+import { wireHumanOversightSubmit , renderHumanOversightFromPipelineResult} from "./oversight_controller.js";
 
 // Optional modules (TODO: Most likely will be deleted)
 import { wireGraphSearch } from "./graph_free_text_search.js";
-import { wireOversightLegacy } from "./oversight_legacy.js"; // keep disabled unless needed
-import { renderHumanOversightFromPipelineResult, wireHumanOversightSubmit } from "./oversight_controller.js";
+// import { wireOversightLegacy } from "./oversight_legacy.js"; // keep disabled unless needed
 
 
 document.addEventListener("DOMContentLoaded", async () => {

@@ -19,3 +19,11 @@ export async function startTripletExtractionJob({ selected_qualities }) {
     body: JSON.stringify({ selected_qualities }),
   });
 }
+
+export async function upsertTripletsToKnowledgeGraphJob({ extractions, source }) {
+  return fetchJson("/api/pipeline/kg-upsert", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ extractions, source }),
+  });
+}

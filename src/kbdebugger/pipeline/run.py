@@ -169,11 +169,11 @@ def run_pipeline(cfg: PipelineConfig) -> None:
     #     # extracted_triplets is like a list of list of triplets with provenance.
     #     # So, each `extraction` corresponds to one quality sentence from which we extract triplets 
     # with timer.stage("🧠 Neo4j upsert_extracted_triplets"):
-    #     upsert_extracted_triplets(
-    #         extractions=extracted_triplets,
-    #         # provenance: we can store the PDF filename as the source of these extracted relations
-    #         source=cfg.corpus_path,  
-    #     )
+        upsert_extracted_triplets(
+            extractions=extracted_triplets,
+            # provenance: we can store the PDF filename as the source of these extracted relations
+            source=cfg.corpus_path,  
+        )
 
     timing_path = timer.save_json()
 

@@ -316,11 +316,11 @@ function escapeHtml(str) {
 // ------------------------------------------------------------------
 // Submit selected -> triplet extraction (Stage 6 job)
 // ------------------------------------------------------------------
-const setShowExtractedTripletsReviewSection = (show) => {
-  const section = document.getElementById("oversight-bottom");
-  if (!section) return;
-  section.classList.toggle("d-none", !show);
-};
+// const setShowExtractedTripletsReviewSection = (show) => {
+//   const section = document.getElementById("oversight-bottom");
+//   if (!section) return;
+//   section.classList.toggle("d-none", !show);
+// };
 
 export function wireHumanOversightSubmit({ keywordSelectId, fileInputId }) {
   const btn = document.getElementById("oversight-submit");
@@ -355,9 +355,8 @@ export function wireHumanOversightSubmit({ keywordSelectId, fileInputId }) {
       while (true) {
         const job = await getJobStatus(jobId);
         if (job.state === "done") {
-          console.log("Triplet extraction result:", job.result);
-          // Next step later: render extracted triplets UI
-          setShowExtractedTripletsReviewSection(true);
+          // show extracted triplets UI + render editable table
+          renderExtractedTripletsFromJobResult(job.result);
           break;
         }
         if (job.state === "error") {

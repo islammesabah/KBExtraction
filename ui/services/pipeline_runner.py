@@ -26,7 +26,6 @@ from kbdebugger.extraction.api import decompose_paragraphs_to_qualities
 from kbdebugger.graph.api import retrieve_keyword_subgraph
 from kbdebugger.subgraph_similarity.api import filter_qualities_by_subgraph_similarity
 from kbdebugger.novelty.comparator import classify_qualities_novelty
-# from kbdebugger.graph.api import retrieve_keyword_subgraph
 
 from ui.services.job_store import JOB_STORE, JobProgressStage
 from ui.services.json_sanitize import to_jsonable
@@ -170,12 +169,19 @@ def run_pipeline(
     )
 
 
-    response: Dict[JobProgressStage, Dict] = {
+    response: Dict[JobProgressStage | str, Dict] = {
         "Docling": docling_log,
         "KeyBERT": keybert_log,
         "DecomposerLLM": decomposer_log,
         "SubgraphSimilarity": subgraph_similarity_log,
         "NoveltyLLM": novelty_log,
+    }
+
+    # ✅ Add pipeline metadata so UI can keep provenance across stages
+    response["_meta"] = {
+        "source": str(file_path),            # e.g., "ui/temp_uploads/foo.pdf"
+        "source_name": file_path.name,       # e.g., "foo.pdf" (nice for UI)
+        "keyword": keyword,
     }
 
     return to_jsonable(response)

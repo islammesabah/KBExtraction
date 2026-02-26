@@ -329,6 +329,9 @@ def coerce_from_browser_dict(d: Dict[str, Any]) -> QualityNoveltyResult:
     novelty_input = QualityNoveltyInput(
         quality=quality,
         max_score=max_score,
+        neighbors=[], # since we will be passing this to extract triplets, we don't need the neighbors;
+        # We're just passing [] because it is required in QualityNoveltyInput.
+
         # if your QualityNoveltyInput has additional fields,
         # fill with safe defaults here
     )

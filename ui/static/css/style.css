@@ -114,12 +114,26 @@ body {
   margin-top: 2rem;
 }
 
-/* Make the section fill available height and allow inner flex scrolling */
+/* Make tab-content fill graph-wrapper */
+#view-tabs-content {
+  height: 100%;
+  min-height: 0;
+}
+
+/* ------------------------------------------------------------
+   Oversight layout: keep everything bounded inside #oversight-view
+   ------------------------------------------------------------ */
+
+
+/* The section must also be a flex column and shrinkable */
 #oversight-section {
   flex: 1 1 auto;
-  min-height: 0;
+  min-height: 0;      /* CRITICAL */
   display: flex;
   flex-direction: column;
+  overflow: hidden;   /* prevent section content from escaping */
+
+  max-height: 90%;
 }
 
 /* Oversight table readability */
@@ -140,45 +154,38 @@ body {
   transform-origin: center;
 }
 
-/* Make the Oversight tab pane a flex column that fills the tab */
+/* The Oversight tab-pane must be a flex column that can shrink */
 #oversight-view {
   display: flex;
   flex-direction: column;
-  min-height: 0;
+  min-height: 0;      /* CRITICAL */
+  overflow: hidden;   /* keep scrolling inside inner container */
 }
 
-/* Make the section fill available height and allow inner flex scrolling
-#oversight-section {
-  flex: 1 1 auto;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-} */
-
-
-/* Oversight split layout */
+/* The split container should fill the remaining section height */
 .oversight-split-container {
-  display: flex;
   flex: 1 1 auto;
   min-height: 0;
+  display: flex;
   flex-direction: column;
-  gap: 1rem;
-  /* height: calc(100% - 48px); */
 }
 
-/* Oversight: the “top” should own scrolling */
+/* The top area owns the vertical space; bottom is hidden for now */
 .oversight-top {
   flex: 1 1 auto;
-  min-height: 0;          /* critical for flex children */
-  overflow: hidden;       /* keep scroll inside inner content */
+  min-height: 0;
+  overflow: hidden;
 }
 
-/* This is the scrolling viewport for tables + pager */
+
+/* This is the ONLY scrolling viewport */
 #oversight-inner-tabs-content {
   flex: 1 1 auto;
   min-height: 0;
-  overflow: auto;         /* ✅ this makes pager reachable */
-  padding-bottom: 1.25rem; /* increase from 0.5rem */
+  overflow: auto;
+
+  /* give the pager some breathing room so it never looks clipped */
+  padding-bottom: 1rem;
 }
 
 /* Optional: ensure each pane doesn’t fight heights */

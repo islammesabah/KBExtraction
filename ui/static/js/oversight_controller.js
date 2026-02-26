@@ -50,6 +50,8 @@ function paginate(items, page, pageSize) {
 }
 
 function renderTable({ container, items, decisionKey, page }) {
+  let isBulkToggle = false; // flag to prevent infinite loop when programmatically toggling checkboxes
+
   container.innerHTML = "";
 
   const { page: cur, pages, slice } = paginate(items, page, PAGE_SIZE);
@@ -63,7 +65,14 @@ function renderTable({ container, items, decisionKey, page }) {
   table.innerHTML = `
     <thead>
       <tr>
-        <th style="width: 52px;"></th>
+        <th style="width: 52px;">
+          <input 
+            class="form-check-input oversight-checkbox" 
+            type="checkbox" 
+            id="select-all-${decisionKey}-${cur}"
+            title="Select all on this page" 
+          />
+        </th>
         <th>Quality</th>
         <th style="width: 130px;">
           Similarity
@@ -115,6 +124,9 @@ function renderTable({ container, items, decisionKey, page }) {
       if (cb.checked) selected.set(id, r);
       else selected.delete(id);
       updateSelectedCount();
+
+      // change the tr background color when selected for better UX
+      tr.classList.toggle("table-active", cb.checked);
     });
 
     // Make the whole row clickable (not just tiny checkbox)
@@ -125,9 +137,72 @@ function renderTable({ container, items, decisionKey, page }) {
       if (e.target.closest("input[type=checkbox], button, a, i")) return;
       cb.checked = !cb.checked;
       cb.dispatchEvent(new Event("change", { bubbles: true }));
+
+      // change the tr background color when selected for better UX
+      tr.classList.toggle("table-active", cb.checked);
     });
 
     tbody.appendChild(tr);
+  });
+
+
+  // After we have appended all rows, we can add "select all" listener
+  const selectAllCheckbox = table.querySelector(`#select-all-${decisionKey}-${cur}`);
+
+  /**
+   * Gets all checkboxes for the current page slice rows
+   */
+  const getRowCheckboxes = () => tbody.querySelectorAll('input[type="checkbox"]');
+
+  // helper: compute select-all checkbox state for this page slice
+  function syncSelectAllCheckboxState() {
+    const rowCheckboxes = getRowCheckboxes();
+    const checkedCount = Array.from(rowCheckboxes).filter(cb => cb.checked).length;
+
+    if (checkedCount === 0) {
+      selectAllCheckbox.checked = false;
+      selectAllCheckbox.indeterminate = false;
+    } else if (checkedCount === rowCheckboxes.length) {
+      selectAllCheckbox.checked = true;
+      selectAllCheckbox.indeterminate = false;
+    } else {
+      selectAllCheckbox.checked = false;
+      selectAllCheckbox.indeterminate = true; // ✅ partial selection
+    }
+  }
+
+  // initialize select-all state on render
+  if (selectAllCheckbox) syncSelectAllCheckboxState();
+
+  // when user clicks select-all => toggle all rows in this page
+  if (selectAllCheckbox) {
+    selectAllCheckbox.addEventListener("change", () => {
+      const rowCheckboxes = getRowCheckboxes();
+
+      isBulkToggle = true; // ✅ prevent header resync during bulk loop
+
+      rowCheckboxes.forEach(cb => {
+        if (cb.checked !== selectAllCheckbox.checked) {
+          cb.checked = selectAllCheckbox.checked;
+          // call dispatchEvent so each row's checkbox listener will run, updating the `selected` map accordingly.
+          // i.e., programmatically toggling the checkbox doesn't trigger the "change" event by default, so we need to dispatch it manually.
+          cb.dispatchEvent(new Event("change", { bubbles: true })); 
+        }
+      });
+
+      isBulkToggle = false;
+
+      // ✅ after bulk is done, sync header ONCE
+      selectAllCheckbox.indeterminate = false;
+    }); 
+  }
+
+  // whenever a row checkbox changes => keep select-all in sync
+  getRowCheckboxes().forEach(cb => {
+    cb.addEventListener("change", () => {
+      if (isBulkToggle) return; // ✅ don't fight bulk operation
+      syncSelectAllCheckboxState();
+    });
   });
 
   tableWrap.appendChild(table);
@@ -257,12 +332,23 @@ export function wireHumanOversightSubmit({ keywordSelectId, fileInputId }) {
       return;
     }
 
-    const payload = Array.from(selected.values()); // list of novelty results
+    // ❌
+    // const payload = Array.from(selected.values()); // list of novelty results
+    
+    // Slim payload: just the quality strings
+    const selected_qualities = Array.from(selected.values())
+      .map(r => (r?.quality ?? "").trim())
+      .filter(Boolean);
+
+    if (selected_qualities.length === 0) {
+      alert("Selected rows had no quality text.");
+      return;
+    }
 
     showOversightOverlay("Extracting triplets…", "This may take a minute.");
 
     try {
-      const start = await startTripletExtractionJob({ selected_results: payload });
+      const start = await startTripletExtractionJob({ selected_qualities });
       const jobId = start.job_id;
 
       // Poll until done (reuse same job API)

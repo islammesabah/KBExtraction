@@ -28,7 +28,7 @@ from ui.services.pipeline_config_service import get_pipeline_config
 
 from kbdebugger.novelty.utils import coerce_from_browser_dict
 from kbdebugger.novelty.types import QualityNoveltyInput, QualityNoveltyResult
-from kbdebugger.extraction.triplet_extraction_batch import extract_triplets_from_novelty_results
+from kbdebugger.extraction.triplet_extraction_batch import extract_triplets_from_novelty_results, extract_triplets_batch
 
 pipeline_bp = Blueprint("pipeline", __name__)
 
@@ -155,18 +155,17 @@ def start_triplet_extraction():
     - final result: List[ExtractionResult]
     """
     payload = request.get_json(silent=True) or {}
-    raw_items = payload.get("selected_results")
+    raw = payload.get("selected_qualities")
 
-    if not isinstance(raw_items, list) or len(raw_items) == 0:
-        return jsonify({"error": "Expected JSON body with non-empty 'selected_results' list"}), 400
+    if not isinstance(raw, list) or len(raw) == 0:
+        return jsonify({"error": "Expected JSON body with non-empty 'selected_qualities' list"}), 400
 
-    try:
-        selected: List[QualityNoveltyResult] = [
-            coerce_from_browser_dict(x) for x in raw_items
-        ]
-    except Exception as e:
-        return jsonify({"error": str(e)}), 400
-
+    # sanitize
+    qualities = [str(x).strip() for x in raw if x is not None and str(x).strip()]
+    
+    if not qualities:
+        return jsonify({"error": "No non-empty qualities provided."}), 400
+    
     job = JOB_STORE.create_job()
 
     def worker() -> None:
@@ -176,15 +175,15 @@ def start_triplet_extraction():
             JOB_STORE.update_progress(
                 job.job_id,
                 stage="TripletExtractionLLM",
-                message=f"🧬 Extracting triplets from {len(selected)} selected qualities...",
+                message=f"🧬 Extracting triplets from {len(qualities)} selected qualities...",
                 current=None,
                 total=None,
             )
             
             cfg = get_pipeline_config()
 
-            extracted = extract_triplets_from_novelty_results(
-                selected,
+            extracted = extract_triplets_batch(
+                qualities,
                 batch_size=cfg.triplet_extraction_batch_size,  # or just hardcode to 5 for now
             )
 

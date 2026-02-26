@@ -23,7 +23,7 @@
  */
 export function wireOversightLegacy({
   fileInputId = "documents",
-  verificationSectionId = "verification-section",
+  verificationSectionId = "oversight-section",
   commonVerifiedListId = "common-verified-list",
   endpoint = "/api/upload_verify",
 }) {

@@ -130,7 +130,7 @@ def classify_qualities_novelty(
         IMPORTANT:
         - In sequential mode, this is "per item".
         - In batched mode, this is "per batch".
-          ⚡️ Increase it when you increase `batch_size` or when rationales get long.
+        ⚡️ Increase it when you increase `batch_size` or when rationales get long.
 
     temperature:
         Decoding temperature.

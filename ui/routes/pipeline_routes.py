@@ -1,4 +1,5 @@
 from __future__ import annotations
+from typing import List
 
 """
 Pipeline API routes.
@@ -24,6 +25,10 @@ from kbdebugger.pipeline.config import PipelineConfig
 from ui.services.job_store import JOB_STORE
 from ui.services.pipeline_runner import run_pipeline
 from ui.services.pipeline_config_service import get_pipeline_config
+
+from kbdebugger.novelty.utils import coerce_from_browser_dict
+from kbdebugger.novelty.types import QualityNoveltyInput, QualityNoveltyResult
+from kbdebugger.extraction.triplet_extraction_batch import extract_triplets_from_novelty_results
 
 pipeline_bp = Blueprint("pipeline", __name__)
 
@@ -126,3 +131,71 @@ def get_job_status(job_id: str):
             "started_at": rec.started_at
         }
     )
+
+
+@pipeline_bp.post("/triplet-extraction")
+def start_triplet_extraction():
+    """
+    Start Stage 6 (Triplet extraction) as a background job.
+
+    Request (JSON)
+    --------------
+    {
+        "selected_results": [ <QualityNoveltyResult-like dict>, ... ]
+    }
+
+    Response (JSON)
+    ---------------
+    { "job_id": "<uuid>" }
+
+    Notes
+    -----
+    Client should poll GET /api/pipeline/jobs/<job_id> to retrieve:
+    - progress updates (optional later)
+    - final result: List[ExtractionResult]
+    """
+    payload = request.get_json(silent=True) or {}
+    raw_items = payload.get("selected_results")
+
+    if not isinstance(raw_items, list) or len(raw_items) == 0:
+        return jsonify({"error": "Expected JSON body with non-empty 'selected_results' list"}), 400
+
+    try:
+        selected: List[QualityNoveltyResult] = [
+            coerce_from_browser_dict(x) for x in raw_items
+        ]
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+
+    job = JOB_STORE.create_job()
+
+    def worker() -> None:
+        try:
+            # Stage 6
+            JOB_STORE.set_running(job.job_id)
+            JOB_STORE.update_progress(
+                job.job_id,
+                stage="TripletExtractionLLM",
+                message=f"🧬 Extracting triplets from {len(selected)} selected qualities...",
+                current=None,
+                total=None,
+            )
+            
+            cfg = get_pipeline_config()
+
+            extracted = extract_triplets_from_novelty_results(
+                selected,
+                batch_size=cfg.triplet_extraction_batch_size,  # or just hardcode to 5 for now
+            )
+
+            result = {
+                "extracted_triplets": extracted,
+            }
+
+            # Store result for polling endpoint
+            JOB_STORE.set_done(job.job_id, result)
+        except Exception as e:
+            JOB_STORE.set_error(job.job_id, str(e))
+
+    Thread(target=worker, daemon=True).start()
+    return jsonify({"job_id": job.job_id})

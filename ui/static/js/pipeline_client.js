@@ -11,3 +11,11 @@ export async function startPipelineJob({ keyword, file }) {
 export async function getJobStatus(jobId) {
   return fetchJson(`/api/pipeline/jobs/${encodeURIComponent(jobId)}`);
 }
+
+export async function startTripletExtractionJob({ selected_results }) {
+  return fetchJson("/api/pipeline/triplet-extraction", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ selected_results }),
+  });
+}

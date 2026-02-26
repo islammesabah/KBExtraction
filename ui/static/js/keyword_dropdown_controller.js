@@ -11,6 +11,7 @@
  */
 
 import { getSearchKeywords, getSubgraph } from "./graph_client.js";
+import { switchToTab } from "./utils/tabs.js"
 
 let currentSubgraphAbort = null;
 
@@ -142,6 +143,7 @@ export async function initKeywordDropdown({
 
       try {
         await fetchAndRenderSubgraph(chosen, onSubgraphFetch);
+        switchToTab("graph-view-tab");
       } finally {
         setLoading(false);
         // Upload will automatically be enabled because:

@@ -114,17 +114,79 @@ body {
   margin-top: 2rem;
 }
 
-/* Verification split layout */
-.verification-split-container {
+/* Make the section fill available height and allow inner flex scrolling */
+#oversight-section {
+  flex: 1 1 auto;
+  min-height: 0;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+}
+
+/* Oversight table readability */
+#oversight-section .table td,
+#oversight-section .table th {
+  padding-top: 0.85rem;
+  padding-bottom: 0.85rem;
+}
+
+#oversight-section .quality-cell {
+  font-size: 1.02rem;
+  line-height: 1.35;
+}
+
+/* Bigger checkbox */
+.oversight-checkbox {
+  transform: scale(1.25);
+  transform-origin: center;
+}
+
+/* Make the Oversight tab pane a flex column that fills the tab */
+#oversight-view {
+  display: flex;
+  flex-direction: column;
   min-height: 0;
+}
+
+/* Make the section fill available height and allow inner flex scrolling
+#oversight-section {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+} */
+
+
+/* Oversight split layout */
+.oversight-split-container {
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+  flex-direction: column;
+  gap: 1rem;
   /* height: calc(100% - 48px); */
 }
 
-.verification-top,
-.verification-bottom {
+/* Oversight: the “top” should own scrolling */
+.oversight-top {
+  flex: 1 1 auto;
+  min-height: 0;          /* critical for flex children */
+  overflow: hidden;       /* keep scroll inside inner content */
+}
+
+/* This is the scrolling viewport for tables + pager */
+#oversight-inner-tabs-content {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;         /* ✅ this makes pager reachable */
+  padding-bottom: 1.25rem; /* increase from 0.5rem */
+}
+
+/* Optional: ensure each pane doesn’t fight heights */
+#oversight-inner-tabs-content .tab-pane {
+  height: auto !important;
+}
+
+.oversight-bottom {
   flex: 1;
   min-height: 0;
 }

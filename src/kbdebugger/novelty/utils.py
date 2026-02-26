@@ -301,3 +301,39 @@ def coerce_batched_novelty_response(
         )
 
     return out
+
+# For UI routes, we can reuse the same coercion logic to convert browser-sent novelty results
+def coerce_from_browser_dict(d: Dict[str, Any]) -> QualityNoveltyResult:
+    """
+    Convert a browser-sent novelty result dict back into a fully typed
+    QualityNoveltyResult using the shared coercion utility.
+
+    This ensures:
+    - decision validation
+    - safe defaults
+    - confidence clamping
+    - EXISTING + novel_spans consistency guard
+    - zero duplication of logic
+
+    The browser sends enriched results (quality + max_score included),
+    so we reconstruct a minimal QualityNoveltyInput and reuse the
+    shared coerce_quality_novelty_result().
+    """
+
+    quality = str(d.get("quality") or "").strip()
+    if not quality:
+        raise ValueError("Missing/empty field: quality")
+
+    max_score = float(d.get("max_score", 0.0))
+
+    novelty_input = QualityNoveltyInput(
+        quality=quality,
+        max_score=max_score,
+        # if your QualityNoveltyInput has additional fields,
+        # fill with safe defaults here
+    )
+
+    return coerce_quality_novelty_result(
+        parsed=d,
+        novelty_input=novelty_input,
+    )

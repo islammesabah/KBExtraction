@@ -7,12 +7,13 @@
  */
 
 import { createCytoscapeGraph } from "./cytoscape.js";
-import { initKeywordDropdown } from "./keyword_dropdown.js";
+import { initKeywordDropdown } from "./keyword_dropdown_controller.js";
 import { wirePipelineUpload } from "./pipeline_controller.js";
 
 // Optional modules (TODO: Most likely will be deleted)
 import { wireGraphSearch } from "./graph_free_text_search.js";
 import { wireOversightLegacy } from "./oversight_legacy.js"; // keep disabled unless needed
+import { renderHumanOversightFromPipelineResult, wireHumanOversightSubmit } from "./oversight_controller.js";
 
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -40,11 +41,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     fileInputId: "documents",
     keywordSelectId: "keyword-select", // whatever your dropdown id is
     onDone: (result) => {
-      console.log("Pipeline result:", result);
-      // Later: feed Stage 4 novelty results into our 3 tabs directly.
+      renderHumanOversightFromPipelineResult(result);
     },
   });
 
+  wireHumanOversightSubmit({});
 
   // ---------------------------------------------------------------------------
   // 4) Optional: graph free-text search (if you keep that UI)
@@ -63,7 +64,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // // ---------------------------------------------------------------------------
   // wireOversightLegacy({
   //   fileInputId: "documents",
-  //   verificationSectionId: "verification-section",
+  //   verificationSectionId: "oversight-section",
   //   commonVerifiedListId: "common-verified-list",
   //   endpoint: "/api/upload_verify",
   // });

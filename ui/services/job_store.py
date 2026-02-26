@@ -37,6 +37,7 @@ JobProgressStage = Literal[
     "DecomposerLLM", # 2c
     "SubgraphSimilarity", # 3
     "NoveltyLLM", # 4
+    "TripletExtractionLLM", # 5
 ]
 
 JobState = Literal[

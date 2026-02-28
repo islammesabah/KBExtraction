@@ -5,7 +5,7 @@
 import { startPipelineJob, getJobStatus } from "./pipeline_client.js";
 import { showProgressPanel, updateProgressPanel } from "./pipeline_progress_ui.js";
 import { resetElapsedTimer, updateElapsedTimer } from "./timer.js";
-import { setRunContext } from "./oversight_state.js";
+import { setRunContext } from "./state/oversight_state.js";
 
 export function wirePipelineUpload({ fileInputId, keywordSelectId, onDone }) {
   const fileInput = document.getElementById(fileInputId);

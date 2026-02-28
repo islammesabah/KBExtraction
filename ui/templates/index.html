@@ -63,7 +63,36 @@
                     <input class="form-control" type="file" id="documents" name="documents" disabled>
                 </div>
 
+                <!-- RIGHT-MOST: Run split button -->
+                <div class="d-flex flex-column align-items-end" style="min-width: 190px;">
+                    <label class="form-label text-muted mb-1">&nbsp;</label>
 
+                    <div class="btn-group">
+                        <button id="pipeline-run-btn" class="btn btn-success" type="button" disabled>
+                            <span class="pipeline-run-icon me-2" aria-hidden="true">
+                                <i class="bi bi-play-fill"></i>
+                            </span>
+                            <span class="pipeline-run-label">Run</span>
+                        </button>
+
+                        <button type="button" class="btn btn-success dropdown-toggle dropdown-toggle-split"
+                            data-bs-toggle="dropdown" aria-expanded="false" aria-label="More pipeline actions"
+                            title="More actions" disabled id="pipeline-run-menu-btn"></button>
+
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li>
+                                <button id="pipeline-reset-btn" class="dropdown-item text-danger" type="button">
+                                    <i class="bi bi-trash3 me-2"></i> Reset current pipeline
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="form-text text-muted small mt-1">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Select keyword + choose a file, then hit <b>Run</b>.
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -126,9 +155,31 @@
                         aria-labelledby="graph-view-tab" style="min-height:0;">
 
                         <div class="position-absolute top-0 end-0 p-2" style="z-index: 10;">
-                            <button id="reset-zoom-btn" class="btn btn-sm btn-outline-secondary">
-                                <i class="bi bi-zoom-out me-1"></i> Reset zoom
-                            </button>
+                            <div class="btn-group btn-group-sm" role="group" aria-label="Graph actions">
+                                <!-- Primary action -->
+                                <button id="reset-zoom-btn" class="btn btn-outline-secondary" type="button">
+                                    <i class="bi bi-zoom-out me-1"></i> Reset zoom
+                                </button>
+
+                                <!-- Split dropdown -->
+                                <button type="button"
+                                    class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split"
+                                    data-bs-toggle="dropdown" aria-expanded="false" aria-label="More actions"
+                                    title="More actions"></button>
+
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li>
+                                        <button id="export-subgraph-json" class="dropdown-item" type="button">
+                                            <i class="bi bi-filetype-json me-2"></i> Export subgraph sentences (JSON)
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <button id="export-subgraph-txt" class="dropdown-item" type="button">
+                                            <i class="bi bi-file-earmark-text me-2"></i> Export subgraph sentences (TXT)
+                                        </button>
+                                    </li>
+                                </ul>
+                            </div>
                         </div>
 
                         <div id="cy" class="graph-container"></div>
@@ -264,6 +315,11 @@
                                             <i class="bi bi-database-up me-1"></i>
                                             Submit to KG
                                         </button>
+
+                                        <button id="triplets-export" class="btn btn-outline-primary btn-sm"
+                                            type="button">
+                                            <i class="bi bi-download me-1"></i> Export
+                                        </button>
                                     </div>
 
                                     <div class="d-flex align-items-center justify-content-between mb-2 flex-wrap gap-2">
@@ -321,7 +377,7 @@
 
 
     <!-- Confirm overwrite of cached triplets -->
-    <div class="modal fade" id="confirm-overwrite-triplets" tabindex="-1" aria-hidden="true">
+    <!-- <div class="modal fade" id="confirm-overwrite-triplets" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
@@ -343,6 +399,35 @@
                     </button>
                     <button type="button" class="btn btn-primary" id="confirm-overwrite-triplets-continue">
                         Yes, re-extract
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div> -->
+
+
+    <!-- Reusable confirmation modal ✅ -->
+    <div class="modal fade" id="confirm-modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirm-modal-title">Confirm</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="text-muted small" id="confirm-modal-body">
+                        Are you sure?
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal"
+                        id="confirm-modal-cancel">
+                        Cancel
+                    </button>
+                    <button type="button" class="btn btn-primary" id="confirm-modal-confirm">
+                        Continue
                     </button>
                 </div>
             </div>

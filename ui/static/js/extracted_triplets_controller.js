@@ -21,12 +21,14 @@
 
 import { upsertTripletsToKnowledgeGraphJob, getJobStatus } from "./pipeline_client.js";
 import { showOversightOverlay, hideOversightOverlay } from "./oversight_overlay.js";
-import { getOversightSource, getKeyword } from "./oversight_state.js";
+import { getOversightSource, getKeyword } from "./state/oversight_state.js";
 import { setOversightStep, OversightSteps } from "./oversight_stepper.js";
 import { showToast } from "./toast.js";
 import { switchToTopLevelTab, TopLevelTabs } from "./utils/tabs.js"
 import { refreshGraphForKeyword } from "./graph_refresh.js";
 import { fireConfetti } from "./confetti.js";
+import { resetPipelineSession } from "./ui_reset.js";
+import { downloadJson, downloadText } from "./utils/export_utils.js";
 
 
 /** Internal in-memory store of editable rows. */
@@ -36,6 +38,16 @@ const state = {
     deletedCount: 0 // derived
 };
 
+// Getters
+const getTableWrap = () => document.getElementById("triplets-table-wrap");
+const getEmptyStateEl = () => document.getElementById("triplets-empty");
+const getCountEl = () => document.getElementById("triplets-count");
+const getDeletedCountEl = () => document.getElementById("triplets-deleted-count");
+const getFilterInput = () => document.getElementById("triplets-filter");
+const getSubmitBtn = () => document.getElementById("triplets-submit");
+const getBackBtn = () => document.getElementById("triplets-back");
+const getClearFilterBtn = () => document.getElementById("triplets-clear-filter");
+const getBottomEl = () => document.getElementById("oversight-bottom");
 
 // Cached last extraction result (for navigation without re-calling API)
 let _hasTripletsCache = false;
@@ -140,7 +152,7 @@ export function showCachedTripletsStep() {
  * Safe to call multiple times (listeners are set with "once" guards).
  */
 function wireTripletsToolbar() {
-    const backBtn = document.getElementById("triplets-back");
+    const backBtn = getBackBtn();
     if (backBtn && !backBtn.dataset.wired) {
         backBtn.dataset.wired = "1";
         backBtn.addEventListener("click", () => {
@@ -149,7 +161,7 @@ function wireTripletsToolbar() {
         });
     }
 
-    const filterInput = document.getElementById("triplets-filter");
+    const filterInput = getFilterInput();
     if (filterInput && !filterInput.dataset.wired) {
         filterInput.dataset.wired = "1";
         filterInput.addEventListener("input", () => {
@@ -159,24 +171,34 @@ function wireTripletsToolbar() {
         });
     }
 
-    const clearBtn = document.getElementById("triplets-clear-filter");
+    const clearBtn = getClearFilterBtn();
     if (clearBtn && !clearBtn.dataset.wired) {
         clearBtn.dataset.wired = "1";
         clearBtn.addEventListener("click", () => {
             state.filter = "";
-            const inp = document.getElementById("triplets-filter");
+            const inp = getFilterInput();
             if (inp) inp.value = "";
             renderTripletsTable();
             updateTripletsCounters();
         });
     }
 
-    const submitBtn = document.getElementById("triplets-submit");
+    const submitBtn = getSubmitBtn();
     if (submitBtn && !submitBtn.dataset.wired) {
         submitBtn.dataset.wired = "1";
         submitBtn.addEventListener("click", async () => {
             console.log("Submitting triplets to KG with payload:");
             await submitTripletsToKnowledgeGraph();
+        });
+    }
+
+    // Export
+    const exportBtn = document.getElementById("triplets-export");
+    if (exportBtn && !exportBtn.dataset.wired) {
+        exportBtn.dataset.wired = "1";
+        exportBtn.addEventListener("click", () => {
+            // simplest: export JSON by default
+            exportTripletsAsJson();
         });
     }
 }
@@ -198,8 +220,8 @@ function getVisibleRows() {
 
 /** Render the editable triplets table into #triplets-table-wrap. */
 function renderTripletsTable() {
-    const wrap = document.getElementById("triplets-table-wrap");
-    const empty = document.getElementById("triplets-empty");
+    const wrap = getTableWrap();
+    const empty = getEmptyStateEl();
     if (!wrap) return;
 
     const rows = getVisibleRows();
@@ -329,9 +351,9 @@ function wireEditableInputs(tr, row) {
  * - Only count rows that are NOT deleted AND have non-empty S/P/O.
  */
 function updateTripletsCounters() {
-    const countEl = document.getElementById("triplets-count");
-    const delEl = document.getElementById("triplets-deleted-count");
-    const submitBtn = document.getElementById("triplets-submit");
+    const countEl = getCountEl();
+    const delEl = getDeletedCountEl();
+    const submitBtn = getSubmitBtn();
 
     const deleted = state.rows.filter(r => r.deleted).length;
 
@@ -453,6 +475,8 @@ async function submitTripletsToKnowledgeGraph() {
 
                 fireConfetti();
 
+                // resetPipelineSession();
+
                 break;
             }
 
@@ -491,4 +515,74 @@ function escapeHtml(str) {
 
 function sleep(ms) {
     return new Promise(res => setTimeout(res, ms));
+}
+
+// =========== Export ===========
+function buildExportPayload() {
+    const payload = buildUpsertPayload();
+    return {
+        keyword: getKeyword() ?? null,
+        ...payload,
+    };
+}
+
+function exportTripletsAsJson() {
+    const data = buildExportPayload();
+    if (!data.extractions?.length) {
+        showToast({ type: "warning", title: "Nothing to export 😅", message: "No valid triplets available." });
+        return;
+    }
+    const base = (data.keyword || "keyword").replaceAll(/\s+/g, "_");
+    downloadJson({ filename: `kbdebugger_triplets_${base}.json`, data });
+    showToast({ type: "success", title: "Exported ✅", message: "Triplets JSON downloaded." });
+}
+
+function exportTripletsAsSentencesTxt() {
+    const data = buildExportPayload();
+    const sentences = (data.extractions || []).map(x => x.sentence).filter(Boolean);
+
+    if (!sentences.length) {
+        showToast({ type: "warning", title: "Nothing to export 😅", message: "No sentences available." });
+        return;
+    }
+
+    // optional: unique sentences
+    const uniq = Array.from(new Set(sentences));
+    const text = uniq.map((s, i) => `${i + 1}. ${s}`).join("\n\n");
+
+    const base = (data.keyword || "keyword").replaceAll(/\s+/g, "_");
+    downloadText({ filename: `kbdebugger_sentences_${base}.txt`, text });
+    showToast({ type: "success", title: "Exported ✅", message: "Sentences TXT downloaded." });
+}
+
+
+/**
+ * Reset extracted triplets UI+cache for a fresh run.
+ */
+export function resetExtractedTripletsUI() {
+    state.rows = [];
+    state.filter = "";
+    _hasTripletsCache = false;
+
+    const wrap = getTableWrap();
+    if (wrap) wrap.innerHTML = "";
+
+    const empty = getEmptyStateEl();
+    if (empty) empty.classList.add("d-none");
+
+    const countEl = getCountEl();
+    if (countEl) countEl.textContent = "0";
+
+    const delEl = getDeletedCountEl();
+    if (delEl) delEl.textContent = "0";
+
+    const filterInput = getFilterInput();
+    if (filterInput) filterInput.value = "";
+
+    const submitBtn = getSubmitBtn();
+    if (submitBtn) submitBtn.disabled = true;
+
+    // Hide extracted triplets step by default
+    const bottom = getBottomEl();
+    if (bottom) bottom.classList.add("d-none");
 }

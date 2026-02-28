@@ -12,7 +12,7 @@ import { showOversightOverlay, hideOversightOverlay } from "./oversight_overlay.
 import { switchToTopLevelTab, TopLevelTabs } from "./utils/tabs.js";
 import { renderExtractedTripletsFromJobResult, hasTripletsCache, showCachedTripletsStep } from "./extracted_triplets_controller.js";
 import { setOversightStep, OversightSteps } from "./oversight_stepper.js";
-import { confirmOverwriteTriplets } from "./confirm_dialogs.js";
+import { confirmModal } from "./confirm_modal.js";
 
 const PAGE_SIZE = 10;
 
@@ -269,11 +269,14 @@ function renderDecision(decisionKey, page = 1) {
   renderTable({ container: pane, items: grouped[decisionKey], decisionKey, page });
 }
 
+const getSelectedCountEl = () => document.getElementById("oversight-selected-count");
+const getSubmitButton = () => document.getElementById("oversight-submit");
+
 function updateSelectedCount() {
-  const el = document.getElementById("oversight-selected-count");
+  const el = getSelectedCountEl();
   if (el) el.textContent = String(selected.size);
 
-  const btn = document.getElementById("oversight-submit");
+  const btn = getSubmitButton();
   if (btn) btn.disabled = selected.size === 0;
 }
 
@@ -323,7 +326,7 @@ function escapeHtml(str) {
 }
 
 export function wireHumanOversightSubmit({ keywordSelectId, fileInputId }) {
-  const btn = document.getElementById("oversight-submit");
+  const btn = getSubmitButton();
   if (!btn) return;
 
   btn.addEventListener("click", async () => {
@@ -334,7 +337,13 @@ export function wireHumanOversightSubmit({ keywordSelectId, fileInputId }) {
 
     // If extracted triplets exist already, confirm before overwriting them.
     if (hasTripletsCache()) {
-      const ok = await confirmOverwriteTriplets();
+      // const ok = await confirmOverwriteTriplets();
+      const ok = await confirmModal({
+        title: "⚠️ Overwrite existing triplets?",
+        body: "There are already extracted triplets waiting for your review. Submitting again will discard the current extracted triplets and generate new ones from your current selection.",
+        confirmText: "Yes, re-extract",
+        confirmBtnClass: "btn-danger",
+      });
       if (!ok) return;
     }
 
@@ -389,6 +398,30 @@ function syncGoToTripletsButton() {
   const btn = getGoToTripletsButton();
   if (!btn) return;
   btn.classList.toggle("d-none", !hasTripletsCache());
+
+  switchActionButtonsColor(hasTripletsCache());
+}
+
+/**
+ * If we have cached triplets, we want to visually guide the user to the "Go to extracted triplets" button 
+ * as the next step, by making it primary colored, and the submit button secondary colored. 
+ * 
+ * If we don't have cached triplets, then the submit button should be primary as the main call to action, 
+ * and the "Go to extracted triplets" button should be hidden.
+ * @param {boolean} hasCache 
+ */
+function switchActionButtonsColor(hasCache) {
+  const submitBtn = getSubmitButton();
+  if (submitBtn) {
+    submitBtn.classList.toggle("btn-primary", !hasCache);
+    submitBtn.classList.toggle("btn-outline-secondary", hasCache);
+  }
+
+  const goTripletsBtn = getGoToTripletsButton();
+  if (goTripletsBtn) {
+    goTripletsBtn.classList.toggle("btn-primary", hasCache);
+    goTripletsBtn.classList.toggle("btn-outline-secondary", !hasCache);
+  }
 }
 
 export function wireGoToTripletsButton() {
@@ -404,3 +437,30 @@ export function wireGoToTripletsButton() {
   });
 }
 
+/**
+ * Reset the Human Oversight UI so a new run starts clean.
+ * - Clears selection map
+ * - Resets selected count and disables submit
+ * - Clears rendered tables (optional but recommended)
+ */
+export function resetHumanOversightUI() {
+  // Clear selection quantity sentences
+  selected.clear();
+
+  // Reset selected count + button
+  const countEl = getSelectedCountEl();
+  if (countEl) countEl.textContent = "0";
+
+  const submitBtn = getSubmitButton();
+  if (submitBtn) submitBtn.disabled = true;
+
+  // Clear the three tab containers so we don't show stale results
+  ["existing", "partially_new", "new"].forEach((k) => {
+    const pane = document.querySelector(`#oversight-${k} .qualities-container`);
+    if (pane) pane.innerHTML = "";
+  });
+
+  // Also ensure we are not showing the bottom section
+  const bottom = document.getElementById("oversight-bottom");
+  if (bottom) bottom.classList.add("d-none");
+}

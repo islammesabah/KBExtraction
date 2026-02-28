@@ -13,6 +13,7 @@
 import { getSearchKeywords, getSubgraph } from "./graph_client.js";
 import { switchToTopLevelTab, TopLevelTabs } from "./utils/tabs.js"
 import { showGlobalLoading, hideGlobalLoading } from "./global_loading_modal.js";
+import { setLastSubgraphPayload } from "./state/graph_state.js";
 
 let currentSubgraphAbort = null;
 
@@ -173,6 +174,9 @@ async function fetchAndRenderSubgraph(keyword, onSubgraphFetch) {
       signal: currentSubgraphAbort.signal,
     });
 
+    // ✅ cache it for export
+    setLastSubgraphPayload(subgraphPayload);
+    
     onSubgraphFetch(subgraphPayload);
   } catch (err) {
     if (err?.name === "AbortError") return;

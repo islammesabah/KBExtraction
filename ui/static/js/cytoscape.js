@@ -7,6 +7,12 @@
 import { renderEmptyDetails, renderEdgeDetails, renderNodeDetails } from "./sidebar.js";
 import { createStyledCytoscape } from "./cytoscape_theme.js";
 
+import { getLastSubgraphPayload } from "./state/graph_state.js";
+import { getKeyword } from "./state/oversight_state.js";
+import { exportSubgraphSentencesAsJson, exportSubgraphSentencesAsTxt } from "./utils/export_utils.js";
+import { showToast } from "./toast.js";
+
+
 export function createCytoscapeGraph(containerId = "cy", detailsContainerId = "details-content") {
   const detailsEl = document.getElementById(detailsContainerId);
   if (detailsEl) renderEmptyDetails(detailsEl);
@@ -80,6 +86,46 @@ export function createCytoscapeGraph(containerId = "cy", detailsContainerId = "d
     });
   }
 
+  function wireGraphExportButtons() {
+    const btnJson = document.getElementById("export-subgraph-json");
+    const btnTxt = document.getElementById("export-subgraph-txt");
+
+    if (btnJson && !btnJson.dataset.wired) {
+      btnJson.dataset.wired = "1";
+      btnJson.addEventListener("click", () => {
+        const payload = getLastSubgraphPayload();
+        const keyword = getKeyword();
+
+        const res = exportSubgraphSentencesAsJson({ subgraphPayload: payload, keyword });
+        if (!res.ok) {
+          showToast({ type: "warning", title: "Nothing to export 😅", message: res.reason });
+          return;
+        }
+        showToast({ type: "success", title: "Exported ✅", message: `Downloaded ${res.count} sentences as JSON 📦` });
+      });
+    }
+
+    if (btnTxt && !btnTxt.dataset.wired) {
+      btnTxt.dataset.wired = "1";
+      btnTxt.addEventListener("click", () => {
+        const payload = getLastSubgraphPayload();
+
+        // Since getKeyword() is only set after pipeline runs, then Graph-tab export might have keyword=null 
+        // when user only browses graph. If that’s the case, use the dropdown selected value instead:
+        const keyword = getKeyword() ?? (document.getElementById("keyword-select")?.value?.trim() || null);
+
+        const res = exportSubgraphSentencesAsTxt({ subgraphPayload: payload, keyword });
+        if (!res.ok) {
+          showToast({ type: "warning", title: "Nothing to export 😅", message: res.reason });
+          return;
+        }
+        showToast({ type: "success", title: "Exported ✅", message: `Downloaded ${res.count} sentences as TXT 📝` });
+      });
+    }
+  }
+
+  wireGraphExportButtons();
+
   function setGraph(elements) {
     /**
      * Expected payload format from server:
@@ -116,10 +162,10 @@ export function createCytoscapeGraph(containerId = "cy", detailsContainerId = "d
     cy.add(elements);
 
     cy.layout({
-      name: 'cose', 
+      name: 'cose',
       animate: true
     }).run();
-    
+
     // Fit the graph to the viewport with padding
     // undefined means fit all elements, 150 is the padding.
     // Sometimes fitting immediately while layout is animating can feel jumpy. You can delay fit slightly:

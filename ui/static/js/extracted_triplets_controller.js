@@ -21,15 +21,13 @@
 
 import { upsertTripletsToKnowledgeGraphJob, getJobStatus } from "./pipeline_client.js";
 import { showOversightOverlay, hideOversightOverlay } from "./oversight_overlay.js";
-import { getRunContext } from "./oversight_state.js";
+import { getOversightSource, getKeyword } from "./oversight_state.js";
 import { setOversightStep, OversightSteps } from "./oversight_stepper.js";
+import { showToast } from "./toast.js";
+import { switchToTopLevelTab, TopLevelTabs } from "./utils/tabs.js"
+import { refreshGraphForKeyword } from "./graph_refresh.js";
+import { fireConfetti } from "./confetti.js";
 
-
-
-function getOversightSource() {
-    // return getRunContext()?.source ?? null;
-    return getRunContext()?.source_name ?? null;
-}
 
 /** Internal in-memory store of editable rows. */
 const state = {
@@ -411,12 +409,20 @@ function buildUpsertPayload() {
  */
 async function submitTripletsToKnowledgeGraph() {
     const payload = buildUpsertPayload();
+
     if (!payload.extractions.length) {
-        alert("No valid triplets to submit.");
+        showToast({
+            type: "warning",
+            title: "⚠️ Nothing to submit",
+            message: "There are no valid triplets to insert into the Knowledge Graph.",
+        });
         return;
     }
 
-    showOversightOverlay("Upserting triplets…", "Inserting reviewed triplets into the Knowledge Graph.");
+    showOversightOverlay(
+        "Upserting triplets…",
+        "Inserting reviewed triplets into the Knowledge Graph."
+    );
 
     try {
         const start = await upsertTripletsToKnowledgeGraphJob(payload);
@@ -424,18 +430,44 @@ async function submitTripletsToKnowledgeGraph() {
 
         while (true) {
             const job = await getJobStatus(jobId);
+
             if (job.state === "done") {
-                console.log("KG upsert done:", job.result);
-                alert("✅ Triplets inserted into KG.");
+                // Keep overlay up while we refresh, so user doesn't see stale graph.
+                showOversightOverlay("🔄 Refreshing graph…", "Fetching updated subgraph from the Knowledge Graph.");
+
+                const keyword = getKeyword();
+                if (keyword) {
+                    await refreshGraphForKeyword(keyword);
+                }
+
+                // Now switch after refresh so the user immediately sees the updated state.
+                switchToTopLevelTab({ tab: TopLevelTabs.GRAPH });
+
+                hideOversightOverlay();
+
+                showToast({
+                    type: "success",
+                    title: "🎉 Success",
+                    message: "Triplets were successfully inserted into the Knowledge Graph.",
+                });
+
+                fireConfetti();
+
                 break;
             }
+
             if (job.state === "error") {
                 throw new Error(job.error || "KG upsert failed.");
             }
+
             await sleep(1000);
         }
     } catch (e) {
-        alert(e.message || String(e));
+        showToast({
+            type: "error",
+            title: "❌ Upsert Failed",
+            message: e.message || String(e),
+        });
     } finally {
         hideOversightOverlay();
     }

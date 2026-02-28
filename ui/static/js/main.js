@@ -9,18 +9,22 @@
 import { createCytoscapeGraph } from "./cytoscape.js";
 import { initKeywordDropdown } from "./keyword_dropdown_controller.js";
 import { wirePipelineUpload } from "./pipeline_controller.js";
-import { wireHumanOversightSubmit , renderHumanOversightFromPipelineResult, wireGoToTripletsButton } from "./oversight_controller.js";
+import { wireHumanOversightSubmit, renderHumanOversightFromPipelineResult, wireGoToTripletsButton } from "./oversight_controller.js";
+import { registerSubgraphRenderer } from "./graph_refresh.js";
 
 // Optional modules (TODO: Most likely will be deleted)
-import { wireGraphSearch } from "./graph_free_text_search.js";
-// import { wireOversightLegacy } from "./oversight_legacy.js"; // keep disabled unless needed
-
+// import { wireGraphSearch } from "./graph_free_text_search.js";
 
 document.addEventListener("DOMContentLoaded", async () => {
   // ---------------------------------------------------------------------------
   // 1) Graph initialize (Cytoscape)
   // ---------------------------------------------------------------------------
   const graph = createCytoscapeGraph("cy", "details-content");
+
+  // To make our graph refreshable from anywhere.
+  registerSubgraphRenderer((payload) => {
+    graph.setGraph(payload.elements);
+  });
 
   // ---------------------------------------------------------------------------
   // 2) Keyword dropdown => fetch subgraph => update Cytoscape
@@ -47,16 +51,16 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   wireHumanOversightSubmit({});
 
-  // ---------------------------------------------------------------------------
-  // 4) Optional: graph free-text search (if you keep that UI)
-  // ---------------------------------------------------------------------------
-  wireGraphSearch({
-    cy: graph.cy, // relies on createCytoscapeGraph exposing cy
-    searchBtnId: "search-btn",
-    searchInputId: "node-search",
-    detailsContentId: "details-content",
-    endpoint: "/api/search_node",
-  });
+  // // ---------------------------------------------------------------------------
+  // // 4) Optional: graph free-text search (if you keep that UI)
+  // // ---------------------------------------------------------------------------
+  // wireGraphSearch({
+  //   cy: graph.cy, // relies on createCytoscapeGraph exposing cy
+  //   searchBtnId: "search-btn",
+  //   searchInputId: "node-search",
+  //   detailsContentId: "details-content",
+  //   endpoint: "/api/search_node",
+  // });
 
 
   // // ---------------------------------------------------------------------------

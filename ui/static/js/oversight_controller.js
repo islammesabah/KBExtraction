@@ -9,7 +9,7 @@
 
 import { startTripletExtractionJob, getJobStatus } from "./pipeline_client.js"; // we’ll add startTripletExtractionJob
 import { showOversightOverlay, hideOversightOverlay } from "./oversight_overlay.js";
-import { switchToTab } from "./utils/tabs.js";
+import { switchToTopLevelTab, TopLevelTabs } from "./utils/tabs.js";
 import { renderExtractedTripletsFromJobResult, hasTripletsCache, showCachedTripletsStep } from "./extracted_triplets_controller.js";
 import { setOversightStep, OversightSteps } from "./oversight_stepper.js";
 import { confirmOverwriteTriplets } from "./confirm_dialogs.js";
@@ -304,7 +304,7 @@ export function renderHumanOversightFromPipelineResult(pipelineResult) {
 
   updateSelectedCount();
 
-  switchToTab("oversight-view-tab");
+  switchToTopLevelTab({ tab: TopLevelTabs.OVERSIGHT });
 
   setOversightStep(OversightSteps.CANDIDATE_SENTENCES);
 

@@ -11,7 +11,8 @@
  */
 
 import { getSearchKeywords, getSubgraph } from "./graph_client.js";
-import { switchToTab } from "./utils/tabs.js"
+import { switchToTopLevelTab, TopLevelTabs } from "./utils/tabs.js"
+import { showGlobalLoading, hideGlobalLoading } from "./global_loading_modal.js";
 
 let currentSubgraphAbort = null;
 
@@ -35,11 +36,6 @@ export async function initKeywordDropdown({
 
   const fileInput = document.getElementById(fileInputId);
   const keywordSpinner = document.getElementById("keyword-spinner");
-
-  // Optional global overlay
-  const overlay = document.getElementById("global-loading-overlay");
-  const overlayTitle = document.getElementById("overlay-title");
-  const overlaySubtitle = document.getElementById("overlay-subtitle");
 
   /**
    * Local UI state:
@@ -65,10 +61,10 @@ export async function initKeywordDropdown({
     // Upload input is enabled ONLY when keyword chosen AND not loading
     if (fileInput) fileInput.disabled = !hasKeywordSelected || isLoading;
 
-    // Optional global overlay
-    if (useGlobalOverlay && overlay) {
-      overlay.classList.toggle("d-none", !isLoading);
-    }
+    // // Optional global overlay
+    // if (useGlobalOverlay && overlay) {
+    //   overlay.classList.toggle("d-none", !isLoading);
+    // }
   }
 
   /**
@@ -77,9 +73,9 @@ export async function initKeywordDropdown({
   function setLoading(nextLoading, { title = "Loading…", subtitle = "Please wait." } = {}) {
     isLoading = nextLoading;
 
-    if (useGlobalOverlay && overlay && isLoading) {
-      if (overlayTitle) overlayTitle.textContent = title;
-      if (overlaySubtitle) overlaySubtitle.textContent = subtitle;
+    if (useGlobalOverlay) {
+      if (isLoading) showGlobalLoading(title, subtitle);
+      else hideGlobalLoading();
     }
 
     syncUI();
@@ -143,7 +139,7 @@ export async function initKeywordDropdown({
 
       try {
         await fetchAndRenderSubgraph(chosen, onSubgraphFetch);
-        switchToTab("graph-view-tab");
+        switchToTopLevelTab({ tab: TopLevelTabs.GRAPH });
       } finally {
         setLoading(false);
         // Upload will automatically be enabled because:

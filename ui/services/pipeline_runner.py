@@ -158,7 +158,7 @@ def run_pipeline(
         total=max(num_batches, 1),  # avoid total=0 in UI
     )
 
-    novelty_results, novelty_log = classify_qualities_novelty(
+    _, novelty_log = classify_qualities_novelty(
         kept,
         max_tokens=cfg.novelty_llm_max_tokens,
         temperature=cfg.novelty_llm_temperature,

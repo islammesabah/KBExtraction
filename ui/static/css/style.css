@@ -24,8 +24,10 @@ body {
 
 /* Your top-level bootstrap container becomes the app frame */
 .app-frame {
-  height: 100dvh;          /* or 100vh if you prefer */
-  box-sizing: border-box;  /* IMPORTANT: includes py-3 padding inside height */
+  height: 100dvh;
+  /* or 100vh if you prefer */
+  box-sizing: border-box;
+  /* IMPORTANT: includes py-3 padding inside height */
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -68,7 +70,8 @@ body {
 
 /* Details panel */
 .details-panel {
-  font-size: 1.10rem; /* slightly larger base */
+  font-size: 1.10rem;
+  /* slightly larger base */
   width: var(--sidebar-width);
   min-width: var(--sidebar-width);
   display: flex;
@@ -81,7 +84,8 @@ body {
 }
 
 .details-panel .small {
-  font-size: 1.25rem; /* don't make metadata tiny */
+  font-size: 1.25rem;
+  /* don't make metadata tiny */
 }
 
 .details-panel .badge {
@@ -96,7 +100,8 @@ body {
 }
 
 .details-panel .text-muted {
-  color: #495057 !important; /* darker than default muted */
+  color: #495057 !important;
+  /* darker than default muted */
 }
 
 .details-content {
@@ -128,10 +133,12 @@ body {
 /* The section must also be a flex column and shrinkable */
 #oversight-section {
   flex: 1 1 auto;
-  min-height: 0;      /* CRITICAL */
+  min-height: 0;
+  /* CRITICAL */
   display: flex;
   flex-direction: column;
-  overflow: hidden;   /* prevent section content from escaping */
+  overflow: hidden;
+  /* prevent section content from escaping */
 
   max-height: 90%;
 }
@@ -158,8 +165,10 @@ body {
 #oversight-view {
   display: flex;
   flex-direction: column;
-  min-height: 0;      /* CRITICAL */
-  overflow: hidden;   /* keep scrolling inside inner container */
+  min-height: 0;
+  /* CRITICAL */
+  overflow: hidden;
+  /* keep scrolling inside inner container */
 }
 
 /* The split container should fill the remaining section height */
@@ -195,18 +204,23 @@ body {
 
 /* Triplets panel: header stays fixed, only table scrolls */
 #oversight-bottom {
-  max-height: 60vh;          /* keep whatever height you liked */
-  overflow: hidden;          /* prevent the whole panel from scrolling */
+  max-height: 60vh;
+  /* keep whatever height you liked */
+  overflow: hidden;
+  /* prevent the whole panel from scrolling */
   display: flex;
   flex-direction: column;
 }
 
 /* The table area becomes the scroll container */
 #triplets-table-wrap {
-  flex: 1;                   /* take remaining space under header/toolbars */
-  min-height: 0;             /* CRITICAL in flex layouts for scrolling */
+  flex: 1;
+  /* take remaining space under header/toolbars */
+  min-height: 0;
+  /* CRITICAL in flex layouts for scrolling */
   overflow-y: auto;
-  overflow-x: auto;          /* keep horizontal scroll if needed */
+  overflow-x: auto;
+  /* keep horizontal scroll if needed */
 }
 
 /* Optional: sticky table header while scrolling */
@@ -217,39 +231,43 @@ body {
   z-index: 2;
 }
 
-/* --- Pipeline progress widget (custom) --- */
-#global-loading-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 2000;
-}
-
-#global-loading-overlay .overlay-backdrop {
-  position: absolute;
-  inset: 0;
-  background: rgba(255, 255, 255, 0.75);
-  backdrop-filter: blur(2px);
-}
-
-#global-loading-overlay .overlay-content {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: #fff;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 12px;
-  padding: 20px 24px;
-  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
-  min-width: 280px;
-}
-
 .relation-card:hover {
-  background: rgba(13, 110, 253, 0.05); /* bootstrap primary-ish tint */
+  background: rgba(13, 110, 253, 0.05);
+  /* bootstrap primary-ish tint */
   border-color: rgba(13, 110, 253, 0.35);
 }
 
 .relation-card:focus {
   outline: 2px solid rgba(13, 110, 253, 0.35);
   outline-offset: 2px;
+}
+
+/* Tiny emoji confetti */
+.confetti-box {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 4000;
+  /* above toast */
+}
+
+.confetti-particle {
+  position: absolute;
+  font-size: 18px;
+  animation-name: confetti-fly;
+  animation-timing-function: ease-out;
+  animation-fill-mode: forwards;
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.15));
+}
+
+@keyframes confetti-fly {
+  from {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 1;
+  }
+
+  to {
+    transform: translate(var(--dx), var(--dy)) rotate(var(--rot));
+    opacity: 0;
+  }
 }

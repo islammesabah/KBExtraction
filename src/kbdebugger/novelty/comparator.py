@@ -164,7 +164,7 @@ def classify_qualities_novelty(
                 progress(
                     idx,
                     len(kept_qualities),
-                    f"🧑🏻‍⚖️ Novelty comparator LLM: determining novelty for quality",
+                    f"🧑🏻‍⚖️ determining novelty for quality",
                 )
             results.append(
                 classify_quality_novelty(
@@ -200,7 +200,7 @@ def classify_qualities_novelty(
             progress(
                 batch_idx,
                 num_batches,
-                f"🧑🏻‍⚖️ Novelty comparator LLM: determining novelty for a batch of qualities (batch size={len(group)})…",
+                f"🧑🏻‍⚖️ determining novelty for a batch of qualities (batch size={len(group)})…",
             )
 
         # 1) Map each kept quality to the minimal input schema expected by the prompt 

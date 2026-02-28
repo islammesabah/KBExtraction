@@ -48,3 +48,13 @@ export function clearRunContext() {
         localStorage.removeItem(KEY);
     } catch (_) { }
 }
+
+// --- Utils ---
+export function getOversightSource() {
+    return getRunContext()?.source_name ?? null;
+}
+
+export function getKeyword() {
+    return getRunContext()?.keyword ?? null;
+}
+

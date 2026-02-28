@@ -83,7 +83,7 @@ def run_pipeline(
     init_stage(
         job_id=job_id,
         stage="KeyBERT",
-        message=f"KeyBERT: 🔎 Scanning {total_par} paragraphs for keyword '{keyword}'...",
+        message=f"🔎 Scanning {total_par} paragraphs for keyword '{keyword}'...",
         current=0,
         total=total_par,
     )

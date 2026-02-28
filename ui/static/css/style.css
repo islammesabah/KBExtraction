@@ -193,16 +193,28 @@ body {
   height: auto !important;
 }
 
-.oversight-bottom {
-  flex: 1;
-  min-height: 0;
+/* Triplets panel: header stays fixed, only table scrolls */
+#oversight-bottom {
+  max-height: 60vh;          /* keep whatever height you liked */
+  overflow: hidden;          /* prevent the whole panel from scrolling */
+  display: flex;
+  flex-direction: column;
 }
 
-.content-list,
-.verified-list {
+/* The table area becomes the scroll container */
+#triplets-table-wrap {
+  flex: 1;                   /* take remaining space under header/toolbars */
+  min-height: 0;             /* CRITICAL in flex layouts for scrolling */
   overflow-y: auto;
-  max-height: 55vh;
-  /* tweak to allow area to scroll inside the tab */
+  overflow-x: auto;          /* keep horizontal scroll if needed */
+}
+
+/* Optional: sticky table header while scrolling */
+#triplets-table-wrap thead th {
+  position: sticky;
+  top: 0;
+  background: #fff;
+  z-index: 2;
 }
 
 /* --- Pipeline progress widget (custom) --- */

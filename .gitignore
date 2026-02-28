@@ -23,10 +23,10 @@ Neo4j-*.txt
 
 fine-tuned-mistral
 
-# Logs
+# Logs -- TODO: consider rotating these instead of ignoring them entirely
+logs/
 Log/user_updates.csv
 Log/data.csv
-
 credentials/
 
 
@@ -48,3 +48,4 @@ ui/tmp/
 # .env File
 .env
 .env.*
+

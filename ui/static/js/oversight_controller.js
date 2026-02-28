@@ -10,6 +10,9 @@
 import { startTripletExtractionJob, getJobStatus } from "./pipeline_client.js"; // we’ll add startTripletExtractionJob
 import { showOversightOverlay, hideOversightOverlay } from "./oversight_overlay.js";
 import { switchToTab } from "./utils/tabs.js";
+import { renderExtractedTripletsFromJobResult, hasTripletsCache, showCachedTripletsStep } from "./extracted_triplets_controller.js";
+import { setOversightStep, OversightSteps } from "./oversight_stepper.js";
+import { confirmOverwriteTriplets } from "./confirm_dialogs.js";
 
 const PAGE_SIZE = 10;
 
@@ -186,7 +189,7 @@ function renderTable({ container, items, decisionKey, page }) {
           cb.checked = selectAllCheckbox.checked;
           // call dispatchEvent so each row's checkbox listener will run, updating the `selected` map accordingly.
           // i.e., programmatically toggling the checkbox doesn't trigger the "change" event by default, so we need to dispatch it manually.
-          cb.dispatchEvent(new Event("change", { bubbles: true })); 
+          cb.dispatchEvent(new Event("change", { bubbles: true }));
         }
       });
 
@@ -194,7 +197,7 @@ function renderTable({ container, items, decisionKey, page }) {
 
       // ✅ after bulk is done, sync header ONCE
       selectAllCheckbox.indeterminate = false;
-    }); 
+    });
   }
 
   // whenever a row checkbox changes => keep select-all in sync
@@ -283,7 +286,7 @@ export function renderHumanOversightFromPipelineResult(pipelineResult) {
   // - Clear previous selections
   // - Hide oversight-bottom
   // - Reset selected count
-  
+
   // selected.clear();
   // setShowExtractedTripletsReviewSection(false);
 
@@ -302,6 +305,12 @@ export function renderHumanOversightFromPipelineResult(pipelineResult) {
   updateSelectedCount();
 
   switchToTab("oversight-view-tab");
+
+  setOversightStep(OversightSteps.CANDIDATE_SENTENCES);
+
+  syncGoToTripletsButton();
+
+  wireGoToTripletsButton();
 }
 
 function escapeHtml(str) {
@@ -313,15 +322,6 @@ function escapeHtml(str) {
     .replaceAll("'", "&#039;");
 }
 
-// ------------------------------------------------------------------
-// Submit selected -> triplet extraction (Stage 6 job)
-// ------------------------------------------------------------------
-// const setShowExtractedTripletsReviewSection = (show) => {
-//   const section = document.getElementById("oversight-bottom");
-//   if (!section) return;
-//   section.classList.toggle("d-none", !show);
-// };
-
 export function wireHumanOversightSubmit({ keywordSelectId, fileInputId }) {
   const btn = document.getElementById("oversight-submit");
   if (!btn) return;
@@ -332,9 +332,15 @@ export function wireHumanOversightSubmit({ keywordSelectId, fileInputId }) {
       return;
     }
 
+    // If extracted triplets exist already, confirm before overwriting them.
+    if (hasTripletsCache()) {
+      const ok = await confirmOverwriteTriplets();
+      if (!ok) return;
+    }
+
     // ❌
     // const payload = Array.from(selected.values()); // list of novelty results
-    
+
     // Slim payload: just the quality strings
     const selected_qualities = Array.from(selected.values())
       .map(r => (r?.quality ?? "").trim())
@@ -357,6 +363,7 @@ export function wireHumanOversightSubmit({ keywordSelectId, fileInputId }) {
         if (job.state === "done") {
           // show extracted triplets UI + render editable table
           renderExtractedTripletsFromJobResult(job.result);
+          syncGoToTripletsButton(); // in case we want to navigate back and forth between steps, we now have a cache to return to without re-calling the API
           break;
         }
         if (job.state === "error") {
@@ -375,3 +382,25 @@ export function wireHumanOversightSubmit({ keywordSelectId, fileInputId }) {
 function sleep(ms) {
   return new Promise(res => setTimeout(res, ms));
 }
+
+const getGoToTripletsButton = () => document.getElementById("oversight-go-triplets");
+
+function syncGoToTripletsButton() {
+  const btn = getGoToTripletsButton();
+  if (!btn) return;
+  btn.classList.toggle("d-none", !hasTripletsCache());
+}
+
+export function wireGoToTripletsButton() {
+  const btn = getGoToTripletsButton();
+  if (!btn || btn.dataset.wired) return;
+  btn.dataset.wired = "1"; // prevent double-wiring if this function is called multiple times
+
+  btn.addEventListener("click", () => {
+    const ok = showCachedTripletsStep();
+    if (!ok) {
+      alert("No extracted triplets yet. Click 'Submit selected for triplet extraction' first.");
+    }
+  });
+}
+

@@ -9,7 +9,7 @@
 import { createCytoscapeGraph } from "./cytoscape.js";
 import { initKeywordDropdown } from "./keyword_dropdown_controller.js";
 import { wirePipelineUpload } from "./pipeline_controller.js";
-import { wireHumanOversightSubmit , renderHumanOversightFromPipelineResult} from "./oversight_controller.js";
+import { wireHumanOversightSubmit , renderHumanOversightFromPipelineResult, wireGoToTripletsButton } from "./oversight_controller.js";
 
 // Optional modules (TODO: Most likely will be deleted)
 import { wireGraphSearch } from "./graph_free_text_search.js";

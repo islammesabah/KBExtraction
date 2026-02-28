@@ -22,6 +22,9 @@
 import { upsertTripletsToKnowledgeGraphJob, getJobStatus } from "./pipeline_client.js";
 import { showOversightOverlay, hideOversightOverlay } from "./oversight_overlay.js";
 import { getRunContext } from "./oversight_state.js";
+import { setOversightStep, OversightSteps } from "./oversight_stepper.js";
+
+
 
 function getOversightSource() {
     // return getRunContext()?.source ?? null;
@@ -34,6 +37,14 @@ const state = {
     filter: "",     // current filter string
     deletedCount: 0 // derived
 };
+
+
+// Cached last extraction result (for navigation without re-calling API)
+let _hasTripletsCache = false;
+
+export function hasTripletsCache() {
+    return _hasTripletsCache && state.rows.length > 0;
+}
 
 /**
  * @typedef {Object} TripletRow
@@ -94,43 +105,36 @@ function normalizeExtractionResult(extractedTripletsList) {
 }
 
 /**
- * Show/hide the candidate qualities section.
- * Here we interpret "candidate section" as the top container with inner tabs + submit.
- * In Our markup, that's `.oversight-top`.
- */
-function setShowCandidateQualitiesSection(show) {
-    const section = document.querySelector(".oversight-top");
-    if (!section) return;
-    section.classList.toggle("d-none", !show);
-}
-
-/** Show/hide the extracted triplets review section. */
-function setShowExtractedTripletsSection(show) {
-    const section = document.getElementById("oversight-bottom");
-    if (!section) return;
-    section.classList.toggle("d-none", !show);
-}
-
-/**
  * Public entrypoint:
  * Call this when triplet extraction job finishes (job.state === "done").
  *
  * @param {any} jobResult job.result (from GET /jobs/<id>)
  */
 export function renderExtractedTripletsFromJobResult(jobResult) {
+    setOversightStep(OversightSteps.EXTRACTED_TRIPLETS);
+
     const extractedTriplets = jobResult?.extracted_triplets ?? [];
 
     state.rows = normalizeExtractionResult(extractedTriplets);
+    _hasTripletsCache = state.rows.length > 0; // now we have a cache to potentially return to if user navigates back and forth between steps
     state.filter = "";
-
-    // Switch UI sections
-    setShowCandidateQualitiesSection(false);
-    setShowExtractedTripletsSection(true);
 
     // Render
     wireTripletsToolbar(); // idempotent
     renderTripletsTable();
     updateTripletsCounters();
+}
+
+/**
+ * to "show existing table again" without needing jobResult. Useful when user navigates back and forth between steps.
+ */
+export function showCachedTripletsStep() {
+    if (!hasTripletsCache()) return false;
+    setOversightStep(OversightSteps.EXTRACTED_TRIPLETS);
+    wireTripletsToolbar(); // idempotent
+    renderTripletsTable();
+    updateTripletsCounters();
+    return true;
 }
 
 /**
@@ -143,8 +147,7 @@ function wireTripletsToolbar() {
         backBtn.dataset.wired = "1";
         backBtn.addEventListener("click", () => {
             // go back to qualities selection UI
-            setShowExtractedTripletsSection(false);
-            setShowCandidateQualitiesSection(true);
+            setOversightStep(OversightSteps.CANDIDATE_SENTENCES);
         });
     }
 
@@ -174,7 +177,8 @@ function wireTripletsToolbar() {
     if (submitBtn && !submitBtn.dataset.wired) {
         submitBtn.dataset.wired = "1";
         submitBtn.addEventListener("click", async () => {
-            await submitTripletsToKG();
+            console.log("Submitting triplets to KG with payload:");
+            await submitTripletsToKnowledgeGraph();
         });
     }
 }
@@ -188,7 +192,8 @@ function getVisibleRows() {
     if (!q) return state.rows;
 
     return state.rows.filter(r => {
-        const hay = `${r.subject} ${r.predicate} ${r.object} ${r.sentence}`.toLowerCase();
+        // const hay = `${r.subject} ${r.predicate} ${r.object} ${r.sentence}`.toLowerCase();
+        const hay = `${r.subject} ${r.predicate} ${r.object}`.toLowerCase();
         return hay.includes(q); // i.e., show the row if the filter query is a substring of any of the fields 
     });
 }
@@ -226,19 +231,7 @@ function renderTripletsTable() {
 
     rows.forEach(r => {
         const tr = document.createElement("tr");
-        // if (r.deleted) tr.classList.add("opacity-50"); // soft-delete: visually indicate deleted rows but keep them visible
-
-        if (r.deleted) {
-            btn.classList.remove("btn-outline-danger");
-            btn.classList.add("btn-outline-secondary");
-            btn.title = "Undo delete";
-            btn.innerHTML = `<i class="bi bi-arrow-counterclockwise"></i>`;
-        } else {
-            btn.classList.remove("btn-outline-secondary");
-            btn.classList.add("btn-outline-danger");
-            btn.title = "Delete row";
-            btn.innerHTML = `<i class="bi bi-trash"></i>`;
-        }
+        if (r.deleted) tr.classList.add("opacity-50"); // soft-delete: visually indicate deleted rows but keep them visible
 
         tr.innerHTML = `
       <td>
@@ -266,8 +259,22 @@ function renderTripletsTable() {
       </td>
     `;
 
-        // Wire delete button
         const btn = tr.querySelector(".triplet-toggle-delete");
+        const icon = btn.querySelector("i");
+
+        // Apply correct delete/undo appearance
+        if (r.deleted) {
+            btn.classList.add("btn-outline-secondary");
+            btn.classList.remove("btn-outline-danger");
+            btn.title = "Undo delete";
+            icon.className = "bi bi-arrow-counterclockwise";
+        } else {
+            btn.classList.add("btn-outline-danger");
+            btn.classList.remove("btn-outline-secondary");
+            btn.title = "Delete row";
+            icon.className = "bi bi-trash";
+        }
+
         btn.addEventListener("click", () => {
             r.deleted = !r.deleted;
             renderTripletsTable();
@@ -276,7 +283,6 @@ function renderTripletsTable() {
 
         // Wire inline edits
         wireEditableInputs(tr, r);
-
         tbody.appendChild(tr);
     });
 
@@ -376,11 +382,6 @@ function buildUpsertPayload() {
         bySentence.get(r.sentence).push([r.subject, r.object, r.predicate]);
     }
 
-    // const extractions = Array.from(bySentence.entries()).map(([sentence, triplets]) => ({
-    //     sentence,
-    //     triplets,
-    // }));
-
     // Before submitting, we might want to deduplicate identical triplets inside each sentence (LLM sometimes repeats):
     for (const [sentence, triplets] of bySentence.entries()) {
         const seen = new Set();
@@ -394,6 +395,11 @@ function buildUpsertPayload() {
         bySentence.set(sentence, uniq);
     }
 
+    // ✅ Convert Map -> expected payload array
+    const extractions = Array.from(bySentence.entries())
+        .map(([sentence, triplets]) => ({ sentence, triplets }))
+        .filter(x => x.triplets.length > 0);
+
     const source = getOversightSource();
 
     return source ? { extractions, source } : { extractions };
@@ -403,7 +409,7 @@ function buildUpsertPayload() {
  * Submit edited triplets to server for KG upsert (Stage 7).
  * Uses the same job polling pattern as Stage 6.
  */
-async function submitTripletsToKG() {
+async function submitTripletsToKnowledgeGraph() {
     const payload = buildUpsertPayload();
     if (!payload.extractions.length) {
         alert("No valid triplets to submit.");

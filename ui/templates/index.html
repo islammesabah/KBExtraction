@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trustworthy AI knowledge discovery</title>
+    <title>KB Debugger for Trustworthy AI</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
@@ -12,21 +12,34 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/favicon.png') }}">
+
+    <!-- <link rel="icon" sizes="32x32" href="{{ url_for('static', filename='img/favicon-32.png') }}">
+    <link rel="icon" sizes="16x16" href="{{ url_for('static', filename='img/favicon-16.png') }}"> -->
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.26.0/cytoscape.min.js"></script>
 </head>
 
 <body>
     <div class="container-fluid app-frame py-3">
         <header class="text-center my-3">
-            <h1 class="display-6 fw-bold text-primary mb-1">Trustworthy AI knowledge discovery</h1>
-            <p class="text-muted mb-0">Process documents and visualize knowledge graphs.</p>
+            <h1 class="display-6 fw-bold text-primary mb-1">
+                Knowledge-based Debugger for Trustworthy AI
+            </h1>
+            <!-- alternative title: Actionable Trustworthy AI with a Knowledge-based Debugger -->
+            <p class="text-muted mb-0">
+                Extract, compare, and integrate structured knowledge from regulatory and technical documents.
+            </p>
+            <!-- alternative subtitle: Human-in-the-loop knowledge extraction and graph-based compliance integration. -->
         </header>
 
         <section class="card p-3">
             <div class="d-flex justify-content-between align-items-end gap-3 flex-wrap">
 
                 <!-- LEFT: keyword -->
-                <div class="d-flex gap-2 flex-wrap align-items-end">
+                <div class="d-flex gap-4 flex-wrap align-items-end">
                     <div class="position-relative" style="min-width: 220px;">
                         <div class="form-floating">
                             <select id="keyword-select" class="form-select" disabled>
@@ -45,6 +58,15 @@
                         </div>
                     </div>
 
+                    <!-- upload -->
+                    <div style="min-width: 260px;">
+                        <label for="documents" class="form-label text-muted mb-1">
+                            Upload a Document
+                        </label>
+
+                        <input class="form-control" type="file" id="documents" name="documents" disabled>
+                    </div>
+
                     <!-- keep for later -->
                     <!--
                     <button id="search-btn" class="btn btn-primary" type="button">
@@ -53,15 +75,6 @@
                     -->
                 </div>
 
-
-                <!-- RIGHT: upload -->
-                <div style="min-width: 260px;">
-                    <label for="documents" class="form-label text-muted mb-1">
-                        Upload Documents
-                    </label>
-
-                    <input class="form-control" type="file" id="documents" name="documents" disabled>
-                </div>
 
                 <!-- RIGHT-MOST: Run split button -->
                 <div class="d-flex flex-column align-items-end" style="min-width: 190px;">
@@ -88,9 +101,14 @@
                         </ul>
                     </div>
 
+                    <!-- ✅ Ready badge (hidden by default) -->
+                    <span id="run-ready-badge" class="badge text-bg-success d-none">
+                        ✅ Ready
+                    </span>
+
                     <div class="form-text text-muted small mt-1">
                         <i class="bi bi-info-circle me-1"></i>
-                        Select keyword + choose a file, then hit <b>Run</b>.
+                        Select keyword + upload a file, then hit <b>Run</b>.
                     </div>
                 </div>
             </div>

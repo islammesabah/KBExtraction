@@ -12,7 +12,7 @@
 
 import { getSearchKeywords, getSubgraph } from "./graph_client.js";
 import { switchToTopLevelTab, TopLevelTabs } from "./utils/tabs.js"
-import { showGlobalLoading, hideGlobalLoading } from "./global_loading_modal.js";
+import { showGlobalLoading, hideGlobalLoading } from "./modals/global_loading_modal.js";
 import { setLastSubgraphPayload } from "./state/graph_state.js";
 
 let currentSubgraphAbort = null;

@@ -8,7 +8,7 @@
 
 import { createCytoscapeGraph } from "./cytoscape.js";
 import { initKeywordDropdown } from "./keyword_dropdown_controller.js";
-import { wirePipelineUpload } from "./pipeline_controller.js";
+import { wirePipelineRunControls } from "./pipeline_controller.js";
 import { wireHumanOversightSubmit, renderHumanOversightFromPipelineResult, wireGoToTripletsButton } from "./oversight_controller.js";
 import { registerSubgraphRenderer } from "./graph_refresh.js";
 
@@ -41,9 +41,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   // ---------------------------------------------------------------------------
   // 3) Pipeline upload
   // ---------------------------------------------------------------------------
-  wirePipelineUpload({
+  wirePipelineRunControls({
     fileInputId: "documents",
-    keywordSelectId: "keyword-select", // whatever your dropdown id is
+    keywordSelectId: "keyword-select",
+    runBtnId: "pipeline-run-btn",
+    runMenuBtnId: "pipeline-run-menu-btn",
+    resetBtnId: "pipeline-reset-btn",
     onDone: (result) => {
       renderHumanOversightFromPipelineResult(result);
     },

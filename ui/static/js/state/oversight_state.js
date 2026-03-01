@@ -14,7 +14,9 @@ let ctx = null;
 
 /**
  * @typedef {Object} RunContext
- * @property {string} source Provenance string, e.g. uploaded PDF filename or server corpus identifier.
+ * @property {string} source Provenance string, e.g. `/tmp/uploaded_file_2024-06-01.txt`
+ * @property {string|null} [source_name] Human-readable filename (without path), e.g. `uploaded_file_2024-06-01.txt`
+ * @property {string|null} [keyword] The keyword used for this pipeline run. e.g., "Transparency"
  */
 
 /** @param {RunContext} newCtx */
@@ -49,6 +51,10 @@ export function clearRunContext() {
     } catch (_) { }
 }
 
+export function hasRunContext() {
+    return getRunContext() !== null;
+}
+
 // --- Utils ---
 export function getOversightSource() {
     return getRunContext()?.source_name ?? null;
@@ -57,4 +63,5 @@ export function getOversightSource() {
 export function getKeyword() {
     return getRunContext()?.keyword ?? null;
 }
+
 

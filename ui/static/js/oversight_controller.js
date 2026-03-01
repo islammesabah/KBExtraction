@@ -12,7 +12,7 @@ import { showOversightOverlay, hideOversightOverlay } from "./oversight_overlay.
 import { switchToTopLevelTab, TopLevelTabs } from "./utils/tabs.js";
 import { renderExtractedTripletsFromJobResult, hasTripletsCache, showCachedTripletsStep } from "./extracted_triplets_controller.js";
 import { setOversightStep, OversightSteps } from "./oversight_stepper.js";
-import { confirmModal } from "./confirm_modal.js";
+import { confirmModal } from "./modals/confirm_modal.js";
 
 const PAGE_SIZE = 10;
 
@@ -463,4 +463,24 @@ export function resetHumanOversightUI() {
   // Also ensure we are not showing the bottom section
   const bottom = document.getElementById("oversight-bottom");
   if (bottom) bottom.classList.add("d-none");
+}
+
+
+/**
+ * Whether the Candidate Sentences UI currently has any rendered items.
+ * Useful to detect an active session even if run_context is missing.
+ *
+ * @returns {boolean}
+ */
+export function hasCandidateQualitiesUI() {
+  // Your HTML uses 3 containers, one per novelty tab.
+  const containers = document.querySelectorAll(
+    "#oversight-existing .qualities-container, #oversight-partially_new .qualities-container, #oversight-new .qualities-container"
+  );
+
+  for (const el of containers) {
+    if (el && el.children && el.children.length > 0) return true;
+    if (el && el.textContent && el.textContent.trim().length > 0) return true; // fallback
+  }
+  return false;
 }

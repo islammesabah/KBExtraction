@@ -73,7 +73,7 @@ def build_chunked_documents_payload(
 
 def save_chunked_documents_json(
     *,
-    docs: Sequence[Document],
+    docs: list[Document],
     source_kind: SourceKind,
 ) -> dict[str, Any]:
     """

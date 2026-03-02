@@ -76,7 +76,8 @@ def extract_paragraphs_with_docling(
         # converter=doc_converter
     )
 
-    docs: List[Document] = loader.load()
+    loaded_docs = loader.load()
+    docs = [Document(page_content=doc.page_content, metadata=doc.metadata) for doc in loaded_docs]
 
     rich.print("\n\n===> 🦆 Docling extraction complete <===")
     rich.print(f"👁️  [DOCLING] OCR enabled: {do_ocr}")

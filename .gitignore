@@ -49,3 +49,5 @@ ui/tmp/
 .env
 .env.*
 
+# Hugging Face
+runtime/

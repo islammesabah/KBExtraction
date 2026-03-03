@@ -24,6 +24,10 @@ def register_blueprints(app: Flask) -> None:
     @app.route('/')
     def index():
         return render_template('index.html')
+
+    @app.get("/health")
+    def health():
+        return {"status": "ok"}
     
     app.register_blueprint(graph_bp, url_prefix="/api/graph")
     app.register_blueprint(pipeline_bp, url_prefix="/api/pipeline")

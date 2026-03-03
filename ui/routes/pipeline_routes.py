@@ -26,10 +26,6 @@ from ui.services.job_store import JOB_STORE
 from ui.services.pipeline_runner import run_pipeline
 from ui.services.pipeline_config_service import get_pipeline_config
 
-from kbdebugger.extraction.triplet_extraction_batch import extract_triplets_batch
-from kbdebugger.graph.api import upsert_extracted_triplets
-from kbdebugger.types import ExtractionResult
-
 
 pipeline_bp = Blueprint("pipeline", __name__)
 
@@ -136,6 +132,9 @@ def get_job_status(job_id: str):
 
 @pipeline_bp.post("/triplet-extraction")
 def start_triplet_extraction():
+    from kbdebugger.extraction.triplet_extraction_batch import extract_triplets_batch
+    from kbdebugger.graph.api import upsert_extracted_triplets
+    from kbdebugger.types import ExtractionResult
     """
     Start Stage 6 (Triplet extraction) as a background job.
 
@@ -204,6 +203,8 @@ def start_triplet_extraction():
 
 @pipeline_bp.post("/kg-upsert")
 def start_kg_upsert():
+    from kbdebugger.graph.api import upsert_extracted_triplets
+    from kbdebugger.types import ExtractionResult
     """
     Start Stage 7 (KG upsert) as a background job.
 

@@ -18,7 +18,6 @@ from __future__ import annotations
 import os
 from flask import Blueprint, jsonify, request, render_template
 
-from kbdebugger.graph.api import retrieve_keyword_subgraph_cytoscape
 from ..services.search_keywords_service import load_search_keywords
 from ..services.pipeline_config_service import get_pipeline_config
 
@@ -53,6 +52,7 @@ def api_search_keywords():
 
 @graph_bp.get("/subgraph")
 def api_subgraph():
+    from kbdebugger.graph.api import retrieve_keyword_subgraph_cytoscape
     """
     Retrieve a keyword-driven KG subgraph.
 

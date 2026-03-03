@@ -40,12 +40,13 @@ cd `KBExtraction`
 
 ### 2. Configure Environment Variables
 
-Create a `.env` file in the project root and add your Neo4j credentials:
+Create a `.env` file in the project root and add your credentials:
 
 ```env
 NEO4J_URI=neo4j://localhost:7687
 NEO4J_USERNAME=neo4j
 NEO4J_PASSWORD=your_password
+GROQ_API_KEY=your_api_key
 ```
 
 ### 3. Run the Setup Script

@@ -38,6 +38,15 @@ git add -A
 git commit -m "Deploy $(date -Iseconds)" || echo "No changes to commit."
 
 echo "📤 Pushing to Hugging Face..."
-git push
+
+# Try the safe force first (protects against overwriting unexpected remote updates)
+if git push --force-with-lease; then
+  echo "✅ Pushed with --force-with-lease."
+else
+  echo "⚠️  --force-with-lease failed (likely remote moved and local didn't fetch)."
+  echo "   Falling back to plain --force for deploy mirror..."
+  git push --force
+  echo "✅ Pushed with --force."
+fi
 
 echo "✅ Deployment complete."

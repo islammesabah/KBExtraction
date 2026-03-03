@@ -115,10 +115,12 @@ def extract_triplets_batch(
         description=f"🧬 Triplet extraction: sentences → S-P-O. (batch size={batch_size}, num_batches={num_batches})",
         total=num_batches,
     ):
-        if use_hf_local():
-            batch_results = _extract_batch_via_hf(batch)
-        else:
-            batch_results = _extract_batch_via_llm(batch)
+        # if use_hf_local():
+        #     batch_results = _extract_batch_via_hf(batch)
+        # else:
+        #     batch_results = _extract_batch_via_llm(batch)
+        
+        batch_results = _extract_batch_via_llm(batch)
         all_results.extend(batch_results)
 
     save_results_json(all_results)

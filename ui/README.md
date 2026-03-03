@@ -57,7 +57,7 @@ GROQ_API_KEY=your_api_key
 
 This script will:
 
-* Create a virtual environment (`.venv/`)
+* Create a virtual environment (`venv/`)
 * Install all dependencies from the locked requirements file
 * Ensure CPU-only PyTorch is installed for compatibility and efficiency
 
@@ -90,10 +90,10 @@ http://127.0.0.1:5002
 ## Project Structure (Relevant Files)
 
 ```
-ui/setup.sh                 # One-time environment setup
+setup.sh                    # One-time environment setup
 ui/run.sh                   # Local development entry point
 src/kbdebugger              # Core backend
-.venv/                      # Virtual environment (auto-created)
+venv/                       # Virtual environment (auto-created)
 ```
 
 ---

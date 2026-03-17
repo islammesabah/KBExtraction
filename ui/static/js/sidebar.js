@@ -169,7 +169,7 @@ function infoRow({ icon = null, emoji = null, label, value, title = "" }) {
 
 function sentenceCallout(sentence) {
   if (!sentence) return "";
-  
+
   return `
     <div class="p-3 rounded-3 bg-light border mb-3">
       <div class="text-muted small mb-1 d-flex justify-content-between">
@@ -239,15 +239,19 @@ function scrollableSentenceLine(sentence) {
 }
 
 export function renderEmptyDetails(container) {
+  // showSidebar();
   setDetailsTitle("Concept Insights");
-  
+
   container.innerHTML = `
     <p class="placeholder-text">Select a node or an edge to view details.</p>
   `;
+
+  hideSidebar();
 }
 
 
 export function renderEdgeDetails(container, edgeData) {
+  showSidebar();
   setDetailsTitle("Relationship details");
   const props = edgeData?.properties || {};
 
@@ -265,21 +269,21 @@ export function renderEdgeDetails(container, edgeData) {
     ${sentenceCallout(sentence)}
 
     
-    ${infoRow({ 
-      icon: "bi-file-earmark-text", 
-      label: "Source", 
-      value: source 
-    })}
+    ${infoRow({
+    icon: "bi-file-earmark-text",
+    label: "Source",
+    value: source
+  })}
     ${timeRow({
-      icon: "bi-clock-history",
-      label: "Created",
-      isoString: createdAt
-    })}
+    icon: "bi-clock-history",
+    label: "Created",
+    isoString: createdAt
+  })}
     ${timeRow({
-      icon: "bi-arrow-repeat",
-      label: "Last updated",
-      isoString: updatedAt
-    })}
+    icon: "bi-arrow-repeat",
+    label: "Last updated",
+    isoString: updatedAt
+  })}
 
     ${debugAccordion(edgeData?.id || "edge", props)}
   `;
@@ -288,6 +292,7 @@ export function renderEdgeDetails(container, edgeData) {
 
 
 export function renderNodeDetails(container, nodeData, incidentEdges, onEdgePick) {
+  showSidebar();
   setDetailsTitle("Node details");
 
   const label = nodeData?.label ?? "node";
@@ -349,6 +354,10 @@ export function renderNodeDetails(container, nodeData, incidentEdges, onEdgePick
 
 export function hideSidebar() {
   detailsPanel.classList.add("d-none");
+}
+
+export function showSidebar() {
+  detailsPanel.classList.remove("d-none");
 }
 
 const closeBtn = document.getElementById("sidebar-close-btn");

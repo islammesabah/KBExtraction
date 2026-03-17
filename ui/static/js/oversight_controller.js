@@ -13,7 +13,7 @@ import { switchToTopLevelTab, TopLevelTabs } from "./utils/tabs.js";
 import { renderExtractedTripletsFromJobResult, hasTripletsCache, showCachedTripletsStep } from "./extracted_triplets_controller.js";
 import { setOversightStep, OversightSteps } from "./oversight_stepper.js";
 import { confirmModal } from "./modals/confirm_modal.js";
-import { exportSentencesAsTxt, exportGroupedSentencesAsTxt } from "./utils/export_utils.js";
+import { exportSentencesAsTxt, exportGroupedSentencesAsTxt, exportGroupedSentencesAsXlsx } from "./utils/export_utils.js";
 import { getKeyword } from "./state/oversight_state.js";
 
 const PAGE_SIZE = 10;
@@ -404,7 +404,7 @@ export function wireHumanOversightSubmit({ keywordSelectId, fileInputId }) {
     }
   });
 
-  wireOversightExportButton({ keywordSelectId });
+  wireOversightExportButton();
 }
 
 function sleep(ms) {
@@ -520,31 +520,57 @@ function getOversightExportButton() {
   return document.getElementById("oversight-export");
 }
 
-export function wireOversightExportButton({ keywordSelectId }) {
-  const btn = getOversightExportButton();
-  if (!btn || btn.dataset.wired) return;
-  btn.dataset.wired = "1";
+function getOversightExportTxtButton() {
+  return document.getElementById("oversight-export-txt");
+}
 
-  btn.addEventListener("click", () => {
-    const sentences = getAllCandidateSentences();
+function getOversightExportXlsxButton() {
+  return document.getElementById("oversight-export-xlsx");
+}
 
-    // const keyword =
-    //   document.getElementById(keywordSelectId)?.value?.trim() || null;
-    
-    const keyword = getKeyword();
+export function wireOversightExportButton() {
+  const mainBtn = getOversightExportButton();
+  const txtBtn = getOversightExportTxtButton();
+  const xlsxBtn = getOversightExportXlsxButton();
 
-    // const result = exportSentencesAsTxt({
-    //   sentences,
-    //   keyword,
-    // });
+  if (mainBtn && !mainBtn.dataset.wired) {
+    mainBtn.dataset.wired = "1";
+    mainBtn.addEventListener("click", exportCandidateSentencesAsTxt);
+  }
 
-    const result = exportGroupedSentencesAsTxt({
-      grouped,
-      keyword,
-    });
+  if (txtBtn && !txtBtn.dataset.wired) {
+    txtBtn.dataset.wired = "1";
+    txtBtn.addEventListener("click", exportCandidateSentencesAsTxt);
+  }
 
-    if (!result.ok) {
-      alert(result.reason);
-    }
+  if (xlsxBtn && !xlsxBtn.dataset.wired) {
+    xlsxBtn.dataset.wired = "1";
+    xlsxBtn.addEventListener("click", exportCandidateSentencesAsXlsx);
+  }
+}
+
+function exportCandidateSentencesAsTxt() {
+  const keyword = getKeyword();
+
+  const result = exportGroupedSentencesAsTxt({
+    grouped,
+    keyword,
   });
+
+  if (!result.ok) {
+    alert(result.reason);
+  }
+}
+
+function exportCandidateSentencesAsXlsx() {
+  const keyword = getKeyword();
+
+  const result = exportGroupedSentencesAsXlsx({
+    grouped,
+    keyword,
+  });
+
+  if (!result.ok) {
+    alert(result.reason);
+  }
 }

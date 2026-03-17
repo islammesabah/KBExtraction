@@ -286,3 +286,92 @@ export function exportGroupedSentencesAsTxt({ grouped, keyword, filename }) {
 
     return { ok: true, count: sections.length };
 }
+
+
+/**
+ * Export candidate oversight rows into ONE Excel sheet.
+ *
+ * Columns:
+ * - Group
+ * - Sentence
+ * - Similarity
+ *
+ * @param {Object} opts
+ * @param {Object} opts.grouped
+ * @param {string|null} [opts.keyword]
+ * @param {string} [opts.filename]
+ * @returns {{ ok: true, count: number } | { ok: false, reason: string }}
+ */
+export function exportGroupedSentencesAsXlsx({ grouped, keyword, filename }) {
+    if (!grouped) {
+        return { ok: false, reason: "No candidate sentences available." };
+    }
+
+    const XLSX_LIB = globalThis.XLSX;
+    if (!XLSX_LIB) {
+        return { ok: false, reason: "XLSX export is not available because SheetJS is not loaded." };
+    }
+
+    const orderedGroups = [
+        { key: "NEW", label: "New" },
+        { key: "PARTIALLY_NEW", label: "Partially New" },
+        { key: "EXISTING", label: "Existing" },
+    ];
+
+    /** @type {{Group: string, Sentence: string, Similarity: number}[]} */
+    const rows = [];
+
+    for (const group of orderedGroups) {
+        const items = dedupeRowsBySentenceKeepBestScore(grouped[group.key] || []);
+
+        for (const r of items) {
+            const sentence = String(r?.quality || "").trim();
+            if (!sentence) continue;
+
+            rows.push({
+                Group: group.label,
+                Sentence: sentence,
+                Similarity: Number((r?.max_score ?? 0).toFixed(2)),
+            });
+        }
+    }
+
+    if (rows.length === 0) {
+        return { ok: false, reason: "No candidate sentences found to export." };
+    }
+
+    const wb = XLSX_LIB.utils.book_new();
+    const ws = XLSX_LIB.utils.json_to_sheet(rows);
+
+    XLSX_LIB.utils.book_append_sheet(wb, ws, "Candidate Sentences");
+
+    const safeKey = _safeSlug(keyword || "keyword");
+    const outName = filename || `kbdebugger_candidate_sentences_${safeKey}.xlsx`;
+
+    XLSX_LIB.writeFile(wb, outName);
+
+    return { ok: true, count: rows.length };
+}
+
+/**
+ * Deduplicate rows by sentence text, keeping the highest-similarity row.
+ *
+ * @param {any[]} items
+ * @returns {any[]}
+ */
+function dedupeRowsBySentenceKeepBestScore(items) {
+    const bestByKey = new Map();
+
+    for (const r of items || []) {
+        const sentence = String(r?.quality || "").trim();
+        const key = sentence.toLowerCase();
+        if (!sentence) continue;
+
+        const existing = bestByKey.get(key);
+        if (!existing || (r?.max_score ?? 0) > (existing?.max_score ?? 0)) {
+            bestByKey.set(key, r);
+        }
+    }
+
+    return Array.from(bestByKey.values());
+}

@@ -13,6 +13,8 @@ import { switchToTopLevelTab, TopLevelTabs } from "./utils/tabs.js";
 import { renderExtractedTripletsFromJobResult, hasTripletsCache, showCachedTripletsStep } from "./extracted_triplets_controller.js";
 import { setOversightStep, OversightSteps } from "./oversight_stepper.js";
 import { confirmModal } from "./modals/confirm_modal.js";
+import { exportSentencesAsTxt, exportGroupedSentencesAsTxt } from "./utils/export_utils.js";
+import { getKeyword } from "./state/oversight_state.js";
 
 const PAGE_SIZE = 10;
 
@@ -29,13 +31,28 @@ function stableId(r) {
   return `${r.decision}::${r.quality}::${neighbor}`;
 }
 
+const sortDesc = (a, b) => (b.max_score ?? 0) - (a.max_score ?? 0);
 function groupByDecision(results) {
-  const sortDesc = (a, b) => (b.max_score ?? 0) - (a.max_score ?? 0);
+
+  function dedupeByQuality(items) {
+    const seen = new Set();
+    const out = [];
+
+    for (const r of items) {
+      const key = String(r?.quality || "").trim().toLowerCase();
+      if (!key || seen.has(key)) continue;
+
+      seen.add(key);
+      out.push(r);
+    }
+
+    return out;
+  }
 
   const filterBy = (decision) =>
-    results
-      .filter(r => r.decision === decision)
-      .sort(sortDesc);
+    dedupeByQuality(
+      results.filter(r => r.decision === decision)
+    ).sort(sortDesc);
 
   return {
     EXISTING: filterBy("EXISTING"),
@@ -386,6 +403,8 @@ export function wireHumanOversightSubmit({ keywordSelectId, fileInputId }) {
       hideOversightOverlay();
     }
   });
+
+  wireOversightExportButton({ keywordSelectId });
 }
 
 function sleep(ms) {
@@ -483,4 +502,49 @@ export function hasCandidateQualitiesUI() {
     if (el && el.textContent && el.textContent.trim().length > 0) return true; // fallback
   }
   return false;
+}
+
+function getAllCandidateSentences() {
+  if (!grouped) return [];
+
+  return [
+    ...(grouped.EXISTING || []),
+    ...(grouped.PARTIALLY_NEW || []),
+    ...(grouped.NEW || []),
+  ]
+    .map(r => String(r?.quality ?? "").trim())
+    .filter(Boolean);
+}
+
+function getOversightExportButton() {
+  return document.getElementById("oversight-export");
+}
+
+export function wireOversightExportButton({ keywordSelectId }) {
+  const btn = getOversightExportButton();
+  if (!btn || btn.dataset.wired) return;
+  btn.dataset.wired = "1";
+
+  btn.addEventListener("click", () => {
+    const sentences = getAllCandidateSentences();
+
+    // const keyword =
+    //   document.getElementById(keywordSelectId)?.value?.trim() || null;
+    
+    const keyword = getKeyword();
+
+    // const result = exportSentencesAsTxt({
+    //   sentences,
+    //   keyword,
+    // });
+
+    const result = exportGroupedSentencesAsTxt({
+      grouped,
+      keyword,
+    });
+
+    if (!result.ok) {
+      alert(result.reason);
+    }
+  });
 }

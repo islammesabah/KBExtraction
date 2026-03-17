@@ -53,3 +53,11 @@ export function updateProgressPanel({ stage, message, current, total }) {
     metaEl.textContent = "Working…";
   }
 }
+
+const closeBtn = document.getElementById("pipeline-close-btn");
+
+if (closeBtn) {
+  closeBtn.addEventListener("click", () => {
+    hideProgressPanel();
+  });
+}

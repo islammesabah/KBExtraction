@@ -125,6 +125,12 @@ body {
   min-height: 0;
 }
 
+/* Compact tabs for space-constrained layouts */
+.nav-tabs .nav-link {
+  padding: 0.35rem 0.65rem;   /* default is ~0.5rem 1rem */
+  font-size: 0.9rem;
+}
+
 /* ------------------------------------------------------------
    Oversight layout: keep everything bounded inside #oversight-view
    ------------------------------------------------------------ */
@@ -151,8 +157,8 @@ body {
 }
 
 #oversight-section .quality-cell {
-  font-size: 1.02rem;
-  line-height: 1.35;
+  /* font-size: 1.02rem; */
+  /* line-height: 1.35; */
 }
 
 /* Bigger checkbox */

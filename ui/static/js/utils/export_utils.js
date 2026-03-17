@@ -181,3 +181,108 @@ function _safeSlug(s) {
         .replaceAll(/\s+/g, "_")
         .replaceAll(/[^a-zA-Z0-9_\-]/g, "");
 }
+
+
+/**
+ * Export candidate oversight sentences as TXT.
+ *
+ * Each line corresponds to one table row sentence.
+ *
+ * TXT format:
+ * 1. sentence...
+ *
+ * 2. sentence...
+ *
+ * @param {Object} opts
+ * @param {string[]} opts.sentences
+ * @param {string|null} [opts.keyword]
+ * @param {string} [opts.filename]
+ * @returns {{ ok: true, count: number } | { ok: false, reason: string }}
+ */
+export function exportSentencesAsTxt({ sentences, keyword, filename }) {
+    const clean = Array.from(
+        new Set(
+            (sentences || [])
+                .map(s => String(s || "").trim())
+                .filter(Boolean)
+        )
+    );
+
+    if (clean.length === 0) {
+        return { ok: false, reason: "No sentences found to export." };
+    }
+
+    const safeKey = _safeSlug(keyword || "keyword");
+    const text = clean.map((s, i) => `${i + 1}. ${s}`).join("\n\n");
+
+    downloadText({
+        filename: filename || `kbdebugger_candidate_sentences_${safeKey}.txt`,
+        text,
+    });
+
+    return { ok: true, count: clean.length };
+}
+
+/**
+ * Export candidate oversight sentences grouped by decision.
+ *
+ * TXT format:
+ * === NEW ===
+ * 1. sentence
+ *
+ * === PARTIALLY NEW ===
+ * 1. sentence
+ *
+ * === EXISTING ===
+ * 1. sentence
+ *
+ * @param {Object} opts
+ * @param {Object} opts.grouped
+ * @param {string|null} [opts.keyword]
+ * @param {string} [opts.filename]
+ * @returns {{ ok: true, count: number } | { ok: false, reason: string }}
+ */
+export function exportGroupedSentencesAsTxt({ grouped, keyword, filename }) {
+    if (!grouped) {
+        return { ok: false, reason: "No sentences available." };
+    }
+
+    const order = ["NEW", "PARTIALLY_NEW", "EXISTING"];
+
+    const sections = [];
+
+    for (const key of order) {
+        const items = grouped[key] || [];
+        const sentences = Array.from(
+            new Set(
+                items
+                    .map(r => String(r?.quality || "").trim())
+                    .filter(Boolean)
+            )
+        );
+
+        if (sentences.length === 0) continue;
+
+        const header = key.replaceAll("_", " ");
+        const body = sentences
+            .map((s, i) => `${i + 1}. ${s}`)
+            .join("\n\n");
+
+        sections.push(`=== ${header} ===\n\n${body}`);
+    }
+
+    if (sections.length === 0) {
+        return { ok: false, reason: "No sentences found to export." };
+    }
+
+    const text = sections.join("\n\n\n");
+
+    const safeKey = _safeSlug(keyword || "keyword");
+
+    downloadText({
+        filename: filename || `kbdebugger_candidate_sentences_${safeKey}.txt`,
+        text,
+    });
+
+    return { ok: true, count: sections.length };
+}

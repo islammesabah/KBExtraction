@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KB Debugger for Trustworthy AI</title>
+    <title>KB Extractor for tAI</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
@@ -24,18 +24,13 @@
 
 <body>
     <div class="container-fluid app-frame py-3">
-        <header class="text-center my-3">
-            <h1 class="display-6 fw-bold text-primary mb-1">
-                Knowledge-based Debugger for Trustworthy AI
-            </h1>
-            <!-- alternative title: Actionable Trustworthy AI with a Knowledge-based Debugger -->
-            <p class="text-muted mb-0">
+        <section class="card p-2">
+            <!-- helper text
+            <div class="text-muted small mb-3">
+                <i class="bi bi-info-circle me-1"></i>
                 Extract, compare, and integrate structured knowledge from regulatory and technical documents.
-            </p>
-            <!-- alternative subtitle: Human-in-the-loop knowledge extraction and graph-based compliance integration. -->
-        </header>
+            </div> -->
 
-        <section class="card p-3">
             <div class="d-flex justify-content-between align-items-end gap-3 flex-wrap">
 
                 <!-- LEFT: keyword -->
@@ -77,7 +72,7 @@
 
 
                 <!-- RIGHT-MOST: Run split button -->
-                <div class="d-flex flex-column align-items-end" style="min-width: 190px;">
+                <div class="d-flex flex-column align-items-end">
                     <label class="form-label text-muted mb-1">&nbsp;</label>
 
                     <div class="btn-group">
@@ -102,18 +97,17 @@
                     </div>
 
                     <!-- ✅ Ready badge (hidden by default) -->
-                    <span id="run-ready-badge" class="badge text-bg-success d-none">
+                    <!-- <span id="run-ready-badge" class="badge text-bg-success d-none">
                         ✅ Ready
                     </span>
 
                     <div class="form-text text-muted small mt-1">
                         <i class="bi bi-info-circle me-1"></i>
                         Select keyword + upload a file, then hit <b>Run</b>.
-                    </div>
+                    </div> -->
                 </div>
             </div>
         </section>
-
 
         <div id="pipeline-progress" class="card d-none">
             <div class="card-body py-2">
@@ -130,6 +124,12 @@
                         style="font-variant-numeric: tabular-nums; white-space: nowrap;">
                         ⏱️ 00:00
                     </div>
+
+                    <!-- Close button -->
+                    <button id="pipeline-close-btn" class="btn btn-sm btn-outline-secondary ms-2" type="button"
+                        title="Hide progress">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
                 </div>
 
                 <div class="progress mt-2" style="height: 10px;">
@@ -145,10 +145,10 @@
 
         <main class="visualization-area">
             <!-- LEFT: Graph / Verification tabs -->
-            <div class="graph-wrapper p-3">
+            <div class="graph-wrapper p-1">
 
                 <!-- Top-level view tabs -->
-                <ul class="nav nav-tabs mb-3" id="view-tabs" role="tablist">
+                <ul class="nav nav-tabs mb-1" id="view-tabs" role="tablist">
                     <li class="nav-item" role="presentation">
                         <button class="nav-link active" id="graph-view-tab" data-bs-toggle="tab"
                             data-bs-target="#graph-view" type="button" role="tab" aria-controls="graph-view"
@@ -219,9 +219,9 @@
                     <div class="tab-pane fade h-100" id="oversight-view" role="tabpanel"
                         aria-labelledby="oversight-view-tab">
                         <section id="oversight-section" class="p-2 p-md-3 bg-white rounded-3 border position-relative">
-                            <div class="d-flex align-items-start justify-content-between flex-wrap gap-2 mb-2">
+                            <div class="d-flex align-items-start justify-content-between flex-wrap gap-2">
                                 <div>
-                                    <h2 id="oversight-title" class="mb-1">🧑🏻‍⚖️ Human Oversight</h2>
+                                    <!-- <h4 id="oversight-title" class="mb-1">🧑🏻‍⚖️ Human Oversight</h2> -->
                                     <div id="oversight-helper" class="text-muted small">
                                         <!-- injected dynamically -->
                                     </div>
@@ -294,6 +294,12 @@
                                                 class="btn btn-outline-secondary btn-sm d-none" type="button">
                                                 <i class="bi bi-arrow-right me-1"></i>
                                                 Go to Extracted Triplets
+                                            </button>
+
+                                            <button id="oversight-export" class="btn btn-outline-primary btn-sm"
+                                                type="button">
+                                                <i class="bi bi-download me-1"></i>
+                                                Export
                                             </button>
                                         </div>
                                     </div>
@@ -392,36 +398,6 @@
             </div>
         </div>
     </div>
-
-
-    <!-- Confirm overwrite of cached triplets -->
-    <!-- <div class="modal fade" id="confirm-overwrite-triplets" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">⚠️ Overwrite extracted triplets?</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-
-                <div class="modal-body">
-                    <div class="text-muted small">
-                        There are already extracted triplets waiting for your review.
-                        Submitting again will discard the current extracted triplets and generate new ones from your
-                        current selection.
-                    </div>
-                </div>
-
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
-                        Cancel
-                    </button>
-                    <button type="button" class="btn btn-primary" id="confirm-overwrite-triplets-continue">
-                        Yes, re-extract
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div> -->
 
 
     <!-- Reusable confirmation modal ✅ -->

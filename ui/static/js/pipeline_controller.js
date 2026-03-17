@@ -187,9 +187,19 @@ export function wirePipelineRunControls({
     }
 
     const poll = async () => {
-      try {
-        const job = await getJobStatus(jobId);
+      let job;
 
+      try {
+        job = await getJobStatus(jobId);
+      } catch (err) {
+        console.error("Polling request failed:", err);
+        alert(`Polling request failed: ${err.message}`);
+        isRunning = false;
+        syncRunUi();
+        return;
+      }
+
+      try {
         updateProgressPanel({
           stage: job.stage,
           message: job.message,
@@ -200,7 +210,6 @@ export function wirePipelineRunControls({
         updateElapsedTimer(job);
 
         if (job.state === "done") {
-          // ✅ Save provenance for downstream stages
           const meta = job.result?._meta;
           if (meta?.source) {
             setRunContext({
@@ -218,7 +227,6 @@ export function wirePipelineRunControls({
         }
 
         if (job.state === "error") {
-          // eslint-disable-next-line no-alert
           alert(`Pipeline failed: ${job.error || "unknown error"}`);
           isRunning = false;
           syncRunUi();
@@ -227,12 +235,13 @@ export function wirePipelineRunControls({
 
         setTimeout(poll, 1000);
       } catch (err) {
-        // eslint-disable-next-line no-alert
-        alert(`Lost connection while polling: ${err.message}`);
+        console.error("Polling UI/update failed:", err, job);
+        alert(`Polling succeeded, but UI update failed: ${err.message}`);
         isRunning = false;
         syncRunUi();
       }
     };
+
 
     poll();
   });

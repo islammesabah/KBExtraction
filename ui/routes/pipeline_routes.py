@@ -14,7 +14,7 @@ Notes
 Flask is the server. Our 'kbdebugger' code runs *inside* Flask
 in the background job thread.
 """
-
+import os
 from pathlib import Path
 from threading import Thread
 
@@ -26,24 +26,37 @@ from ui.services.job_store import JOB_STORE
 from ui.services.pipeline_runner import run_pipeline
 from ui.services.pipeline_config_service import get_pipeline_config
 
+from uuid import uuid4
+import tempfile
 
 pipeline_bp = Blueprint("pipeline", __name__)
 
 
-def _save_upload_to_tmp(file_storage) -> Path:
-    """
-    Save uploaded file to a temporary location under ui/temp_uploads/.
+# def _save_upload_to_tmp(file_storage) -> Path:
+#     """
+#     Save uploaded file to a temporary location under ui/temp_uploads/.
 
-    Returns
-    -------
-    Path
-        Filesystem path to the saved upload.
-    """
-    uploads_dir = Path("ui/temp_uploads")
+#     Returns
+#     -------
+#     Path
+#         Filesystem path to the saved upload.
+#     """
+#     # uploads_dir = Path("ui/temp_uploads")
+#     uploads_dir = Path(tempfile.gettempdir()) / "kbdebugger_uploads"
+#     uploads_dir.mkdir(parents=True, exist_ok=True)
+
+#     # Keep original name; we can sanitize further if needed.
+#     dst = uploads_dir / file_storage.filename
+#     file_storage.save(dst)
+#     return dst
+
+
+def _save_upload_to_tmp(file_storage) -> Path:
+    uploads_dir = Path(tempfile.gettempdir()) / "kbdebugger_uploads"
     uploads_dir.mkdir(parents=True, exist_ok=True)
 
-    # Keep original name; we can sanitize further if needed.
-    dst = uploads_dir / file_storage.filename
+    safe_name = Path(file_storage.filename).name
+    dst = uploads_dir / f"{uuid4()}_{safe_name}"
     file_storage.save(dst)
     return dst
 
@@ -65,6 +78,8 @@ def start_pipeline_run():
     JSON:
         {"job_id": "<uuid>"}
     """
+    print(f"[RUN] pid={os.getpid()}")
+
     keyword = (request.args.get("keyword") or "").strip()
     if not keyword:
         return jsonify({"error": "Missing query param: keyword"}), 400
@@ -113,6 +128,7 @@ def get_job_status(job_id: str):
           "error": "..." | null
         }
     """
+    print(f"[POLL] pid={os.getpid()} job_id={job_id}")
     rec = JOB_STORE.get(job_id)
     if rec is None:
         return jsonify({"error": f"Unknown job_id: {job_id}"}), 404

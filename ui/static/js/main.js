@@ -11,6 +11,7 @@ import { initKeywordDropdown } from "./keyword_dropdown_controller.js";
 import { wirePipelineRunControls } from "./pipeline_controller.js";
 import { wireHumanOversightSubmit, renderHumanOversightFromPipelineResult, wireGoToTripletsButton } from "./oversight_controller.js";
 import { registerSubgraphRenderer } from "./graph_refresh.js";
+import { hideProgressPanel } from "./pipeline_progress_ui.js"
 
 // Optional modules (TODO: Most likely will be deleted)
 // import { wireGraphSearch } from "./graph_free_text_search.js";
@@ -48,6 +49,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     runMenuBtnId: "pipeline-run-menu-btn",
     resetBtnId: "pipeline-reset-btn",
     onDone: (result) => {
+      // hideProgressPanel()
       renderHumanOversightFromPipelineResult(result);
     },
   });

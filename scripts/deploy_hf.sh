@@ -28,6 +28,7 @@ rsync -av --delete \
   --exclude "data/" \
   --exclude "notebooks/" \
   --exclude "ui/static/img/" \
+  --exclude "README.md" \
   "$DEV_ROOT/" "$HF_ROOT/"
 
 # Commit and push

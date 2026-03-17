@@ -1,3 +1,5 @@
+const detailsPanel = document.getElementById("details-panel") // aka sidebar or insights panel
+
 function escapeHtml(s) {
   return String(s ?? "")
     .replaceAll("&", "&amp;")
@@ -344,3 +346,16 @@ export function renderNodeDetails(container, nodeData, incidentEdges, onEdgePick
 
   wireCopyButtons(container);
 }
+
+export function hideSidebar() {
+  detailsPanel.classList.add("d-none");
+}
+
+const closeBtn = document.getElementById("sidebar-close-btn");
+
+if (closeBtn) {
+  closeBtn.addEventListener("click", () => {
+    hideSidebar();
+  });
+}
+

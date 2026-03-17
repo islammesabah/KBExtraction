@@ -126,8 +126,7 @@
                     </div>
 
                     <!-- Close button -->
-                    <button id="pipeline-close-btn" class="btn btn-sm ms-2" type="button"
-                        title="Hide progress">
+                    <button id="pipeline-close-btn" class="btn btn-sm ms-2" type="button" title="Hide progress">
                         <i class="bi bi-x-lg"></i>
                     </button>
                 </div>
@@ -411,7 +410,15 @@
 
             <!-- RIGHT: Details panel (always visible) -->
             <div id="details-panel" class="details-panel">
-                <h3 id="details-title">Concept Insights</h3>
+                <div class="details-header d-flex align-items-center justify-content-between">
+                    <h3 id="details-title">Concept Insights</h3>
+
+                    <button id="sidebar-close-btn" class="btn btn-sm btn-link text-muted p-0" type="button"
+                        title="Hide Insights">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+
                 <div id="details-content" class="details-content">
                     <p class="placeholder-text">Select a node or search to view details.</p>
                 </div>

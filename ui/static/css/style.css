@@ -92,16 +92,28 @@ body {
   font-size: 1.0rem;
 }
 
-.details-panel h3 {
+/* .details-panel h3 {
   font-size: 1.3rem;
   margin: 0;
   padding: 0.75rem 1rem;
   border-bottom: 1px solid #dee2e6;
-}
+} */
 
 .details-panel .text-muted {
   color: #495057 !important;
   /* darker than default muted */
+}
+
+.details-header {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.details-header h3 {
+  font-size: 1.3rem;
+  margin: 0;
+  padding: 0;
+  border-bottom: 0;
 }
 
 .details-content {

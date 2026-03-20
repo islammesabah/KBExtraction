@@ -56,7 +56,8 @@ def _save_upload_to_tmp(file_storage) -> Path:
     uploads_dir.mkdir(parents=True, exist_ok=True)
 
     safe_name = Path(file_storage.filename).name
-    dst = uploads_dir / f"{uuid4()}_{safe_name}"
+    # dst = uploads_dir / f"{uuid4()}_{safe_name}"
+    dst = uploads_dir / f"{safe_name}"
     file_storage.save(dst)
     return dst
 

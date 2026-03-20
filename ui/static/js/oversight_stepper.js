@@ -41,9 +41,11 @@ export function setOversightHeader({ title, helper }) {
  */
 const STEP_COPY = {
     "candidate-qualities": {
-        title: "💬 Candidate Sentences",
+        // title: "💬 Candidate Sentences",
+        // helper:
+        //     "KBExtractor extracted and classified these quality sentences by comparing them to the current Knowledge Graph. Your decision is decisive 🧑🏻‍⚖️ Please select the sentences you would like to proceed with.",
         helper:
-            "KBDebugger extracted and classified these quality sentences by comparing them to the current Knowledge Graph. Your decision is decisive 🧑🏻‍⚖️ Please select the sentences you would like to proceed with.",
+            "🧑🏻‍⚖️ KBExtractor extracted and classified these quality sentences by comparing them to the current Knowledge Graph.",
     },
     "triplets-review": {
         title: "🧬 Extracted Triplets",

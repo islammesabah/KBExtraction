@@ -30,7 +30,7 @@ body {
   /* IMPORTANT: includes py-3 padding inside height */
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 6px;
 }
 
 
